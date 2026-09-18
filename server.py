@@ -1,51 +1,48 @@
-import asyncio
+from aiohttp import web
 import json
 import os
 from datetime import datetime
-import websockets
-from websockets.http11 import Response
+import asyncio
 
 clients = set()
-lock = asyncio.Lock()
 
-HTML_FILE = os.path.join(os.path.dirname(__file__), 'static', 'index.html')
+async def index(request):
+    path = os.path.join(os.path.dirname(__file__), 'static', 'index.html')
+    return web.FileResponse(path)
 
-async def process_request(connection, request):
-    if request.path in ('/', '/index.html'):
-        try:
-            with open(HTML_FILE, 'rb') as f:
-                body = f.read()
-            return Response(200, 'OK', websockets.Headers([
-                ('Content-Type', 'text/html; charset=utf-8'),
-                ('Content-Length', str(len(body))),
-            ]), body)
-        except Exception as e:
-            return Response(500, 'Error', websockets.Headers([
-                ('Content-Type', 'text/plain'),
-            ]), str(e).encode())
-
-async def handler(websocket):
-    async with lock:
-        clients.add(websocket)
+async def websocket_handler(request):
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+    clients.add(ws)
     try:
-        async for message in websocket:
-            data = json.loads(message)
-            data['time'] = datetime.now().strftime('%H:%M:%S')
-            async with lock:
+        async for msg in ws:
+            if msg.type == web.WSMsgType.TEXT:
+                data = json.loads(msg.data)
+                data['time'] = datetime.now().strftime('%H:%M:%S')
+                text = json.dumps(data, ensure_ascii=False)
                 for client in list(clients):
-                    try:
-                        await client.send(json.dumps(data, ensure_ascii=False))
-                    except Exception:
-                        pass
+                    if not client.closed:
+                        try:
+                            await client.send_str(text)
+                        except Exception:
+                            pass
     finally:
-        async with lock:
-            clients.discard(websocket)
+        clients.discard(ws)
+    return ws
 
 async def main():
-    port = int(os.environ.get('PORT', 10000))
+    app = web.Application()
+    app.router.add_get('/', index)
+    app.router.add_get('/index.html', index)
+    app.router.add_get('/ws', websocket_handler)
+    port = int(os.environ.get('PORT', 8080))
     print(f'[POU] Запуск на порту {port}')
-    async with websockets.serve(handler, '0.0.0.0', port, process_request=process_request):
-        await asyncio.Future()
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    print('[POU] Сервер готов')
+    await asyncio.Future()
 
 if __name__ == '__main__':
     asyncio.run(main())
