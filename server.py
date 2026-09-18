@@ -12,7 +12,7 @@ lock = asyncio.Lock()
 ONLINE_TIMEOUT = 30
 MAX_HISTORY = 500
 ADMIN_NAME = 'POUADMINISTRATOR'
-ADMIN_PASSWORD = 'admin123'
+ADMIN_PASSWORD = '123fff123'
 
 # ============ ХРАНИЛИЩЕ В ПАМЯТИ ============
 messages = []
