@@ -12,7 +12,7 @@ lock = asyncio.Lock()
 ONLINE_TIMEOUT = 30
 MAX_HISTORY = 500
 ADMIN_NAME = 'POUADMINISTRATOR'
-ADMIN_PASSWORD = '123fff123'
+ADMIN_PASSWORD = 'admin123'
 
 # ============ ХРАНИЛИЩЕ В ПАМЯТИ ============
 messages = []
@@ -23,9 +23,8 @@ muted_users = {}
 user_info = {}
 registered_users = {}
 
-# ============ СОХРАНЕНИЕ В ФАЙЛ ============
+# ============ СОХРАНЕНИЕ ============
 def save_data():
-    """Сохраняем всё на диск, чтобы не сбрасывалось при перезапуске"""
     try:
         data = {
             'messages': messages[-MAX_HISTORY:],
@@ -41,7 +40,6 @@ def save_data():
         print(f'[POU] Ошибка сохранения: {e}')
 
 def load_data():
-    """Загружаем при старте"""
     global messages, verified_users, banned_users, muted_users, user_info, registered_users
     if not os.path.exists(DATA_FILE):
         print('[POU] Файл данных не найден, старт с нуля')
@@ -55,7 +53,6 @@ def load_data():
         muted_users = data.get('muted_users', {})
         user_info = data.get('user_info', {})
         registered_users = data.get('registered_users', {})
-        # Админ никогда не должен быть в бане
         banned_users.discard(ADMIN_NAME)
         print(f'[POU] Загружено: {len(registered_users)} юзеров, {len(messages)} сообщений')
     except Exception as e:
@@ -146,6 +143,16 @@ async def index(request):
     path = os.path.join(os.path.dirname(__file__), 'static', 'index.html')
     return web.FileResponse(path)
 
+async def gamestrel(request):
+    path = os.path.join(os.path.dirname(__file__), 'static', 'gamestrel.html')
+    return web.FileResponse(path)
+
+async def games(request):
+    path = os.path.join(os.path.dirname(__file__), 'static', 'games.html')
+    if os.path.exists(path):
+        return web.FileResponse(path)
+    return web.FileResponse(os.path.join(os.path.dirname(__file__), 'static', 'index.html'))
+
 async def auth(request):
     data = await request.json()
     action = data.get('action')
@@ -173,7 +180,6 @@ async def auth(request):
             return web.json_response({'ok': True, 'message': 'Регистрация успешна'})
 
         elif action == 'login':
-            # Админ — всегда пускаем, если пароль верный (игнорируем бан)
             if username == ADMIN_NAME:
                 if password == ADMIN_PASSWORD:
                     return web.json_response({'ok': True, 'is_admin': True})
@@ -200,7 +206,6 @@ async def send_message(request):
     async with lock:
         register_user(request, sender)
 
-        # АДМИН — всегда может писать, даже если в бане
         if sender in banned_users and sender != ADMIN_NAME:
             return web.json_response({'ok': False, 'error': 'Вы забанены'})
 
@@ -290,7 +295,7 @@ async def handle_admin_command(text, admin):
     if cmd == '/kick' and len(parts) >= 2:
         u = parts[1]
         if u == ADMIN_NAME:
-            return '❌ Нельзя кикнуть администратора'
+            return '❌ Нельзя'
         if u in users_online:
             users_online.pop(u, None)
             return f'👢 {u} кикнут'
@@ -308,7 +313,7 @@ async def handle_admin_command(text, admin):
         if parts[1] in registered_users:
             registered_users[parts[1]]['verified'] = False
         save_data()
-        return f'❌ {parts[1]} лишён верификации'
+        return f'❌ {parts[1]} лишён'
 
     if cmd == '/verified':
         return '✅ Верифицированы: ' + (', '.join(sorted(verified_users)) if verified_users else 'пусто')
@@ -340,7 +345,7 @@ async def handle_admin_command(text, admin):
         L.append('━━━━━━━━━━━━━━━━━')
         L.append(f'🌐 Статус: {"онлайн" if u in users_online else "офлайн"}')
         if u == ADMIN_NAME:
-            L.append('👑 Администратор')
+            L.append('👑 Админ')
         if u in verified_users:
             L.append('✅ Верифицирован')
         if u in banned_users:
@@ -381,7 +386,6 @@ async def get_messages(request):
     async with lock:
         if user:
             register_user(request, user)
-            # АДМИН — никогда не банится
             if user in banned_users and user != ADMIN_NAME:
                 return web.json_response({'banned': True, 'reason': 'Вы забанены'})
             users_online[user] = time.time()
@@ -433,9 +437,9 @@ async def jitsi_room(request):
     room = ''.join(c if c.isalnum() or c == '-' else '-' for c in room)
     return web.json_response({'room': room})
 
+# ============ ЗАПУСК ============
 async def main():
     load_data()
-    # Защита: админ никогда не в бане
     banned_users.discard(ADMIN_NAME)
     if ADMIN_NAME in registered_users:
         registered_users[ADMIN_NAME]['banned'] = False
@@ -443,6 +447,8 @@ async def main():
     app = web.Application()
     app.router.add_get('/', index)
     app.router.add_get('/index.html', index)
+    app.router.add_get('/gamestrel.html', gamestrel)
+    app.router.add_get('/games.html', games)
     app.router.add_post('/auth', auth)
     app.router.add_post('/send', send_message)
     app.router.add_get('/messages', get_messages)
@@ -451,7 +457,7 @@ async def main():
 
     port = int(os.environ.get('PORT', 8080))
     print(f'[POU] Запуск на порту {port}')
-    print(f'[POU] Админ: {ADMIN_NAME}')
+    print(f'[POU] Админ: {ADMIN_NAME} / пароль: {ADMIN_PASSWORD}')
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', port)
@@ -471,7 +477,6 @@ async def main():
                     del muted_users[u]
     asyncio.create_task(cleanup())
 
-    # Автосохранение каждые 30 секунд
     async def autosave():
         while True:
             await asyncio.sleep(30)
