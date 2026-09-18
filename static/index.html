@@ -1,1 +1,66 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pou</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+body{background:#1e1e2e;color:#cdd6f4;height:100vh;display:flex;flex-direction:column}
+header{padding:12px 16px;background:#181825;color:#89b4fa;font-weight:bold;font-size:20px;display:flex;justify-content:space-between}
+header span{font-size:13px;color:#6c7086}
+#chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msg{padding:8px 12px;border-radius:12px;max-width:80%;word-wrap:break-word}
+.me{align-self:flex-end;background:#89b4fa;color:#1e1e2e}
+.other{align-self:flex-start;background:#313244}
+.sys{align-self:center;color:#6c7086;font-size:12px;font-style:italic}
+footer{display:flex;gap:8px;padding:10px;background:#181825}
+input{flex:1;padding:12px;background:#313244;border:none;border-radius:8px;color:#cdd6f4;font-size:15px;outline:none}
+button{padding:12px 18px;background:#89b4fa;color:#1e1e2e;border:none;border-radius:8px;font-weight:bold;font-size:15px}
+</style>
+</head>
+<body>
+<header>Pou <span id="status">Подключение...</span></header>
+<div id="chat"></div>
+<footer>
+<input id="input" placeholder="Сообщение..." autocomplete="off">
+<button onclick="send()">➤</button>
+</footer>
+<script>
+const chat=document.getElementById('chat');
+const input=document.getElementById('input');
+const status=document.getElementById('status');
+const WS_URL=(location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws';
+let ws;
+let myName=prompt('Ваше имя:','Guest')||'Guest';
+function add(text,cls){
+const d=document.createElement('div');
+d.className='msg '+cls;
+d.textContent=text;
+chat.appendChild(d);
+chat.scrollTop=chat.scrollHeight;
+}
+function connect(){
+ws=new WebSocket(WS_URL);
+ws.onopen=()=>{status.textContent='Онлайн';status.style.color='#a6e3a1'};
+ws.onclose=()=>{status.textContent='Отключено';status.style.color='#f38ba8';setTimeout(connect,3000)};
+ws.onerror=()=>add('Ошибка соединения','sys');
+ws.onmessage=(e)=>{
+const m=JSON.parse(e.data);
+if(m.from===myName)return;
+add('['+m.time+'] '+m.from+': '+m.text,'other');
+};
+}
+function send(){
+const t=input.value.trim();
+if(!t||!ws||ws.readyState!==1)return;
+ws.send(JSON.stringify({from:myName,text:t}));
+add('['+new Date().toLocaleTimeString()+'] Вы: '+t,'me');
+input.value='';
+}
+input.addEventListener('keydown',(e)=>{if(e.key==='Enter')send()});
+connect();
+</script>
+</body>
+</html>
