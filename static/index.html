@@ -62,7 +62,8 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 #emoji-panel{display:none;position:absolute;bottom:60px;left:8px;right:8px;background:#313244;border-radius:10px;padding:8px;font-size:22px;line-height:1.6;max-height:120px;overflow-y:auto;z-index:10}
 #emoji-panel span{cursor:pointer;padding:3px}
 .muted-warn{background:#f9e2af;color:#1e1e2e;padding:8px 12px;font-size:12px;text-align:center;font-weight:bold}
-.banned-screen{position:fixed;inset:0;background:#1e1e2e;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:9999;text-align:center;padding:30px}
+.banned-screen{position:fixed;inset:0;background:#1e1e2e;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:9999;text-align:center;padding:30px}
+.banned-screen.on{display:flex}
 .banned-screen h1{color:#f38ba8;font-size:32px}
 .banned-screen p{color:#cdd6f4;font-size:15px}
 .admin-menu{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
@@ -126,7 +127,7 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
   </main>
 </div>
 
-<div id="banned-screen" class="banned-screen" style="display:none"><h1>🚫 Вы забанены</h1><p id="ban-reason">Доступ запрещён.</p></div>
+<div id="banned-screen" class="banned-screen"><h1>🚫 Вы забанены</h1><p id="ban-reason">Доступ запрещён.</p></div>
 
 <div id="admin-menu" class="admin-menu">
   <div class="admin-card">
@@ -169,6 +170,7 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 </div>
 
 <script>
+// ===== СОХРАНЁННЫЕ АККАУНТЫ =====
 function getSaved(){try{return JSON.parse(localStorage.getItem('pou_saved')||'[]')}catch{return[]}}
 function saveAcc(n){let s=getSaved();if(!s.includes(n)){s.push(n);localStorage.setItem('pou_saved',JSON.stringify(s))}}
 function renderSaved(){
@@ -201,6 +203,7 @@ async function doAuth(action){
 }
 function logout(){localStorage.removeItem('pou_current');location.reload()}
 
+// ===== ЭЛЕМЕНТЫ =====
 const chat=document.getElementById('chat');
 const input=document.getElementById('input');
 const statusEl=document.getElementById('status');
@@ -242,7 +245,22 @@ async function poll(){
   try{
     const r=await fetch('/messages?since='+lastTimestamp+'&user='+encodeURIComponent(myName));
     const data=await r.json();
-    if(data.banned){document.getElementById('banned-screen').style.display='flex';document.getElementById('ban-reason').textContent=data.reason||'Вы забанены';return}
+
+    // ★ Отладка в заголовке вкладки
+    document.title = 'Pou | ban:' + (data.banned===true?'YES':'no') + ' am_ban:' + (data.am_banned===true?'YES':'no');
+
+    // ★ СТРОГАЯ проверка — только true, не "true", не undefined
+    const reallyBanned = (data.banned === true) || (data.am_banned === true);
+
+    if (reallyBanned) {
+      document.getElementById('banned-screen').classList.add('on');
+      document.getElementById('ban-reason').textContent = data.reason || 'Вы забанены';
+      return;
+    } else {
+      // Если экран бана открыт, но бан сняли — закрываем
+      document.getElementById('banned-screen').classList.remove('on');
+    }
+
     statusEl.textContent='✅ онлайн';statusEl.style.color='#a6e3a1';
     onlineUsers=data.online||[];
     verifiedUsers=new Set(data.verified||[]);
@@ -309,6 +327,7 @@ function toggleEmoji(){if(emojiPanel.style.display==='block'){emojiPanel.style.d
 function insertEmoji(e){input.value+=e;input.focus();emojiPanel.style.display='none'}
 function callFriend(){let f=currentChat;if(!f){f=prompt('С кем звонок?','');if(!f)return}fetch('/room?a='+encodeURIComponent(myName)+'&b='+encodeURIComponent(f)).then(r=>r.json()).then(d=>{const url='https://meet.jit.si/'+d.room;addSys('📞 '+url);window.open(url,'_blank')})}
 
+// ===== АДМИН-ПАНЕЛЬ =====
 function openAdminMenu(){document.getElementById('admin-menu').classList.add('open');updateAdminPanel()}
 function closeAdminMenu(){document.getElementById('admin-menu').classList.remove('open')}
 function updateAdminPanel(){
@@ -372,4 +391,4 @@ window.addEventListener('load',()=>{
 });
 </script>
 </body>
-  </html>
+</html>
