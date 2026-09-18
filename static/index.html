@@ -8,8 +8,8 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
 body{background:#1e1e2e;color:#cdd6f4;height:100vh;overflow:hidden;display:flex}
 
-/* ЭКРАН ВХОДА */
-#auth-screen{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;background:#1e1e2e}
+/* Экран входа */
+#auth-screen{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:#1e1e2e}
 .auth-box{background:#181825;padding:30px;border-radius:16px;width:340px;max-width:90%}
 .auth-box h1{color:#89b4fa;font-size:32px;text-align:center;margin-bottom:6px}
 .auth-box p{color:#6c7086;text-align:center;font-size:13px;margin-bottom:20px}
@@ -19,51 +19,47 @@ body{background:#1e1e2e;color:#cdd6f4;height:100vh;overflow:hidden;display:flex}
 .auth-box .error{color:#f38ba8;font-size:12px;text-align:center;min-height:16px;margin-top:8px}
 .saved-accounts{margin-top:16px;border-top:1px solid #313244;padding-top:12px}
 .saved-accounts .title{font-size:11px;color:#6c7086;margin-bottom:8px}
-.saved-acc{padding:8px 10px;background:#313244;border-radius:6px;margin-bottom:6px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.saved-acc:hover{background:#45475a}
-.saved-acc .x{color:#f38ba8;font-size:14px;padding:0 4px}
+.saved-accounts .acc{padding:8px;background:#313244;border-radius:6px;margin-bottom:5px;font-size:13px;cursor:pointer;display:flex;justify-content:space-between}
+.saved-accounts .acc:hover{background:#45475a}
 
-/* ОСНОВНОЙ ЭКРАН */
-#main-screen{width:100%;height:100vh;display:none}
+/* Мессенджер */
+#app{display:none;width:100vw;height:100vh}
+#app.on{display:flex}
 .sidebar{width:250px;background:#181825;display:flex;flex-direction:column;border-right:1px solid #313244}
 .brand{padding:14px;font-size:20px;font-weight:bold;color:#89b4fa;border-bottom:1px solid #313244}
 .brand .me{font-size:11px;color:#6c7086;font-weight:normal;margin-top:3px}
-.sidebar-btns{display:flex;gap:4px;padding:8px}
-.sidebar-btns button{flex:1;padding:8px;background:#313244;color:#cdd6f4;border:none;border-radius:6px;font-size:12px;cursor:pointer}
-.sidebar-btns button.primary{background:#89b4fa;color:#1e1e2e;font-weight:bold}
-.tabs{display:flex;border-bottom:1px solid #313244}
-.tabs button{flex:1;padding:10px;background:none;border:none;color:#6c7086;font-size:12px;cursor:pointer;border-bottom:2px solid transparent}
-.tabs button.active{color:#89b4fa;border-bottom-color:#89b4fa}
-.tab-content{flex:1;overflow-y:auto;display:none}
-.tab-content.active{display:block}
-
+.admin-badge{background:#f9e2af;color:#1e1e2e;font-size:9px;font-weight:bold;padding:2px 6px;border-radius:4px;margin-left:4px}
+.new-chat{margin:8px;padding:8px;background:#89b4fa;color:#1e1e2e;border:none;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer}
+.chat-list{flex:1;overflow-y:auto}
 .chat-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid #252535;display:flex;justify-content:space-between;align-items:center;gap:8px}
 .chat-item:hover{background:#313244}
 .chat-item.active{background:#313244;border-left:3px solid #89b4fa;padding-left:11px}
 .chat-item .name{font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-item .preview{font-size:11px;color:#6c7086;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-item .badge{background:#f38ba8;color:#1e1e2e;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+.online-sec{padding:8px 14px;font-size:11px;color:#6c7086;border-top:1px solid #313244;background:#181825;max-height:150px;overflow-y:auto}
+.online-sec .user{color:#a6e3a1;cursor:pointer;padding:3px 0;font-size:12px;display:flex;align-items:center;gap:4px}
+.online-sec .user:hover{text-decoration:underline}
+.verified-check{color:#1d9bf0;font-weight:bold}
+.banned-mark{color:#f38ba8;font-size:11px}
+.muted-mark{color:#f9e2af;font-size:11px}
 
-.user-row{padding:10px 14px;border-bottom:1px solid #252535;display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:13px}
-.user-row .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.user-row button{padding:5px 10px;background:#89b4fa;color:#1e1e2e;border:none;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer}
-.user-row button.sec{background:#45475a;color:#cdd6f4}
-.user-row button.danger{background:#f38ba8;color:#1e1e2e}
-.badge-req{background:#f38ba8;color:#1e1e2e;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:bold}
-
-/* Основная часть */
 .main{flex:1;display:flex;flex-direction:column;background:#1e1e2e;min-width:0}
 header{padding:12px 16px;background:#181825;border-bottom:1px solid #313244;display:flex;justify-content:space-between;align-items:center;gap:8px}
 header .title{font-size:16px;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 header .status{font-size:11px;color:#6c7086;margin-top:2px}
 header .actions{display:flex;gap:6px;flex-shrink:0}
 header button{background:#313244;color:#cdd6f4;border:none;border-radius:6px;padding:7px 10px;font-size:14px;cursor:pointer}
+.admin-bar{background:#f9e2af;color:#1e1e2e;padding:8px 12px;font-size:13px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.admin-bar button{background:#1e1e2e;color:#f9e2af;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:bold}
+
 #chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
 .msg{padding:8px 12px;border-radius:12px;max-width:75%;word-wrap:break-word;font-size:14px}
 .me{align-self:flex-end;background:#89b4fa;color:#1e1e2e}
 .other{align-self:flex-start;background:#313244}
 .private-msg{background:#45475a}
 .sys{align-self:center;color:#6c7086;font-size:11px;font-style:italic;max-width:90%;text-align:center}
+.sys-admin{align-self:center;color:#1e1e2e;font-size:12px;background:#f9e2af;padding:8px 14px;border-radius:8px;max-width:90%;text-align:left;font-weight:bold;white-space:pre-line}
 .msg .meta{font-size:10px;opacity:.7;margin-bottom:3px}
 footer{display:flex;gap:6px;padding:8px;background:#181825;align-items:center;position:relative}
 input{flex:1;min-width:100px;padding:10px;background:#313244;border:none;border-radius:8px;color:#cdd6f4;font-size:14px;outline:none}
@@ -71,12 +67,24 @@ footer button{padding:10px 14px;background:#89b4fa;color:#1e1e2e;border:none;bor
 footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:16px}
 #emoji-panel{display:none;position:absolute;bottom:60px;left:8px;right:8px;background:#313244;border-radius:10px;padding:8px;font-size:22px;line-height:1.6;max-height:120px;overflow-y:auto;z-index:10}
 #emoji-panel span{cursor:pointer;padding:3px}
-.empty{color:#6c7086;text-align:center;padding:20px;font-size:12px}
-
-@media (max-width:600px){
-  .sidebar{width:180px}
-  .chat-item .preview{display:none}
-}
+.muted-warn{background:#f9e2af;color:#1e1e2e;padding:8px 12px;font-size:12px;text-align:center;font-weight:bold}
+.banned-screen{position:fixed;inset:0;background:#1e1e2e;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:9999;text-align:center;padding:30px}
+.banned-screen h1{color:#f38ba8;font-size:32px}
+.banned-screen p{color:#cdd6f4;font-size:15px}
+.admin-menu{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.admin-menu.open{display:flex}
+.admin-card{background:#181825;border-radius:12px;padding:20px;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
+.admin-card h2{color:#f9e2af;margin-bottom:15px;font-size:20px}
+.admin-card h3{color:#89b4fa;font-size:14px;margin:15px 0 8px;border-bottom:1px solid #313244;padding-bottom:5px}
+.admin-card .field{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.admin-card input{flex:1;min-width:80px;padding:8px;background:#313244;border:none;border-radius:6px;color:#cdd6f4;font-size:13px}
+.admin-card button{background:#89b4fa;color:#1e1e2e;border:none;padding:8px 12px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;white-space:nowrap}
+.admin-card button.red{background:#f38ba8}
+.admin-card button.yellow{background:#f9e2af}
+.admin-card button.green{background:#a6e3a1}
+.admin-card .close{position:absolute;top:15px;right:15px;background:transparent;color:#cdd6f4;font-size:22px;border:none;cursor:pointer}
+.admin-card .list{background:#1e1e2e;border-radius:6px;padding:8px;font-size:12px;max-height:120px;overflow-y:auto;color:#a6adc8;margin-top:5px;white-space:pre-wrap}
+@media (max-width:600px){.sidebar{width:200px}.chat-item .preview{display:none}}
 </style>
 </head>
 <body>
@@ -86,55 +94,35 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
   <div class="auth-box">
     <h1>🐧 Pou</h1>
     <p>Мессенджер</p>
-    <input id="auth-user" placeholder="Имя пользователя" autocomplete="off">
-    <input id="auth-pass" type="password" placeholder="Пароль">
-    <button id="btn-login">Войти</button>
-    <button id="btn-register" class="sec">Регистрация</button>
-    <div class="error" id="auth-error"></div>
-    <div class="saved-accounts" id="saved-accounts" style="display:none">
+    <input id="au-name" placeholder="Имя пользователя" autocomplete="off">
+    <input id="au-pass" type="password" placeholder="Пароль">
+    <button onclick="doAuth('login')">Войти</button>
+    <button class="sec" onclick="doAuth('register')">Регистрация</button>
+    <div class="error" id="au-error"></div>
+    <div class="saved-accounts" id="saved-acc" style="display:none">
       <div class="title">СОХРАНЁННЫЕ АККАУНТЫ</div>
       <div id="saved-list"></div>
     </div>
   </div>
 </div>
 
-<!-- ОСНОВНОЙ ЭКРАН -->
-<div id="main-screen">
+<!-- МЕССЕНДЖЕР -->
+<div id="app">
   <aside class="sidebar">
-    <div class="brand">
-      🐧 Pou
-      <div class="me">вы: <span id="my-name"></span></div>
-    </div>
-    <div class="sidebar-btns">
-      <button class="primary" onclick="openNewChat()">＋ Чат</button>
-      <button onclick="openGames()">🎮</button>
-      <button onclick="logout()">🚪</button>
-    </div>
-    <div class="tabs">
-      <button class="active" onclick="switchTab('chats')">Чаты</button>
-      <button onclick="switchTab('friends')">Друзья <span id="req-badge"></span></button>
-      <button onclick="switchTab('people')">Люди</button>
-    </div>
-    <div class="tab-content active" id="tab-chats">
-      <div id="chat-list"></div>
-    </div>
-    <div class="tab-content" id="tab-friends">
-      <div id="friends-list"></div>
-    </div>
-    <div class="tab-content" id="tab-people">
-      <div id="people-list"></div>
-    </div>
+    <div class="brand">🐧 Pou<div class="me">вы: <span id="my-name"></span><span id="my-admin" style="display:none" class="admin-badge">ADMIN</span></div></div>
+    <button class="new-chat" onclick="newPrivateChat()">＋ Новый чат</button>
+    <div class="chat-list" id="chat-list"></div>
+    <div class="online-sec"><div style="margin-bottom:5px">ОНЛАЙН</div><div id="online-list">—</div></div>
   </aside>
-
   <main class="main">
+    <div id="admin-bar" class="admin-bar" style="display:none"><span>👑 Режим администратора</span><button onclick="openAdminMenu()">⚙ Панель</button></div>
+    <div id="muted-warn" class="muted-warn" style="display:none">🔇 Вы в муте — писать нельзя</div>
     <header>
       <div style="min-width:0;flex:1">
         <div class="title" id="chat-title">🌍 Общий чат</div>
         <div class="status" id="status">подключение...</div>
       </div>
-      <div class="actions">
-        <button onclick="callFriend()" title="Позвонить">📞</button>
-      </div>
+      <div class="actions"><button onclick="callFriend()">📞</button><button onclick="logout()">🚪</button></div>
     </header>
     <div id="chat"></div>
     <div id="emoji-panel"></div>
@@ -146,432 +134,66 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
   </main>
 </div>
 
+<div id="banned-screen" class="banned-screen" style="display:none"><h1>🚫 Вы забанены</h1><p id="ban-reason">Доступ запрещён.</p></div>
+
+<!-- АДМИН-ПАНЕЛЬ -->
+<div id="admin-menu" class="admin-menu">
+  <div class="admin-card">
+    <button class="close" onclick="closeAdminMenu()">✕</button>
+    <h2>👑 Админ-панель</h2>
+    <h3>🚫 Бан / Разбан</h3>
+    <div class="field">
+      <input id="ban-user" placeholder="Имя">
+      <button class="red" onclick="adminCmd('ban')">Бан</button>
+      <button class="green" onclick="adminCmd('unban')">Разбан</button>
+    </div>
+    <div class="list" id="banned-list">—</div>
+    <h3>🔇 Мут</h3>
+    <div class="field">
+      <input id="mute-user" placeholder="Имя">
+      <input id="mute-time" placeholder="Сек" style="max-width:70px">
+      <button class="yellow" onclick="adminCmd('mute')">Мут</button>
+    </div>
+    <div class="field">
+      <input id="unmute-user" placeholder="Имя для размута">
+      <button class="green" onclick="adminCmd('unmute')">Размут</button>
+    </div>
+    <div class="list" id="muted-list">—</div>
+    <h3>👢 Кик</h3>
+    <div class="field"><input id="kick-user" placeholder="Имя"><button class="red" onclick="adminCmd('kick')">Кикнуть</button></div>
+    <h3>✅ Верификация</h3>
+    <div class="field">
+      <input id="verify-user" placeholder="Имя">
+      <button onclick="adminCmd('verify')">✅</button>
+      <button class="red" onclick="adminCmd('unverify')">❌</button>
+    </div>
+    <div class="list" id="verified-list">—</div>
+    <h3>🗑 Очистка</h3>
+    <div class="field"><input id="clear-user" placeholder="Имя (пусто = всё)"><button class="red" onclick="adminCmd('clearchat')">Очистить</button></div>
+    <h3>🔍 Инфо о юзере</h3>
+    <div class="field"><input id="info-user" placeholder="Имя"><button onclick="adminCmd('info')">Показать</button></div>
+    <h3>📋 Онлайн</h3>
+    <div class="list" id="online-admin-list">—</div>
+  </div>
+</div>
+
 <script>
-// ============ ГЛОБАЛЬНОЕ ============
-let myName = null;
-let myToken = null;
-let currentChat = null;
-let lastTimestamp = 0;
-let allMessages = [];
-let unread = {};
-let onlineUsers = [];
-let friends = [];
-let requests = [];
-let sentRequests = [];
-let manualChats = [];
-
-const EMOJIS = ['😀','😂','😍','🥰','😎','🤔','😴','😢','😡','👍','👎','❤️','🔥','🎉','✅','❌','🐧','🚀','💬','📞','👋','🙏','😊','🤗','🤣','😅','🤩','😭','🥺','😱'];
-
-// ============ СОХРАНЁННЫЕ АККАУНТЫ (мультиакк) ============
-function getSavedAccounts() {
-  try { return JSON.parse(localStorage.getItem('pou_accounts') || '[]'); }
-  catch(e) { return []; }
+// ===== АВТОРИЗАЦИЯ =====
+function getSaved() {
+  try { return JSON.parse(localStorage.getItem('pou_saved') || '[]'); } catch { return []; }
 }
-function saveAccount(username, token) {
-  let accs = getSavedAccounts().filter(a => a.username !== username);
-  accs.push({username, token});
-  localStorage.setItem('pou_accounts', JSON.stringify(accs));
+function saveAcc(name) {
+  let s = getSaved();
+  if (!s.includes(name)) { s.push(name); localStorage.setItem('pou_saved', JSON.stringify(s)); }
 }
-function removeSavedAccount(username) {
-  const accs = getSavedAccounts().filter(a => a.username !== username);
-  localStorage.setItem('pou_accounts', JSON.stringify(accs));
-  renderSavedAccounts();
-}
-function renderSavedAccounts() {
-  const accs = getSavedAccounts();
-  const box = document.getElementById('saved-accounts');
+function renderSaved() {
+  const s = getSaved();
+  const box = document.getElementById('saved-acc');
   const list = document.getElementById('saved-list');
-  if (!accs.length) { box.style.display = 'none'; return; }
+  if (!s.length) { box.style.display = 'none'; return; }
   box.style.display = 'block';
-  list.innerHTML = '';
-  accs.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'saved-acc';
-    div.innerHTML = '<span>👤 ' + escapeHtml(a.username) + '</span><span class="x" title="Удалить">✕</span>';
-    div.querySelector('span').onclick = () => quickLogin(a);
-    div.querySelector('.x').onclick = (e) => { e.stopPropagation(); removeSavedAccount(a.username); };
-    list.appendChild(div);
-  });
+  list.innerHTML = s.map(n =>
+    '<div class="acc" onclick="pickAcc(\'' + escapeHtml(n) + '\')">👤 ' + escapeHtml(n) + ' <span style="color:#f38ba8" onclick="event.stopPropagation();delAcc(\'' + escapeHtml(n) + '\')">✕</span></div>'
+  ).join('');
 }
-
-function quickLogin(acc) {
-  myToken = acc.token;
-  myName = acc.username;
-  fetch('/friends?token=' + myToken).then(r => {
-    if (r.status === 401) {
-      removeSavedAccount(acc.username);
-      showAuthError('Сессия истекла, войдите заново');
-      return;
-    }
-    enterApp();
-  }).catch(() => showAuthError('Ошибка входа'));
-}
-
-// ============ АВТОРИЗАЦИЯ ============
-function showAuthError(msg) {
-  document.getElementById('auth-error').textContent = msg || '';
-}
-
-async function auth(action) {
-  const username = document.getElementById('auth-user').value.trim();
-  const password = document.getElementById('auth-pass').value;
-  if (!username || !password) { showAuthError('Заполните оба поля'); return; }
-  showAuthError('');
-  try {
-    const r = await fetch('/' + action, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username, password})
-    });
-    const d = await r.json();
-    if (!d.ok) { showAuthError(d.error || 'Ошибка'); return; }
-    myName = d.username;
-    myToken = d.token;
-    saveAccount(myName, myToken);
-    enterApp();
-  } catch (e) {
-    showAuthError('Сеть: ' + e.message);
-  }
-}
-
-async function logout() {
-  if (!confirm('Выйти из аккаунта ' + myName + '?')) return;
-  try { await fetch('/logout', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token: myToken})}); } catch(e){}
-  myName = null; myToken = null;
-  document.getElementById('main-screen').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-  renderSavedAccounts();
-}
-
-// ============ ВХОД В ПРИЛОЖЕНИЕ ============
-async function enterApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('main-screen').style.display = 'flex';
-  document.getElementById('my-name').textContent = myName;
-  clearChat();
-  addSys('Добро пожаловать, ' + myName + '!');
-  await loadFriends();
-  await loadHistory();
-  await poll();
-  setInterval(poll, 2000);
-}
-
-// ============ ЭМОДЗИ ============
-function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function addMsg(from, text, time, cls, isPrivate) {
-  const chat = document.getElementById('chat');
-  const d = document.createElement('div');
-  d.className = 'msg ' + cls + (isPrivate ? ' private-msg' : '');
-  d.innerHTML = '<div class="meta">[' + time + '] ' + escapeHtml(from) + '</div>' + escapeHtml(text);
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-}
-function addSys(text) {
-  const chat = document.getElementById('chat');
-  const d = document.createElement('div');
-  d.className = 'msg sys';
-  d.textContent = text;
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-}
-function clearChat(){document.getElementById('chat').innerHTML='';}
-
-// ============ ОТПРАВКА ============
-async function send() {
-  const input = document.getElementById('input');
-  const t = input.value.trim();
-  if (!t) return;
-  input.value = '';
-  addMsg('Вы', t, new Date().toLocaleTimeString().slice(0, 8), 'me', !!currentChat);
-  try {
-    const r = await fetch('/send', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({token: myToken, text: t, to: currentChat})
-    });
-    const d = await r.json();
-    if (!d.ok) addSys('⚠ ' + (d.error || 'Ошибка'));
-  } catch (e) {
-    addSys('Не удалось отправить: ' + e.message);
-  }
-}
-
-// ============ ОПРОС ============
-async function poll() {
-  try {
-    const r = await fetch('/messages?since=' + lastTimestamp + '&token=' + myToken);
-    if (r.status === 401) { addSys('Сессия истекла'); return; }
-    const data = await r.json();
-    document.getElementById('status').textContent = '✅ онлайн';
-    document.getElementById('status').style.color = '#a6e3a1';
-    onlineUsers = data.online;
-    for (const m of data.messages) {
-      lastTimestamp = Math.max(lastTimestamp, m.timestamp);
-      allMessages.push(m);
-      if (m.from === myName) continue;
-      if (m.to === null) {
-        if (currentChat === null) addMsg(m.from, m.text, m.time, 'other', false);
-        else unread['__general__'] = (unread['__general__']||0)+1;
-      } else if (m.to === myName) {
-        if (currentChat === m.from) addMsg(m.from, m.text, m.time, 'other', true);
-        else unread[m.from] = (unread[m.from]||0)+1;
-      }
-    }
-    renderChatList();
-    renderOnlineAndFriends();
-  } catch (e) {
-    document.getElementById('status').textContent = '⚠ нет связи';
-    document.getElementById('status').style.color = '#f38ba8';
-  }
-}
-
-// ============ СПИСОК ЧАТОВ ============
-function renderChatList() {
-  const list = document.getElementById('chat-list');
-  const items = [];
-  const genUnread = unread['__general__'] || 0;
-  const lastGen = [...allMessages].reverse().find(m => !m.to);
-  items.push({
-    id: '__general__',
-    name: '🌍 Общий чат',
-    preview: lastGen ? lastGen.from + ': ' + lastGen.text : 'Только для друзей',
-    unread: genUnread,
-    active: currentChat === null
-  });
-
-  const partners = new Set();
-  friends.forEach(u => { if (u !== myName) partners.add(u); });
-  allMessages.forEach(m => {
-    if (m.to && m.from === myName) partners.add(m.to);
-    if (m.to === myName) partners.add(m.from);
-  });
-  manualChats.forEach(u => partners.add(u));
-
-  partners.forEach(u => {
-    const last = [...allMessages].reverse().find(m =>
-      (m.from === myName && m.to === u) || (m.from === u && m.to === myName));
-    items.push({
-      id: u,
-      name: '💬 ' + u + (friends.includes(u) ? '' : ' (не в друзьях)'),
-      preview: last ? (last.from === myName ? 'Вы: ' : '') + last.text : 'Нет сообщений',
-      unread: unread[u] || 0,
-      active: currentChat === u
-    });
-  });
-
-  list.innerHTML = '';
-  items.forEach(it => {
-    const div = document.createElement('div');
-    div.className = 'chat-item' + (it.active ? ' active' : '');
-    div.innerHTML = '<div style="flex:1;min-width:0">' +
-      '<div class="name">' + escapeHtml(it.name) + '</div>' +
-      '<div class="preview">' + escapeHtml(it.preview) + '</div>' +
-      '</div>' + (it.unread > 0 ? '<div class="badge">' + it.unread + '</div>' : '');
-    div.onclick = () => switchChat(it.id === '__general__' ? null : it.id);
-    list.appendChild(div);
-  });
-}
-
-// ============ ПЕРЕКЛЮЧЕНИЕ ЧАТА ============
-function switchChat(name) {
-  currentChat = name;
-  if (name === null) { document.getElementById('chat-title').textContent = '🌍 Общий чат'; delete unread['__general__']; }
-  else {
-    document.getElementById('chat-title').textContent = '💬 ' + name;
-    delete unread[name];
-    if (!manualChats.includes(name)) manualChats.push(name);
-  }
-  loadChat();
-  renderChatList();
-}
-
-function loadChat() {
-  clearChat();
-  let shown = 0;
-  for (const m of allMessages) {
-    if (currentChat === null) { if (m.to) continue; }
-    else {
-      const isMine = m.from === myName && m.to === currentChat;
-      const isOther = m.from === currentChat && m.to === myName;
-      if (!isMine && !isOther) continue;
-    }
-    addMsg(m.from, m.text, m.time, m.from === myName ? 'me' : 'other', !!currentChat);
-    shown++;
-  }
-  if (shown === 0) {
-    if (currentChat === null) addSys('Общий чат. Видят только ваши друзья.');
-    else addSys('Личный чат с ' + currentChat + (friends.includes(currentChat) ? '' : '. Он ещё не в друзьях — сообщения могут не дойти.'));
-  }
-}
-
-// ============ ДРУЗЬЯ ============
-async function loadFriends() {
-  try {
-    const r = await fetch('/friends?token=' + myToken);
-    const d = await r.json();
-    if (!d.ok) return;
-    friends = d.friends;
-    requests = d.requests;
-    sentRequests = d.sent_requests || [];
-    renderFriends();
-    renderOnlineAndFriends();
-    renderChatList();
-  } catch(e) {}
-}
-
-function renderFriends() {
-  const list = document.getElementById('friends-list');
-  list.innerHTML = '';
-  const badge = document.getElementById('req-badge');
-  badge.textContent = requests.length ? '🔴' + requests.length : '';
-
-  if (requests.length) {
-    const h = document.createElement('div');
-    h.className = 'empty';
-    h.textContent = 'ЗАЯВКИ';
-    list.appendChild(h);
-    requests.forEach(u => {
-      const row = document.createElement('div');
-      row.className = 'user-row';
-      row.innerHTML = '<span class="name">👤 ' + escapeHtml(u) + '</span>' +
-        '<button onclick="acceptFriend(\''+escapeHtml(u)+'\')">✓</button>' +
-        '<button class="danger" onclick="declineFriend(\''+escapeHtml(u)+'\')">✕</button>';
-      list.appendChild(row);
-    });
-  }
-
-  const h2 = document.createElement('div');
-  h2.className = 'empty';
-  h2.textContent = 'МОИ ДРУЗЬЯ (' + friends.length + ')';
-  list.appendChild(h2);
-
-  if (!friends.length) {
-    const e = document.createElement('div');
-    e.className = 'empty';
-    e.textContent = 'Пока нет друзей. Откройте вкладку «Люди» и добавьте.';
-    list.appendChild(e);
-  }
-  friends.forEach(u => {
-    const row = document.createElement('div');
-    row.className = 'user-row';
-    const isOnline = onlineUsers.includes(u);
-    row.innerHTML = '<span class="name">' + (isOnline ? '🟢' : '⚫') + ' ' + escapeHtml(u) + '</span>' +
-      '<button onclick="switchChat(\''+escapeHtml(u)+'\')">💬</button>' +
-      '<button class="danger" onclick="removeFriend(\''+escapeHtml(u)+'\')">🗑</button>';
-    list.appendChild(row);
-  });
-}
-
-function renderOnlineAndFriends() {
-  // Обновляем вкладку "Друзья" (статусы онлайн)
-  renderFriends();
-}
-
-async function loadAllUsers() {
-  try {
-    const r = await fetch('/users');
-    const d = await r.json();
-    const list = document.getElementById('people-list');
-    list.innerHTML = '';
-    const others = d.users.filter(u => u !== myName);
-    if (!others.length) {
-      list.innerHTML = '<div class="empty">Пока никого нет</div>';
-      return;
-    }
-    others.forEach(u => {
-      const row = document.createElement('div');
-      row.className = 'user-row';
-      let btn = '';
-      if (friends.includes(u)) btn = '<button class="sec">✓ В друзьях</button>';
-      else if (sentRequests.includes(u)) btn = '<button class="sec">⏳ Заявка</button>';
-      else btn = '<button onclick="addFriend(\''+escapeHtml(u)+'\')">＋</button>';
-      row.innerHTML = '<span class="name">👤 ' + escapeHtml(u) + '</span>' + btn;
-      list.appendChild(row);
-    });
-  } catch(e){}
-}
-
-async function addFriend(target) {
-  const r = await fetch('/friend/request', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({token: myToken, target})
-  });
-  const d = await r.json();
-  if (!d.ok) addSys('⚠ ' + (d.error||'Ошибка'));
-  await loadFriends();
-  await loadAllUsers();
-}
-async function acceptFriend(target) {
-  await fetch('/friend/accept', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token:myToken, target})});
-  await loadFriends(); await loadAllUsers();
-}
-async function declineFriend(target) {
-  await fetch('/friend/decline', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token:myToken, target})});
-  await loadFriends();
-}
-async function removeFriend(target) {
-  if (!confirm('Удалить ' + target + ' из друзей?')) return;
-  await fetch('/friend/remove', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token:myToken, target})});
-  await loadFriends(); await loadAllUsers();
-}
-
-// ============ ВКЛАДКИ ============
-function switchTab(t) {
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('tab-' + t).classList.add('active');
-  if (t === 'people') loadAllUsers();
-  if (t === 'friends') loadFriends();
-}
-
-// ============ ЭМОДЗИ / ЧАТ / ЗВОНОК ============
-function toggleEmoji() {
-  const p = document.getElementById('emoji-panel');
-  if (p.style.display === 'block') { p.style.display = 'none'; return; }
-  if (!p.dataset.filled) {
-    p.innerHTML = EMOJIS.map(e => '<span onclick="insertEmoji(\''+e+'\')">'+e+'</span>').join('');
-    p.dataset.filled = '1';
-  }
-  p.style.display = 'block';
-}
-function insertEmoji(e) { const i = document.getElementById('input'); i.value += e; i.focus(); document.getElementById('emoji-panel').style.display='none'; }
-function openNewChat() {
-  const name = prompt('С кем чат? Введите имя:', '');
-  if (!name || name === myName) return;
-  if (!manualChats.includes(name)) manualChats.push(name);
-  switchChat(name);
-}
-function openGames() { window.open('/games', '_blank'); }
-function callFriend() {
-  let friend = currentChat;
-  if (!friend) { friend = prompt('С кем звонок?', ''); if (!friend) return; }
-  fetch('/room?a=' + encodeURIComponent(myName) + '&b=' + encodeURIComponent(friend))
-    .then(r => r.json()).then(d => {
-      const url = 'https://meet.jit.si/' + d.room;
-      addSys('📞 ' + url);
-      window.open(url, '_blank');
-    });
-}
-
-// ============ ИСТОРИЯ ============
-async function loadHistory() {
-  try {
-    const r = await fetch('/history?token=' + myToken);
-    const d = await r.json();
-    allMessages = d.messages || [];
-    if (allMessages.length) lastTimestamp = allMessages[allMessages.length-1].timestamp;
-    renderChatList();
-    loadChat();
-  } catch(e){}
-}
-
-// ============ ИНИЦИАЛИЗАЦИЯ ============
-document.getElementById('input').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
-document.getElementById('auth-pass').addEventListener('keydown', e => { if (e.key === 'Enter') auth('login'); });
-document.getElementById('btn-login').onclick = () => auth('login');
-document.getElementById('btn-register').onclick = () => auth('register');
-renderSavedAccounts();
-</script>
-</body>
-</html>
+function pickAcc(name) { document.getElementById('au-name').value = name;
