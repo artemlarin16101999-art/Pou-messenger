@@ -54,6 +54,9 @@ def load_data():
         user_info = data.get('user_info', {})
         registered_users = data.get('registered_users', {})
         banned_users.discard(ADMIN_NAME)
+        # Обновляем игровые данные для всех
+        for username in list(registered_users.keys()):
+            ensure_user_data(username)
         print(f'[POU] Загружено: {len(registered_users)} юзеров, {len(messages)} сообщений')
     except Exception as e:
         print(f'[POU] Ошибка загрузки: {e}')
@@ -63,6 +66,60 @@ def hash_password(password, salt=None):
         salt = os.urandom(16).hex()
     h = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 100000)
     return h.hex(), salt
+
+# ============ ИГРОВЫЕ ДАННЫЕ ============
+def ensure_user_data(username):
+    """Создаёт игровые поля для пользователя"""
+    if username not in registered_users:
+        return
+    u = registered_users[username]
+    if 'pukoins' not in u:
+        if username == ADMIN_NAME:
+            u['pukoins'] = 9999999
+        else:
+            u['pukoins'] = 0
+    if 'owned_skins' not in u:
+        u['owned_skins'] = ['default']
+    if 'equipped_skin' not in u:
+        u['equipped_skin'] = 'default'
+    if 'kills' not in u:
+        u['kills'] = 0
+    if 'deaths' not in u:
+        u['deaths'] = 0
+    if 'matches_won' not in u:
+        u['matches_won'] = 0
+    if 'matches_lost' not in u:
+        u['matches_lost'] = 0
+
+def ensure_admin_exists():
+    """Создаёт запись админа, если её нет"""
+    if ADMIN_NAME not in registered_users:
+        registered_users[ADMIN_NAME] = {
+            'password_hash': '',
+            'salt': '',
+            'created': time.time(),
+            'verified': True,
+            'banned': False,
+            'pukoins': 9999999,
+            'owned_skins': ['default', 'gold', 'ruby', 'emerald', 'sapphire',
+                            'neon', 'fire', 'ice', 'rainbow', 'cristal'],
+            'equipped_skin': 'gold',
+            'kills': 0, 'deaths': 0,
+            'matches_won': 0, 'matches_lost': 0
+        }
+    else:
+        registered_users[ADMIN_NAME]['pukoins'] = 9999999
+        registered_users[ADMIN_NAME]['verified'] = True
+        registered_users[ADMIN_NAME]['banned'] = False
+
+def get_user_game_data(username):
+    """Возвращает игровые данные"""
+    if username == ADMIN_NAME:
+        ensure_admin_exists()
+    if username not in registered_users:
+        return None
+    ensure_user_data(username)
+    return registered_users[username]
 
 # ============ УТИЛИТЫ ============
 def is_muted(user):
@@ -138,7 +195,7 @@ def register_user(request, name):
         info['ip'] = ip
         info['ua'] = ua
 
-# ============ РОУТЫ ============
+# ============ РОУТЫ: HTML ============
 async def index(request):
     path = os.path.join(os.path.dirname(__file__), 'static', 'index.html')
     return web.FileResponse(path)
@@ -153,6 +210,7 @@ async def games(request):
         return web.FileResponse(path)
     return web.FileResponse(os.path.join(os.path.dirname(__file__), 'static', 'index.html'))
 
+# ============ АВТОРИЗАЦИЯ МЕССЕНДЖЕРА ============
 async def auth(request):
     data = await request.json()
     action = data.get('action')
@@ -174,7 +232,12 @@ async def auth(request):
             registered_users[username] = {
                 'password_hash': pw_hash, 'salt': salt,
                 'created': time.time(),
-                'verified': False, 'banned': False
+                'verified': False, 'banned': False,
+                'pukoins': 0,
+                'owned_skins': ['default'],
+                'equipped_skin': 'default',
+                'kills': 0, 'deaths': 0,
+                'matches_won': 0, 'matches_lost': 0
             }
             save_data()
             return web.json_response({'ok': True, 'message': 'Регистрация успешна'})
@@ -182,6 +245,8 @@ async def auth(request):
         elif action == 'login':
             if username == ADMIN_NAME:
                 if password == ADMIN_PASSWORD:
+                    ensure_admin_exists()
+                    save_data()
                     return web.json_response({'ok': True, 'is_admin': True})
                 return web.json_response({'ok': False, 'error': 'Неверный пароль админа'})
 
@@ -197,6 +262,7 @@ async def auth(request):
 
         return web.json_response({'ok': False, 'error': 'Неизвестное действие'})
 
+# ============ СООБЩЕНИЯ ============
 async def send_message(request):
     data = await request.json()
     sender = data.get('from', 'Guest')
@@ -245,7 +311,8 @@ async def handle_admin_command(text, admin):
                 '/verify <имя> | /unverify <имя>\n'
                 '/verified | /banned | /muted | /users\n'
                 '/clearchat [имя]\n'
-                '/info <имя>')
+                '/info <имя>\n'
+                '/give <имя> <сумма> — выдать пукоины')
 
     if cmd == '/ban' and len(parts) >= 2:
         u = parts[1]
@@ -335,6 +402,19 @@ async def handle_admin_command(text, admin):
     if cmd == '/users':
         return '👥 Онлайн: ' + (', '.join(sorted(users_online)) if users_online else 'никого')
 
+    if cmd == '/give' and len(parts) >= 3:
+        u = parts[1]
+        try:
+            amount = int(parts[2])
+        except:
+            return '❌ Сумма числом'
+        if u not in registered_users:
+            return f'❓ {u} не найден'
+        ensure_user_data(u)
+        registered_users[u]['pukoins'] = registered_users[u].get('pukoins', 0) + amount
+        save_data()
+        return f'💰 {u} получил {amount} пукоинов (итого: {registered_users[u]["pukoins"]})'
+
     if cmd == '/info' and len(parts) >= 2:
         u = parts[1]
         info = user_info.get(u)
@@ -352,6 +432,12 @@ async def handle_admin_command(text, admin):
             L.append('🚫 ЗАБАНЕН')
         if is_muted(u):
             L.append(f'🔇 Мут: {mute_info(u)}')
+        # Игровая статистика
+        game = get_user_game_data(u)
+        if game:
+            L.append(f'💰 Пукоинов: {game.get("pukoins", 0)}')
+            L.append(f'🏆 Побед: {game.get("matches_won", 0)} | Поражений: {game.get("matches_lost", 0)}')
+            L.append(f'🎯 Убийств: {game.get("kills", 0)} | Смертей: {game.get("deaths", 0)}')
         L.append(f'📅 Первый вход: {fmt_time(info["first_seen"])}')
         L.append(f'🕐 Активность: {time_ago(info["last_seen"])}')
         L.append(f'⏱ Сессий: {info["sessions"]}')
@@ -437,12 +523,119 @@ async def jitsi_room(request):
     room = ''.join(c if c.isalnum() or c == '-' else '-' for c in room)
     return web.json_response({'room': room})
 
+# ============ ИГРОВОЙ API ============
+async def get_profile(request):
+    data = await request.json()
+    username = (data.get('username') or '').strip()
+    if not username:
+        return web.json_response({'ok': False, 'error': 'Не указано имя'})
+
+    async with lock:
+        game = get_user_game_data(username)
+        if game is None:
+            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
+        save_data()
+        return web.json_response({
+            'ok': True,
+            'pukoins': game.get('pukoins', 0),
+            'owned_skins': game.get('owned_skins', ['default']),
+            'equipped_skin': game.get('equipped_skin', 'default'),
+            'kills': game.get('kills', 0),
+            'deaths': game.get('deaths', 0),
+            'matches_won': game.get('matches_won', 0),
+            'matches_lost': game.get('matches_lost', 0)
+        })
+
+async def buy_skin(request):
+    data = await request.json()
+    username = (data.get('username') or '').strip()
+    skin_id = (data.get('skin_id') or '').strip()
+    price = int(data.get('price', 0))
+
+    if not username or not skin_id:
+        return web.json_response({'ok': False, 'error': 'Не указаны данные'})
+
+    async with lock:
+        game = get_user_game_data(username)
+        if game is None:
+            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
+
+        if skin_id in game.get('owned_skins', []):
+            return web.json_response({'ok': False, 'error': 'Уже куплен'})
+
+        if game.get('pukoins', 0) < price:
+            return web.json_response({'ok': False, 'error': 'Недостаточно пукоинов'})
+
+        game['pukoins'] -= price
+        game['owned_skins'].append(skin_id)
+        save_data()
+        return web.json_response({
+            'ok': True,
+            'pukoins': game['pukoins'],
+            'owned_skins': game['owned_skins']
+        })
+
+async def equip_skin(request):
+    data = await request.json()
+    username = (data.get('username') or '').strip()
+    skin_id = (data.get('skin_id') or '').strip()
+
+    if not username or not skin_id:
+        return web.json_response({'ok': False, 'error': 'Не указаны данные'})
+
+    async with lock:
+        game = get_user_game_data(username)
+        if game is None:
+            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
+
+        if skin_id not in game.get('owned_skins', []):
+            return web.json_response({'ok': False, 'error': 'Скин не куплен'})
+
+        game['equipped_skin'] = skin_id
+        save_data()
+        return web.json_response({'ok': True, 'equipped_skin': skin_id})
+
+async def match_result(request):
+    data = await request.json()
+    username = (data.get('username') or '').strip()
+    won = bool(data.get('won', False))
+    kills = int(data.get('kills', 0))
+    deaths = int(data.get('deaths', 0))
+
+    if not username:
+        return web.json_response({'ok': False, 'error': 'Не указано имя'})
+
+    async with lock:
+        game = get_user_game_data(username)
+        if game is None:
+            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
+
+        reward = 20 if won else 5
+        game['pukoins'] = game.get('pukoins', 0) + reward
+        game['kills'] = game.get('kills', 0) + kills
+        game['deaths'] = game.get('deaths', 0) + deaths
+        if won:
+            game['matches_won'] = game.get('matches_won', 0) + 1
+        else:
+            game['matches_lost'] = game.get('matches_lost', 0) + 1
+        save_data()
+
+        return web.json_response({
+            'ok': True,
+            'reward': reward,
+            'pukoins': game['pukoins'],
+            'kills': game['kills'],
+            'deaths': game['deaths'],
+            'matches_won': game['matches_won'],
+            'matches_lost': game['matches_lost']
+        })
+
 # ============ ЗАПУСК ============
 async def main():
     load_data()
+    ensure_admin_exists()
     banned_users.discard(ADMIN_NAME)
-    if ADMIN_NAME in registered_users:
-        registered_users[ADMIN_NAME]['banned'] = False
+    save_data()
 
     app = web.Application()
     app.router.add_get('/', index)
@@ -454,10 +647,16 @@ async def main():
     app.router.add_get('/messages', get_messages)
     app.router.add_get('/history', get_history)
     app.router.add_get('/room', jitsi_room)
+    # Игровой API
+    app.router.add_post('/api/get-profile', get_profile)
+    app.router.add_post('/api/buy-skin', buy_skin)
+    app.router.add_post('/api/equip-skin', equip_skin)
+    app.router.add_post('/api/match-result', match_result)
 
     port = int(os.environ.get('PORT', 8080))
     print(f'[POU] Запуск на порту {port}')
     print(f'[POU] Админ: {ADMIN_NAME} / пароль: {ADMIN_PASSWORD}')
+    print(f'[POU] Админ имеет 9999999 пукоинов')
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', port)
