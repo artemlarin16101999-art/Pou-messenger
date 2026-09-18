@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pou — Игры</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+body{background:#1e1e2e;color:#cdd6f4;min-height:100vh;padding:16px}
+h1{color:#89b4fa;text-align:center;margin-bottom:6px}
+.sub{text-align:center;color:#6c7086;font-size:13px;margin-bottom:20px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;max-width:900px;margin:0 auto 20px}
+.game-card{background:#181825;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:.2s;border:2px solid transparent}
+.game-card:hover{transform:translateY(-3px);border-color:#89b4fa}
+.game-card .icon{font-size:44px;margin-bottom:8px}
+.game-card .name{font-size:16px;font-weight:bold}
+.game-card .desc{font-size:11px;color:#6c7086;margin-top:4px}
+#game-area{max-width:600px;margin:0 auto;background:#181825;border-radius:12px;padding:20px;display:none}
+#game-area .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+#game-area h2{color:#89b4fa;font-size:20px}
+#game-area button{background:#313244;color:#cdd6f4;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
+#game-area button.primary{background:#89b4fa;color:#1e1e2e;font-weight:bold}
+.board-wrap{display:flex;justify-content:center}
+
+/* 2048 */
+.g2048{background:#313244;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,70px);gap:8px;touch-action:none}
+.g2048 .cell{width:70px;height:70px;background:#45475a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:24px;color:#cdd6f4;transition:.1s}
+.c2{background:#eee!important;color:#333!important}
+.c4{background:#ede0c8!important;color:#333!important}
+.c8{background:#f2b179!important;color:#fff!important}
+.c16{background:#f59563!important;color:#fff!important}
+.c32{background:#f67c5f!important;color:#fff!important}
+.c64{background:#f65e3b!important;color:#fff!important}
+.c128,.c256,.c512,.c1024,.c2048{background:#edcf72!important;color:#fff!important;font-size:20px!important}
+
+/* TicTacToe */
+.ttt{display:grid;grid-template-columns:repeat(3,90px);gap:6px}
+.ttt .cell{width:90px;height:90px;background:#313244;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;cursor:pointer}
+.ttt .cell:hover{background:#45475a}
+
+/* Saper */
+.saper{display:grid;grid-template-columns:repeat(9,36px);gap:2px}
+.saper .cell{width:36px;height:36px;background:#45475a;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;cursor:pointer;user-select:none}
+.saper .cell.open{background:#313244;cursor:default}
+.saper .cell.bomb{background:#f38ba8;color:#1e1e2e}
+.saper .cell.flag{color:#f9e2af}
+.s1{color:#89b4fa}.s2{color:#a6e3a1}.s3{color:#f38ba8}.s4{color:#cba6f7}.s5{color:#fab387}
+
+.score{text-align:center;margin:12px 0;font-size:16px;color:#f9e2af;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>🎮 Игры Pou</h1>
+<div class="sub">Развлекись, пока ждёшь сообщения</div>
+
+<div class="games">
+  <div class="game-card" onclick="start2048()">
+    <div class="icon">🔢</div><div class="name">2048</div><div class="desc">Собери плитку 2048</div>
+  </div>
+  <div class="game-card" onclick="startTTT()">
+    <div class="icon">⭕</div><div class="name">Крестики-нолики</div><div class="desc">Против бота</div>
+  </div>
+  <div class="game-card" onclick="startSaper()">
+    <div class="icon">💣</div><div class="name">Сапёр</div><div class="desc">Найди все мины</div>
+  </div>
+</div>
+
+<div id="game-area">
+  <div class="head">
+    <h2 id="game-title"></h2>
+    <div>
+      <button class="primary" id="btn-restart">↻ Заново</button>
+      <button onclick="closeGame()">✕</button>
+    </div>
+  </div>
+  <div id="game-content"></div>
+</div>
+
+<script>
+function openGame(title){
+  document.getElementById('game-title').textContent = title;
+  document.getElementById('game-area').style.display = 'block';
+  document.getElementById('game-area').scrollIntoView({behavior:'smooth'});
+}
+function closeGame(){
+  document.getElementById('game-area').style.display = 'none';
+  document.getElementById('game-content').innerHTML = '';
+}
+
+// ========== 2048 ==========
+let g2048 = { board: [], score: 0 };
+function start2048(){
+  openGame('2048');
+  g2048.board = Array(4).fill().map(()=>Array(4).fill(0));
+  g2048.score = 0;
+  addTile2048(); addTile2048();
+  document.getElementById('btn-restart').onclick = start2048;
+  render2048();
+}
+function addTile2048(){
+  const empty = [];
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++) if(g2048.board[i][j]===0) empty.push([i,j]);
+  if(!empty.length) return;
+  const [i,j] = empty[Math.floor(Math.random()*empty.length)];
+  g2048.board[i][j] = Math.random()<0.9 ? 2 : 4;
+}
+function render2048(){
+  const c = document.getElementById('game-content');
+  let html = '<div class="score">Счёт: ' + g2048.score + '</div><div class="board-wrap"><div class="g2048">';
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++){
+    const v = g2048.board[i][j];
+    html += '<div class="cell ' + (v?'c'+v:'') + '">' + (v||'') + '</div>';
+  }
+  html += '</div></div><div class="sub" style="margin-top:10px">Свайпайте или используйте стрелки</div>';
+  c.innerHTML = html;
+}
+function move2048(dir){
+  const b = g2048.board;
+  const moveRow = (row) => {
+    let r = row.filter(x=>x);
+    for(let i=0;i<r.length-1;i++){
+      if(r[i]===r[i+1]){ r[i]*=2; g2048.score += r[i]; r.splice(i+1,1); }
+    }
+    while(r.length<4) r.push(0);
+    return r;
+  };
+  const rotate = (m) => m[0].map((_,i)=>m.map(r=>r[i]).reverse());
+  let old = JSON.stringify(b);
+  for(let k=0;k<dir;k++) g2048.board = rotate(g2048.board);
+  g2048.board = g2048.board.map(moveRow);
+  for(let k=0;k<(4-dir)%4;k++) g2048.board = rotate(g2048.board);
+  if(JSON.stringify(g2048.board)!==old){ addTile2048(); render2048(); }
+  if(g2048.board.flat().includes(2048)) setTimeout(()=>alert('🎉 Победа! 2048!'),100);
+}
+document.addEventListener('keydown', e=>{
+  if(!g2048.board.length || document.getElementById('game-area').style.display==='none') return;
+  if(e.key==='ArrowLeft') move2048(0);
+  else if(e.key==='ArrowUp') move2048(1);
+  else if(e.key==='ArrowRight') move2048(2);
+  else if(e.key==='ArrowDown') move2048(3);
+});
+let touch2048 = null;
+document.addEventListener('touchstart', e=>{ touch2048 = e.touches[0]; }, {passive:true});
+document.addEventListener('touchend', e=>{
+  if(!touch2048 || !g2048.board.length) return;
+  const dx = e.changedTouches[0].clientX - touch2048.clientX;
+  const dy = e.changedTouches[0].clientY - touch2048.clientY;
+  if(Math.abs(dx)<30 && Math.abs(dy)<30) return;
+  if(Math.abs(dx)>Math.abs(dy)) move2048(dx>0?2:0);
+  else move2048(dy>0?3:1);
+  touch2048 = null;
+}, {passive:true});
+
+// ========== КРЕСТИКИ-НОЛИКИ ==========
+let ttt = { board: [], over: false };
+function startTTT(){
+  openGame('Крестики-нолики');
+  ttt.board = Array(9).fill('');
+  ttt.over = false;
+  document.getElementById('btn-restart').onclick = startTTT;
+  renderTTT();
+}
+function renderTTT(msg){
+  const c = document.getElementById('game-content');
+  let html = '<div class="score">' + (msg || 'Вы — ✕, бот — ◯') + '</div><div class="board-wrap"><div class="ttt">';
+  ttt.board.forEach((v,i)=>{ html += '<div class="cell" onclick="tttMove('+i+')">'+v+'</div>'; });
+  html += '</div></div>';
+  c.innerHTML = html;
+}
+function tttMove(i){
+  if(ttt.over || ttt.board[i]) return;
+  ttt.board[i]='✕';
+  if(checkTTT('✕')){ renderTTT('🎉 Вы победили!'); ttt.over=true; return; }
+  if(ttt.board.every(x=>x)){ renderTTT('Ничья'); ttt.over=true; return; }
+  renderTTT('Ход бота...');
+  setTimeout(()=>{
+    const empty = ttt.board.map((v,i)=>v?null:i).filter(x=>x!==null);
+    // Простой ИИ: выиграть, заблокировать, центр, случайно
+    let move = findWin('◯') ?? findWin('✕') ?? (ttt.board[4]==='' ? 4 : empty[Math.floor(Math.random()*empty.length)]);
+    if(move!==null && move!==undefined) ttt.board[move]='◯';
+    if(checkTTT('◯')){ renderTTT('😢 Бот победил'); ttt.over=true; return; }
+    if(ttt.board.every(x=>x)){ renderTTT('Ничья'); ttt.over=true; return; }
+    renderTTT();
+  }, 300);
+}
+function findWin(sym){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,b,c] of lines){
+    const t=[ttt.board[a],ttt.board[b],ttt.board[c]];
+    if(t.filter(x=>x===sym).length===2 && t.includes('')) return [a,b,c][t.indexOf('')];
+  }
+  return null;
+}
+function checkTTT(sym){
+  const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  return lines.some(([a,b,c])=>ttt.board[a]===sym&&ttt.board[b]===sym&&ttt.board[c]===sym);
+}
+
+// ========== САПЁР ==========
+let saper = { grid: [], revealed: [], flags: [], over: false };
+function startSaper(){
+  openGame('Сапёр (9×9, 10 мин)');
+  saper.grid = Array(81).fill(0);
+  saper.revealed = Array(81).fill(false);
+  saper.flags = Array(81).fill(false);
+  saper.over = false;
+  let placed = 0;
+  while(placed<10){
+    const i = Math.floor(Math.random()*81);
+    if(saper.grid[i]!==-1){ saper.grid[i]=-1; placed++; }
+  }
+  // Считаем числа
+  for(let i=0;i<81;i++){
+    if(saper.grid[i]===-1) continue;
+    let n=0;
+    for(const nb of neighbors(i)) if(saper.grid[nb]===-1) n++;
+    saper.grid[i]=n;
+  }
+  document.getElementById('btn-restart').onclick = startSaper;
+  renderSaper();
+}
+function neighbors(i){
+  const r = Math.floor(i/9), c = i%9;
+  const res = [];
+  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+    if(!dr && !dc) continue;
+    const nr=r+dr, nc=c+dc;
+    if(nr>=0&&nr<9&&nc>=0&&nc<9) res.push(nr*9+nc);
+  }
+  return res;
+}
+function renderSaper(msg){
+  const c = document.getElementById('game-content');
+  let html = '<div class="score">' + (msg || 'ЛКМ — открыть, ПКМ — флаг') + '</div><div class="board-wrap"><div class="saper">';
+  for(let i=0;i<81;i++){
+    let cls='cell', text='';
+    if(saper.revealed[i]){
+      cls += ' open';
+      if(saper.grid[i]===-1){ cls += ' bomb'; text='💣'; }
+      else if(saper.grid[i]>0){ cls += ' s'+saper.grid[i]; text=saper.grid[i]; }
+    } else if(saper.flags[i]){ cls += ' flag'; text='🚩'; }
+    html += '<div class="'+cls+'" onclick="saperOpen('+i+')" oncontextmenu="event.preventDefault();saperFlag('+i+')">'+text+'</div>';
+  }
+  html += '</div></div>';
+  c.innerHTML = html;
+}
+function saperOpen(i){
+  if(saper.over || saper.revealed[i] || saper.flags[i]) return;
+  saper.revealed[i]=true;
+  if(saper.grid[i]===-1){ renderSaper('💥 Взрыв! Игра окончена'); saper.over=true; return; }
+  if(saper.grid[i]===0){ neighbors(i).forEach(n=>{ if(!saper.revealed[n]) saperOpen(n); }); }
+  if(saper.revealed.filter((v,i)=>v && saper.grid[i]!==-1).length === 81-10){
+    renderSaper('🎉 Победа!'); saper.over=true; return;
+  }
+  renderSaper();
+}
+function saperFlag(i){
+  if(saper.over || saper.revealed[i]) return;
+  saper.flags[i] = !saper.flags[i];
+  renderSaper();
+}
+</script>
+</body>
+</html>
