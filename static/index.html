@@ -79,7 +79,56 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 .admin-card button.green{background:#a6e3a1}
 .admin-card .close{position:absolute;top:15px;right:15px;background:transparent;color:#cdd6f4;font-size:22px;border:none;cursor:pointer}
 .admin-card .list{background:#1e1e2e;border-radius:6px;padding:8px;font-size:12px;max-height:120px;overflow-y:auto;color:#a6adc8;margin-top:5px;white-space:pre-wrap}
-@media (max-width:600px){.sidebar{width:200px}.chat-item .preview{display:none}}
+
+.pours-bar{background:linear-gradient(135deg,#f9e2af,#e0b84a);color:#1e1e2e;padding:8px 12px;font-weight:bold;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pours-bar b{font-size:16px}
+.pours-bar .btns{display:flex;gap:4px;flex-wrap:wrap}
+.pours-bar button{background:#1e1e2e;color:#f9e2af;border:none;padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:bold}
+.pours-bar button:hover{background:#313244}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;backdrop-filter:blur(4px)}
+.modal.open{display:flex}
+.modal-box{background:#181825;border-radius:14px;padding:20px;max-width:500px;width:100%;max-height:88vh;overflow-y:auto;position:relative}
+.modal-box h2{color:#f9e2af;font-size:22px;margin-bottom:15px}
+.modal-box .close-btn{position:absolute;top:15px;right:15px;background:transparent;color:#cdd6f4;font-size:22px;border:none;cursor:pointer}
+.modal-box input,.modal-box textarea{width:100%;padding:10px;margin-bottom:8px;background:#313244;border:1px solid #45475a;border-radius:8px;color:#cdd6f4;font-size:13px;outline:none;font-family:inherit}
+.modal-box input:focus,.modal-box textarea:focus{border-color:#f9e2af}
+.modal-box button{background:#89b4fa;color:#1e1e2e;border:none;padding:10px 16px;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;margin-right:5px;margin-bottom:5px}
+.modal-box button:hover{opacity:.9}
+.gifts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.gift-card{background:#313244;padding:8px 4px;border-radius:8px;cursor:pointer;font-size:10px;text-align:center;border:2px solid transparent;transition:.15s}
+.gift-card:hover{background:#45475a;border-color:#f9e2af}
+.gift-card .emoji{font-size:26px;display:block;margin-bottom:3px}
+.gift-card .name{font-size:10px;margin-bottom:2px}
+.gift-card .price{color:#f9e2af;font-size:10px;font-weight:bold}
+.gift-card.disabled{opacity:.4;cursor:not-allowed}
+.buy-pours-card{background:linear-gradient(135deg,#f9e2af,#e0b84a);border-radius:12px;padding:24px 16px;text-align:center;margin:15px 0;box-shadow:0 8px 30px rgba(249,226,175,.4)}
+.buy-pours-card .card-title{color:#1e1e2e;font-size:14px;font-weight:bold;margin-bottom:15px;letter-spacing:2px}
+.buy-pours-card .card-number{background:#1e1e2e;color:#f9e2af;font-size:22px;font-weight:bold;letter-spacing:3px;padding:16px 10px;border-radius:10px;margin:12px 0;font-family:monospace}
+.buy-pours-card .rate{color:#1e1e2e;font-size:13px;font-weight:bold;margin-top:12px}
+
+.call-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0a0a14);display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:300;padding:20px;text-align:center}
+.call-overlay.on{display:flex}
+.call-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#89b4fa,#5a7fc4);display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:15px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(137,180,250,.5)}50%{transform:scale(1.05);box-shadow:0 0 0 20px rgba(137,180,250,0)}}
+.call-name{color:#cdd6f4;font-size:24px;font-weight:bold}
+.call-status{color:#6c7086;font-size:14px;margin-top:5px}
+.call-buttons{display:flex;gap:30px;margin-top:30px}
+.call-btn{width:80px;height:80px;border-radius:50%;border:none;font-size:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff}
+.call-btn.accept{background:linear-gradient(135deg,#a6e3a1,#5a9a55)}
+.call-btn.reject{background:linear-gradient(135deg,#f38ba8,#c25a7a)}
+.call-btn.end{background:linear-gradient(135deg,#f38ba8,#c25a7a)}
+.call-btn:active{transform:scale(.95)}
+.call-timer{color:#a6e3a1;font-size:16px;margin-top:10px;font-family:monospace}
+
+@media (max-width:600px){
+  .sidebar{width:200px}
+  .chat-item .preview{display:none}
+  .pours-bar{font-size:11px;padding:6px 8px}
+  .pours-bar button{font-size:10px;padding:5px 7px}
+  .gifts-grid{grid-template-columns:repeat(3,1fr)}
+  .buy-pours-card .card-number{font-size:18px;letter-spacing:2px}
+}
 </style>
 </head>
 <body>
@@ -108,6 +157,15 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
     <div class="online-sec"><div style="margin-bottom:5px">ОНЛАЙН</div><div id="online-list">—</div></div>
   </aside>
   <main class="main">
+    <div class="pours-bar">
+      <span>💰 Pours: <b id="my-pours">0</b></span>
+      <div class="btns">
+        <button onclick="claimFree()">🎁 Получить</button>
+        <button onclick="openBuyPours()">💳 Купить</button>
+        <button onclick="openGifts()">🎀 Подарить</button>
+        <button onclick="openTicTacToe()">🎮 Крестики</button>
+      </div>
+    </div>
     <div id="admin-bar" class="admin-bar" style="display:none"><span>👑 Режим администратора</span><button onclick="openAdminMenu()">⚙ Панель</button></div>
     <div id="muted-warn" class="muted-warn" style="display:none">🔇 Вы в муте — писать нельзя</div>
     <header>
@@ -115,7 +173,10 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
         <div class="title" id="chat-title">🌍 Общий чат</div>
         <div class="status" id="status">подключение...</div>
       </div>
-      <div class="actions"><button onclick="callFriend()">📞</button><button onclick="logout()">🚪</button></div>
+      <div class="actions">
+        <button onclick="startCall()" title="Позвонить">📞</button>
+        <button onclick="logout()">🚪</button>
+      </div>
     </header>
     <div id="chat"></div>
     <div id="emoji-panel"></div>
@@ -160,17 +221,73 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
       <button class="red" onclick="adminCmd('unverify')">❌</button>
     </div>
     <div class="list" id="verified-list">—</div>
+    <h3>💰 Выдать Pours</h3>
+    <div class="field">
+      <input id="givepours-user" placeholder="Имя">
+      <input id="givepours-amount" placeholder="Сумма" style="max-width:100px">
+      <button class="green" onclick="adminCmd('givepours')">💰 Выдать</button>
+    </div>
     <h3>🗑 Очистка</h3>
     <div class="field"><input id="clear-user" placeholder="Имя (пусто = всё)"><button class="red" onclick="adminCmd('clearchat')">Очистить</button></div>
-    <h3>🔍 Инфо о юзере</h3>
+    <h3>🔍 Инфо</h3>
     <div class="field"><input id="info-user" placeholder="Имя"><button onclick="adminCmd('info')">Показать</button></div>
     <h3>📋 Онлайн</h3>
     <div class="list" id="online-admin-list">—</div>
   </div>
 </div>
 
+<div id="gifts-modal" class="modal">
+  <div class="modal-box">
+    <button class="close-btn" onclick="closeModal('gifts-modal')">✕</button>
+    <h2>🎁 Магазин подарков</h2>
+    <div style="color:#6c7086;font-size:12px;margin-bottom:10px">Выберите подарок и отправьте другу</div>
+    <input id="gift-recipient" placeholder="Имя получателя" autocomplete="off">
+    <input id="gift-message" placeholder="Сообщение (необязательно)" autocomplete="off">
+    <div class="gifts-grid" id="gifts-grid">Загрузка...</div>
+  </div>
+</div>
+
+<div id="buy-pours-modal" class="modal">
+  <div class="modal-box">
+    <button class="close-btn" onclick="closeModal('buy-pours-modal')">✕</button>
+    <h2>💳 Купить Pours</h2>
+    <div class="buy-pours-card">
+      <div class="card-title">💳 ПЕРЕВОД НА КАРТУ</div>
+      <div class="card-number">2200 2480 3597 4046</div>
+      <div class="rate">донать сюда,<br>курс 1 руб = 10 поурс</div>
+    </div>
+    <div style="color:#6c7086;font-size:11px;text-align:center;margin-top:10px">
+      После перевода напишите администратору — он начислит Pours
+    </div>
+  </div>
+</div>
+
+<div id="claim-modal" class="modal">
+  <div class="modal-box" style="text-align:center">
+    <button class="close-btn" onclick="closeModal('claim-modal')">✕</button>
+    <h2>🎁 Получить Pours</h2>
+    <div style="padding:20px">
+      <div style="font-size:48px;margin-bottom:15px">💰</div>
+      <div style="color:#cdd6f4;font-size:14px;margin-bottom:15px">Бесплатно +10 Pours раз в час</div>
+      <button onclick="doClaimFree()" style="background:linear-gradient(135deg,#f9e2af,#e0b84a);color:#1e1e2e;padding:12px 30px;font-size:14px">🎁 ЗАБРАТЬ</button>
+      <div id="claim-status" style="color:#6c7086;font-size:12px;margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="call-overlay" class="call-overlay">
+  <div class="call-avatar">📞</div>
+  <div class="call-name" id="call-name">...</div>
+  <div class="call-status" id="call-status">Исходящий звонок...</div>
+  <div class="call-timer" id="call-timer"></div>
+  <div class="call-buttons" id="call-buttons"></div>
+</div>
+
+<audio id="local-audio" autoplay muted></audio>
+<audio id="remote-audio" autoplay></audio>
+
 <script>
-// ===== СОХРАНЁННЫЕ АККАУНТЫ =====
+// ===== АВТОРИЗАЦИЯ =====
 function getSaved(){try{return JSON.parse(localStorage.getItem('pou_saved')||'[]')}catch{return[]}}
 function saveAcc(n){let s=getSaved();if(!s.includes(n)){s.push(n);localStorage.setItem('pou_saved',JSON.stringify(s))}}
 function renderSaved(){
@@ -182,7 +299,13 @@ function renderSaved(){
 function pickAcc(n){document.getElementById('au-name').value=n;document.getElementById('au-pass').focus()}
 function delAcc(n){let s=getSaved().filter(x=>x!==n);localStorage.setItem('pou_saved',JSON.stringify(s));renderSaved()}
 
-let myName=null,amAdmin=false;
+let myName=null;
+let amAdmin=false;
+let currentChat=null,lastTimestamp=0;
+let allMessages=[],unread={},onlineUsers=[];
+let verifiedUsers=new Set(),bannedUsers=new Set(),mutedUsers={};
+let myPours=0;
+let currentCall=null;
 
 async function doAuth(action){
   const name=document.getElementById('au-name').value.trim();
@@ -203,7 +326,6 @@ async function doAuth(action){
 }
 function logout(){localStorage.removeItem('pou_current');location.reload()}
 
-// ===== ЭЛЕМЕНТЫ =====
 const chat=document.getElementById('chat');
 const input=document.getElementById('input');
 const statusEl=document.getElementById('status');
@@ -211,16 +333,10 @@ const onlineListEl=document.getElementById('online-list');
 const chatListEl=document.getElementById('chat-list');
 const chatTitle=document.getElementById('chat-title');
 const emojiPanel=document.getElementById('emoji-panel');
-
-let currentChat=null,lastTimestamp=0;
-let allMessages=[],unread={},onlineUsers=[];
-let verifiedUsers=new Set(),bannedUsers=new Set(),mutedUsers={};
-
 const EMOJIS=['😀','😂','😍','🥰','😎','🤔','😴','😢','😡','👍','👎','❤️','🔥','🎉','✅','❌','🐧','🚀','💬','📞','👋','🙏','😊','🤗','🤣','😅','🤩','😭','🥺','😱','👑'];
 
 function escapeHtml(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function userMarks(n){let m='';if(verifiedUsers.has(n))m+=' <span class="verified-check">✅</span>';if(bannedUsers.has(n))m+=' <span class="banned-mark">🚫</span>';if(mutedUsers[n])m+=' <span class="muted-mark">🔇</span>';return m}
-
 function addMsg(from,text,time,cls,isPrivate,isAdminReply){
   const d=document.createElement('div');
   if(isAdminReply){d.className='msg sys-admin';d.textContent=text}
@@ -245,22 +361,8 @@ async function poll(){
   try{
     const r=await fetch('/messages?since='+lastTimestamp+'&user='+encodeURIComponent(myName));
     const data=await r.json();
-
-    // ★ Отладка в заголовке вкладки
-    document.title = 'Pou | ban:' + (data.banned===true?'YES':'no') + ' am_ban:' + (data.am_banned===true?'YES':'no');
-
-    // ★ СТРОГАЯ проверка — только true, не "true", не undefined
-    const reallyBanned = (data.banned === true) || (data.am_banned === true);
-
-    if (reallyBanned) {
-      document.getElementById('banned-screen').classList.add('on');
-      document.getElementById('ban-reason').textContent = data.reason || 'Вы забанены';
-      return;
-    } else {
-      // Если экран бана открыт, но бан сняли — закрываем
-      document.getElementById('banned-screen').classList.remove('on');
-    }
-
+    if(data.banned){document.getElementById('banned-screen').classList.add('on');document.getElementById('ban-reason').textContent=data.reason||'Забанены';return}
+    document.getElementById('banned-screen').classList.remove('on');
     statusEl.textContent='✅ онлайн';statusEl.style.color='#a6e3a1';
     onlineUsers=data.online||[];
     verifiedUsers=new Set(data.verified||[]);
@@ -277,7 +379,18 @@ async function poll(){
       else if(m.to===myName){if(currentChat===m.from)addMsg(m.from,m.text,m.time,'other',true);else unread[m.from]=(unread[m.from]||0)+1}
     }
     renderChatList();
+    handleIncomingCall(data.incoming_call);
+    handleOutgoingCall(data.outgoing_call);
+    if(myPours===0)refreshProfile();
   }catch(e){statusEl.textContent='⚠ нет связи';statusEl.style.color='#f38ba8'}
+}
+
+async function refreshProfile(){
+  try{
+    const r=await fetch('/api/get-profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:myName})});
+    const data=await r.json();
+    if(data.ok){myPours=data.pours;document.getElementById('my-pours').textContent=myPours}
+  }catch(e){}
 }
 
 function renderChatList(){
@@ -325,9 +438,8 @@ function loadChat(){
 function newPrivateChat(){const n=prompt('С кем начать чат?','');if(!n||n===myName)return;if(!window._manualChats)window._manualChats=[];if(!window._manualChats.includes(n))window._manualChats.push(n);switchChat(n)}
 function toggleEmoji(){if(emojiPanel.style.display==='block'){emojiPanel.style.display='none';return}if(!emojiPanel.dataset.filled){emojiPanel.innerHTML=EMOJIS.map(e=>'<span onclick="insertEmoji(\''+e+'\')">'+e+'</span>').join('');emojiPanel.dataset.filled='1'}emojiPanel.style.display='block'}
 function insertEmoji(e){input.value+=e;input.focus();emojiPanel.style.display='none'}
-function callFriend(){let f=currentChat;if(!f){f=prompt('С кем звонок?','');if(!f)return}fetch('/room?a='+encodeURIComponent(myName)+'&b='+encodeURIComponent(f)).then(r=>r.json()).then(d=>{const url='https://meet.jit.si/'+d.room;addSys('📞 '+url);window.open(url,'_blank')})}
 
-// ===== АДМИН-ПАНЕЛЬ =====
+// ===== АДМИН =====
 function openAdminMenu(){document.getElementById('admin-menu').classList.add('open');updateAdminPanel()}
 function closeAdminMenu(){document.getElementById('admin-menu').classList.remove('open')}
 function updateAdminPanel(){
@@ -346,6 +458,7 @@ async function adminCmd(action){
   else if(action==='kick'){const u=document.getElementById('kick-user').value.trim();if(!u)return;text='/kick '+u;document.getElementById('kick-user').value=''}
   else if(action==='verify'){const u=document.getElementById('verify-user').value.trim();if(!u)return;text='/verify '+u;document.getElementById('verify-user').value=''}
   else if(action==='unverify'){const u=document.getElementById('verify-user').value.trim();if(!u)return;text='/unverify '+u;document.getElementById('verify-user').value=''}
+  else if(action==='givepours'){const u=document.getElementById('givepours-user').value.trim();const a=document.getElementById('givepours-amount').value.trim();if(!u||!a)return;text='/givepours '+u+' '+a;document.getElementById('givepours-user').value='';document.getElementById('givepours-amount').value=''}
   else if(action==='clearchat'){const u=document.getElementById('clear-user').value.trim();text='/clearchat'+(u?' '+u:'');document.getElementById('clear-user').value=''}
   else if(action==='info'){const u=document.getElementById('info-user').value.trim();if(!u)return;text='/info '+u;document.getElementById('info-user').value=''}
   if(!text)return;
@@ -357,18 +470,193 @@ async function adminCmd(action){
   closeAdminMenu();
 }
 
-async function loadHistory(){
-  try{
-    const r=await fetch('/history?user='+encodeURIComponent(myName));
-    const data=await r.json();
-    allMessages=data.messages||[];
-    verifiedUsers=new Set(data.verified||[]);
-    amAdmin=data.am_admin||amAdmin;
-    if(allMessages.length)lastTimestamp=allMessages[allMessages.length-1].timestamp;
-    renderChatList();loadChat();
-  }catch(e){addSys('Не удалось загрузить историю')}
+// ===== МОДАЛКИ =====
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+function openBuyPours(){openModal('buy-pours-modal')}
+
+function openGifts(){
+  openModal('gifts-modal');
+  loadGifts();
 }
 
+async function loadGifts(){
+  try{
+    const r=await fetch('/api/gifts');
+    const data=await r.json();
+    if(data.ok){
+      const grid=document.getElementById('gifts-grid');
+      grid.innerHTML=data.gifts.map(g=>{
+        const can=g.price<=myPours;
+        return '<div class="gift-card'+(can?'':' disabled')+'" onclick="sendGift(\''+g.id+'\')">'+
+          '<span class="emoji">'+g.emoji+'</span>'+
+          '<div class="name">'+g.name+'</div>'+
+          '<div class="price">'+g.price+'💰</div>'+
+        '</div>';
+      }).join('');
+    }
+  }catch(e){document.getElementById('gifts-grid').textContent='Ошибка загрузки'}
+}
+
+async function sendGift(giftId){
+  const to=document.getElementById('gift-recipient').value.trim();
+  const msg=document.getElementById('gift-message').value.trim();
+  if(!to){alert('Введите имя получателя');return}
+  if(to===myName){alert('Нельзя подарить себе');return}
+  try{
+    const r=await fetch('/api/send-gift',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:myName,to:to,gift_id:giftId,message:msg})});
+    const data=await r.json();
+    if(data.ok){
+      alert('✅ Подарок отправлен!');
+      myPours=data.pours;
+      document.getElementById('my-pours').textContent=myPours;
+      closeModal('gifts-modal');
+      document.getElementById('gift-recipient').value='';
+      document.getElementById('gift-message').value='';
+    }else{
+      alert('❌ '+(data.error||'Ошибка'));
+    }
+  }catch(e){alert('Сеть: '+e.message)}
+}
+
+function claimFree(){
+  openModal('claim-modal');
+  document.getElementById('claim-status').textContent='';
+}
+
+async function doClaimFree(){
+  const st=document.getElementById('claim-status');
+  try{
+    const r=await fetch('/api/claim-free',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:myName})});
+    const data=await r.json();
+    if(data.ok){
+      myPours=data.pours;
+      document.getElementById('my-pours').textContent=myPours;
+      st.style.color='#a6e3a1';
+      st.textContent='✅ Получено +10 Pours! Баланс: '+myPours;
+    }else{
+      st.style.color='#f38ba8';
+      if(data.cooldown){
+        const m=Math.floor(data.cooldown/60);
+        const s=data.cooldown%60;
+        st.textContent='⏱ Подожди ещё '+m+'м '+s+'с';
+      }else{
+        st.textContent='❌ '+(data.error||'Ошибка');
+      }
+    }
+  }catch(e){st.textContent='Сеть: '+e.message;st.style.color='#f38ba8'}
+}
+
+function openTicTacToe(){window.open('/tictactoe.html','_blank')}
+
+// ===== ЗВОНКИ =====
+let peerConnection=null;
+let localStream=null;
+let callTimerInterval=null;
+let callStartTime=0;
+
+async function startCall(){
+  let to=currentChat;
+  if(!to){to=prompt('Кому позвонить? Введите имя:','');if(!to)return}
+  if(to===myName){alert('Нельзя позвонить себе');return}
+  try{
+    await fetch('/api/call/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:myName,to:to})});
+    currentCall={with:to,status:'ringing',isCaller:true};
+    showCallUI(to,'Исходящий звонок...',true);
+  }catch(e){alert('Ошибка звонка: '+e.message)}
+}
+
+function handleIncomingCall(call){
+  if(!call)return;
+  if(currentCall)return;
+  if(call.from===myName)return;
+  currentCall={with:call.from,status:'ringing',isCaller:false};
+  showCallUI(call.from,'Входящий звонок...',false);
+}
+
+function handleOutgoingCall(call){
+  if(!call)return;
+  if(!currentCall||!currentCall.isCaller)return;
+  if(call.status==='accepted'&&currentCall.status==='ringing'){
+    currentCall.status='active';
+    document.getElementById('call-status').textContent='Разговор';
+    document.getElementById('call-buttons').innerHTML='<button class="call-btn end" onclick="endCall()">📴</button>';
+    startWebRTC(true);
+  }
+}
+
+function showCallUI(name,status,isCaller){
+  document.getElementById('call-name').textContent=name;
+  document.getElementById('call-status').textContent=status;
+  document.getElementById('call-overlay').classList.add('on');
+  if(isCaller){
+    document.getElementById('call-buttons').innerHTML='<button class="call-btn end" onclick="endCall()">📴</button>';
+  }else{
+    document.getElementById('call-buttons').innerHTML=
+      '<button class="call-btn accept" onclick="acceptCall()">✅</button>'+
+      '<button class="call-btn reject" onclick="rejectCall()">❌</button>';
+  }
+}
+
+async function acceptCall(){
+  if(!currentCall)return;
+  try{
+    await fetch('/api/call/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caller:currentCall.with,recipient:myName})});
+    currentCall.status='active';
+    document.getElementById('call-status').textContent='Разговор';
+    document.getElementById('call-buttons').innerHTML='<button class="call-btn end" onclick="endCall()">📴</button>';
+    startWebRTC(false);
+  }catch(e){alert('Ошибка: '+e.message)}
+}
+
+async function rejectCall(){
+  if(!currentCall)return;
+  try{await fetch('/api/call/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caller:currentCall.with})})}catch(e){}
+  currentCall=null;
+  document.getElementById('call-overlay').classList.remove('on');
+}
+
+async function endCall(){
+  if(!currentCall)return;
+  try{await fetch('/api/call/end',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:myName})})}catch(e){}
+  if(peerConnection){peerConnection.close();peerConnection=null}
+  if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}
+  if(callTimerInterval){clearInterval(callTimerInterval);callTimerInterval=null}
+  currentCall=null;
+  document.getElementById('call-overlay').classList.remove('on');
+  document.getElementById('call-timer').textContent='';
+}
+
+async function startWebRTC(isCaller){
+  try{
+    localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    document.getElementById('local-audio').srcObject=localStream;
+    peerConnection=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+    localStream.getTracks().forEach(t=>peerConnection.addTrack(t,localStream));
+    peerConnection.ontrack=(e)=>{document.getElementById('remote-audio').srcObject=e.streams[0]};
+    peerConnection.onicecandidate=(e)=>{
+      if(e.candidate){
+        fetch('/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:myName,text:'__ICE__'+JSON.stringify(e.candidate),to:currentCall.with})});
+      }
+    };
+    callStartTime=Date.now();
+    callTimerInterval=setInterval(()=>{
+      const s=Math.floor((Date.now()-callStartTime)/1000);
+      document.getElementById('call-timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+    },1000);
+    if(isCaller){
+      const offer=await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      fetch('/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:myName,text:'__OFFER__'+JSON.stringify(offer),to:currentCall.with})});
+    }
+  }catch(e){
+    alert('Микрофон недоступен: '+e.message);
+    endCall();
+  }
+}
+
+// ===== СТАРТ =====
 input.addEventListener('keydown',e=>{if(e.key==='Enter')send()});
 document.getElementById('au-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doAuth('login')});
 
@@ -379,7 +667,7 @@ async function startApp(){
   if(amAdmin){document.getElementById('my-admin').style.display='inline-block';document.getElementById('admin-bar').style.display='flex'}
   addSys('Добро пожаловать в Pou, '+myName+'!');
   if(amAdmin)addSys('👑 Вы вошли как администратор.');
-  await loadHistory();
+  await refreshProfile();
   await poll();
   setInterval(poll,2000);
 }
@@ -391,4 +679,4 @@ window.addEventListener('load',()=>{
 });
 </script>
 </body>
-</html>
+  </html>
