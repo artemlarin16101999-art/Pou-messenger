@@ -22,7 +22,8 @@ banned_users = set()
 muted_users = {}
 user_info = {}
 registered_users = {}
-active_calls = {}  # {caller: {'to': recipient, 'status': 'ringing'|'accepted'|'rejected', 'time': ts}}
+active_calls = {}
+sessions = {}  # токены сессий
 
 # ============ 21 ПОДАРОК ============
 GIFTS = [
@@ -91,6 +92,22 @@ def hash_password(password, salt=None):
         salt = os.urandom(16).hex()
     h = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 100000)
     return h.hex(), salt
+
+def create_session_token(username):
+    token = os.urandom(32).hex()
+    sessions[token] = {'username': username, 'time': time.time()}
+    return token
+
+def check_session_token(token):
+    if not token:
+        return None
+    sess = sessions.get(token)
+    if not sess:
+        return None
+    if time.time() - sess['time'] > 30 * 86400:
+        del sessions[token]
+        return None
+    return sess['username']
 
 # ============ ИГРОВЫЕ ДАННЫЕ ============
 def ensure_user_data(username):
@@ -266,8 +283,9 @@ async def auth(request):
             if username == ADMIN_NAME:
                 if password == ADMIN_PASSWORD:
                     ensure_admin_exists()
+                    token = create_session_token(ADMIN_NAME)
                     save_data()
-                    return web.json_response({'ok': True, 'is_admin': True})
+                    return web.json_response({'ok': True, 'is_admin': True, 'token': token})
                 return web.json_response({'ok': False, 'error': 'Неверный пароль админа'})
 
             if username not in registered_users:
@@ -278,9 +296,27 @@ async def auth(request):
             pw_hash, _ = hash_password(password, u['salt'])
             if pw_hash != u['password_hash']:
                 return web.json_response({'ok': False, 'error': 'Неверный пароль'})
-            return web.json_response({'ok': True})
+            token = create_session_token(username)
+            return web.json_response({'ok': True, 'token': token})
 
         return web.json_response({'ok': False, 'error': 'Неизвестное действие'})
+
+async def check_token(request):
+    data = await request.json()
+    token = (data.get('token') or '').strip()
+    if not token:
+        return web.json_response({'ok': False})
+    username = check_session_token(token)
+    if username:
+        return web.json_response({'ok': True, 'username': username, 'is_admin': username == ADMIN_NAME})
+    return web.json_response({'ok': False})
+
+async def logout_session(request):
+    data = await request.json()
+    token = (data.get('token') or '').strip()
+    if token in sessions:
+        del sessions[token]
+    return web.json_response({'ok': True})
 
 # ============ СООБЩЕНИЯ ============
 async def send_message(request):
@@ -508,7 +544,6 @@ async def get_messages(request):
             elif m['to'] == user or m['from'] == user:
                 new_msgs.append(m)
 
-        # Входящие звонки
         incoming = None
         for caller, call in list(active_calls.items()):
             if call['to'] == user and call['status'] == 'ringing':
@@ -517,7 +552,6 @@ async def get_messages(request):
                 else:
                     del active_calls[caller]
 
-        # Статус моего исходящего звонка
         outgoing = None
         if user in active_calls:
             call = active_calls[user]
@@ -606,17 +640,13 @@ async def send_gift(request):
 
         s['pours'] -= gift['price']
         gift_record = {
-            'gift_id': gift_id,
-            'from': sender,
-            'time': time.time(),
-            'message': message
+            'gift_id': gift_id, 'from': sender,
+            'time': time.time(), 'message': message
         }
         r.setdefault('gifts_received', []).append(gift_record)
         s.setdefault('gifts_sent', []).append({
-            'gift_id': gift_id,
-            'to': recipient,
-            'time': time.time(),
-            'message': message
+            'gift_id': gift_id, 'to': recipient,
+            'time': time.time(), 'message': message
         })
 
         msg = {
@@ -624,8 +654,7 @@ async def send_gift(request):
             'text': f'🎁 {sender} подарил вам {gift["emoji"]} {gift["name"]}!' + (f'\n💬 "{message}"' if message else ''),
             'time': datetime.now().strftime('%H:%M:%S'),
             'timestamp': time.time(),
-            'to': recipient,
-            'system': True
+            'to': recipient, 'system': True
         }
         messages.append(msg)
         if len(messages) > MAX_HISTORY:
@@ -689,8 +718,7 @@ async def ttt_result(request):
 
         save_data()
         return web.json_response({
-            'ok': True, 'reward': reward,
-            'pours': game['pours'],
+            'ok': True, 'reward': reward, 'pours': game['pours'],
             'wins': game.get('ttt_wins', 0),
             'losses': game.get('ttt_losses', 0),
             'draws': game.get('ttt_draws', 0)
@@ -701,67 +729,46 @@ async def call_start(request):
     data = await request.json()
     caller = (data.get('from') or '').strip()
     recipient = (data.get('to') or '').strip()
-
     if not caller or not recipient or caller == recipient:
         return web.json_response({'ok': False, 'error': 'Неверные данные'})
-
     async with lock:
         active_calls[caller] = {'to': recipient, 'status': 'ringing', 'time': time.time()}
-        save_data()
     return web.json_response({'ok': True})
 
 async def call_accept(request):
     data = await request.json()
     caller = (data.get('caller') or '').strip()
-    recipient = (data.get('recipient') or '').strip()
-
     async with lock:
         if caller in active_calls:
             active_calls[caller]['status'] = 'accepted'
-            save_data()
             return web.json_response({'ok': True})
     return web.json_response({'ok': False, 'error': 'Звонок не найден'})
 
 async def call_reject(request):
     data = await request.json()
     caller = (data.get('caller') or '').strip()
-
     async with lock:
         if caller in active_calls:
             del active_calls[caller]
-            save_data()
-            return web.json_response({'ok': True})
-    return web.json_response({'ok': False})
+    return web.json_response({'ok': True})
 
 async def call_end(request):
     data = await request.json()
     user = (data.get('user') or '').strip()
-
     async with lock:
         if user in active_calls:
             del active_calls[user]
         for caller, call in list(active_calls.items()):
             if call['to'] == user:
                 del active_calls[caller]
-        save_data()
     return web.json_response({'ok': True})
 
-async def call_status(request):
-    data = await request.json()
-    caller = (data.get('caller') or '').strip()
-    async with lock:
-        if caller in active_calls:
-            return web.json_response({'ok': True, 'status': active_calls[caller]['status']})
-    return web.json_response({'ok': False, 'status': 'ended'})
-
-# ============ API ИГРЫ (PouStrel) ============
+# ============ API ИГРЫ ============
 async def buy_skin(request):
     data = await request.json()
     username = (data.get('username') or '').strip()
     skin_id = (data.get('skin_id') or '').strip()
     price = int(data.get('price', 0))
-    if not username or not skin_id:
-        return web.json_response({'ok': False, 'error': 'Не указаны данные'})
     async with lock:
         game = get_user_game_data(username)
         if game is None:
@@ -817,25 +824,20 @@ async def main():
     app.router.add_get('/gamestrel.html', gamestrel)
     app.router.add_get('/tictactoe.html', tictactoe)
     app.router.add_post('/auth', auth)
+    app.router.add_post('/api/check-token', check_token)
+    app.router.add_post('/api/logout', logout_session)
     app.router.add_post('/send', send_message)
     app.router.add_get('/messages', get_messages)
     app.router.add_get('/history', get_history)
-    # API профиля
     app.router.add_post('/api/get-profile', get_profile)
-    # API подарков
     app.router.add_get('/api/gifts', get_gifts)
     app.router.add_post('/api/send-gift', send_gift)
-    # API получить pours
     app.router.add_post('/api/claim-free', claim_free)
-    # API крестиков
     app.router.add_post('/api/ttt-result', ttt_result)
-    # API звонков
     app.router.add_post('/api/call/start', call_start)
     app.router.add_post('/api/call/accept', call_accept)
     app.router.add_post('/api/call/reject', call_reject)
     app.router.add_post('/api/call/end', call_end)
-    app.router.add_post('/api/call/status', call_status)
-    # API игры
     app.router.add_post('/api/buy-skin', buy_skin)
     app.router.add_post('/api/equip-skin', equip_skin)
     app.router.add_post('/api/match-result', match_result)
@@ -860,7 +862,6 @@ async def main():
                 expired_mutes = [u for u, t in muted_users.items() if t != 0 and now > t]
                 for u in expired_mutes:
                     del muted_users[u]
-                # Чистим старые звонки
                 old_calls = [c for c, v in active_calls.items() if now - v['time'] > 60]
                 for c in old_calls:
                     del active_calls[c]
