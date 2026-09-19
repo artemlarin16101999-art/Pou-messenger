@@ -40,7 +40,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;color:#e0e0e0}
 #canvas3d{display:block;width:100%;height:100%;touch-action:none}
 #hud{position:absolute;inset:0;pointer-events:none;z-index:10}
 #hud-top{display:flex;justify-content:space-between;align-items:flex-start;padding:10px;gap:10px}
-.hud-box{background:rgba(24,24,37,.85);padding:8px 14px;border-radius:10px;font-size:13px;backdrop-filter:blur(8px);border:1px solid rgba(137,180,250,.2)}
+.hud-box{background:rgba(24,24,37,.85);padding:8px 14px;border-radius:10px;font-size:13px;border:1px solid rgba(137,180,250,.2)}
 .hud-box b{color:#a6e3a1;font-size:18px}
 .hud-center{background:rgba(24,24,37,.85);padding:8px 20px;border-radius:10px;text-align:center;border:1px solid rgba(137,180,250,.2)}
 .hud-center .score{font-size:24px;font-weight:bold}
@@ -227,11 +227,8 @@ const WALL_HEIGHT = 4;
 const PLAYER_HEIGHT = 1.7;
 const PLAYER_RADIUS = 0.4;
 
-// ★★★★★ ИСПРАВЛЕНО: строгое определение ПК
-// Если НЕТ тачскрина ИЛИ размер окна большой — ПК
 const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const isPC = !hasTouch || window.innerWidth > 1280;
-console.log('[POU] isPC:', isPC, 'hasTouch:', hasTouch, 'width:', window.innerWidth);
 if (isPC) document.body.classList.add('pc-mode');
 
 let scene, camera, renderer, clock;
@@ -253,10 +250,8 @@ let balance = 0;
 let ownedSkins = ['default'];
 let equippedSkin = 'default';
 let currentPlayerName = null;
-
-// ★★★★★ ИСПРАВЛЕНО: миникарта реже
 let minimapLastUpdate = 0;
-const MINIMAP_INTERVAL = 200; // обновление раз в 200мс вместо 60/сек
+const MINIMAP_INTERVAL = 200;
 
 // ============ API ============
 async function loadProfile(username) {
@@ -275,7 +270,6 @@ async function loadProfile(username) {
   } catch (e) {}
   return false;
 }
-
 async function saveMatchResult(won, kills, deaths) {
   if (!currentPlayerName) return won ? 20 : 5;
   try {
@@ -285,7 +279,6 @@ async function saveMatchResult(won, kills, deaths) {
   } catch (e) {}
   return won ? 20 : 5;
 }
-
 async function buySkinOnServer(skinId, price) {
   if (!currentPlayerName) return false;
   try {
@@ -296,7 +289,6 @@ async function buySkinOnServer(skinId, price) {
   } catch (e) {}
   return false;
 }
-
 async function equipSkinOnServer(skinId) {
   if (!currentPlayerName) return false;
   try {
@@ -309,27 +301,20 @@ async function equipSkinOnServer(skinId) {
 
 // ============ ТЕКСТУРЫ ============
 function makeBrickTexture() {
-  const c = document.createElement('canvas');
-  c.width = 128; c.height = 128;
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#3a2a24'; ctx.fillRect(0, 0, 128, 128);
   ctx.fillStyle = '#5a3a2e';
-  for (let y = 0; y < 128; y += 32) {
-    for (let x = 0; x < 128; x += 64) {
-      const offset = (y / 32) % 2 ? 32 : 0;
-      ctx.fillRect(x + offset, y, 60, 28);
-    }
+  for (let y = 0; y < 128; y += 32) for (let x = 0; x < 128; x += 64) {
+    const offset = (y / 32) % 2 ? 32 : 0;
+    ctx.fillRect(x + offset, y, 60, 28);
   }
   ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2;
   for (let y = 0; y < 128; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(128, y); ctx.stroke(); }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  return tex;
+  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
 }
-
 function makeMetalTexture() {
-  const c = document.createElement('canvas');
-  c.width = 128; c.height = 128;
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#4a4a5e'; ctx.fillRect(0, 0, 128, 128);
   ctx.strokeStyle = '#2a2a3e'; ctx.lineWidth = 1;
@@ -337,63 +322,43 @@ function makeMetalTexture() {
     ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(128, i); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 128); ctx.stroke();
   }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  return tex;
+  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
 }
-
 function makeWoodTexture() {
-  const c = document.createElement('canvas');
-  c.width = 128; c.height = 128;
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#6a4a2e'; ctx.fillRect(0, 0, 128, 128);
   ctx.strokeStyle = '#4a3018';
   for (let y = 0; y < 128; y += 8) {
     ctx.lineWidth = 1 + Math.random() * 2;
-    ctx.beginPath();
-    ctx.moveTo(0, y + Math.random() * 3);
-    ctx.bezierCurveTo(40, y - 2, 90, y + 2, 128, y);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y + Math.random() * 3);
+    ctx.bezierCurveTo(40, y - 2, 90, y + 2, 128, y); ctx.stroke();
   }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  return tex;
+  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
 }
-
 let TEX_BRICK, TEX_METAL, TEX_WOOD;
 
-// ★★★★★ ИСПРАВЛЕНО: низкое качество для ПК производительности
+// ============ 3D ============
 function init3D() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a1a2e);
   scene.fog = new THREE.Fog(0x1a1a2e, 15, 55);
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 150);
   camera.rotation.order = 'YXZ';
-  renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById('canvas3d'),
-    antialias: false,
-    powerPreference: 'high-performance'
-  });
+  renderer = new THREE.WebGLRenderer({canvas: document.getElementById('canvas3d'), antialias: false, powerPreference: 'high-performance'});
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(1); // ★ НЕ увеличиваем DPR, чтобы не лагало
-  renderer.shadowMap.enabled = false; // ★ ТЕНИ ВЫКЛЮЧЕНЫ для производительности
-  
-  const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-  scene.add(ambient);
+  renderer.setPixelRatio(1);
+  renderer.shadowMap.enabled = false;
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
   const sun = new THREE.DirectionalLight(0xffeedd, 0.8);
   sun.position.set(20, 40, 20);
   scene.add(sun);
-  
-  // ★ УПРОЩЁННОЕ небо — просто цвет
-  // Убрана огромная сфера с шейдером
-  
   TEX_BRICK = makeBrickTexture();
   TEX_METAL = makeMetalTexture();
   TEX_WOOD = makeWoodTexture();
   window.addEventListener('resize', onResize);
   clock = new THREE.Clock();
 }
-
 function onResize() {
   if (!camera) return;
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -417,23 +382,22 @@ function generateMap() {
   addWall(0, 0, 1, S, WALL_HEIGHT, TEX_METAL);
   addWall(S-1, 0, 1, S, WALL_HEIGHT, TEX_METAL);
   const obs = [
-    {x:10, y:10, w:8,  h:4,  h3:3.0, t:TEX_WOOD},
-    {x:42, y:10, w:8,  h:4,  h3:3.0, t:TEX_WOOD},
-    {x:10, y:46, w:8,  h:4,  h3:3.0, t:TEX_WOOD},
-    {x:42, y:46, w:8,  h:4,  h3:3.0, t:TEX_WOOD},
+    {x:10, y:10, w:8, h:4, h3:3.0, t:TEX_WOOD},
+    {x:42, y:10, w:8, h:4, h3:3.0, t:TEX_WOOD},
+    {x:10, y:46, w:8, h:4, h3:3.0, t:TEX_WOOD},
+    {x:42, y:46, w:8, h:4, h3:3.0, t:TEX_WOOD},
     {x:25, y:25, w:10, h:10, h3:5.0, t:TEX_METAL},
-    {x:5,  y:25, w:3,  h:10, h3:2.0, t:TEX_BRICK},
-    {x:52, y:25, w:3,  h:10, h3:2.0, t:TEX_BRICK},
-    {x:20, y:5,  w:4,  h:8,  h3:2.5, t:TEX_WOOD},
-    {x:36, y:47, w:4,  h:8,  h3:2.5, t:TEX_WOOD},
-    {x:15, y:35, w:10, h:2,  h3:1.5, t:TEX_BRICK},
-    {x:35, y:23, w:10, h:2,  h3:1.5, t:TEX_BRICK},
-    {x:28, y:42, w:4,  h:4,  h3:2.0, t:TEX_METAL},
-    {x:28, y:14, w:4,  h:4,  h3:2.0, t:TEX_METAL}
+    {x:5, y:25, w:3, h:10, h3:2.0, t:TEX_BRICK},
+    {x:52, y:25, w:3, h:10, h3:2.0, t:TEX_BRICK},
+    {x:20, y:5, w:4, h:8, h3:2.5, t:TEX_WOOD},
+    {x:36, y:47, w:4, h:8, h3:2.5, t:TEX_WOOD},
+    {x:15, y:35, w:10, h:2, h3:1.5, t:TEX_BRICK},
+    {x:35, y:23, w:10, h:2, h3:1.5, t:TEX_BRICK},
+    {x:28, y:42, w:4, h:4, h3:2.0, t:TEX_METAL},
+    {x:28, y:14, w:4, h:4, h3:2.0, t:TEX_METAL}
   ];
   for (const o of obs) addWall(o.x, o.y, o.w, o.h, o.h3, o.t);
 }
-
 function addWall(x, y, w, h, h3, tex) {
   const geo = new THREE.BoxGeometry(w, h3, h);
   const mat = new THREE.MeshLambertMaterial({map: tex.clone()});
@@ -443,7 +407,6 @@ function addWall(x, y, w, h, h3, tex) {
   scene.add(mesh);
   walls.push({x, y, w, h, h3, mesh});
 }
-
 function collides(x, y, r) {
   for (const w of walls) {
     const cx = Math.max(w.x, Math.min(x, w.x + w.w));
@@ -453,13 +416,12 @@ function collides(x, y, r) {
   }
   return false;
 }
-
 function tryMove(o, dx, dy) {
   if (!collides(o.x + dx, o.y, PLAYER_RADIUS)) o.x += dx;
   if (!collides(o.x, o.y + dy, PLAYER_RADIUS)) o.y += dy;
 }
 
-// ============ ОРУЖИЕ В РУКАХ ============
+// ============ МОДЕЛЬ ОРУЖИЯ ============
 function createWeaponModel(wpn) {
   const g = new THREE.Group();
   const mat = new THREE.MeshLambertMaterial({color: wpn.color});
@@ -497,7 +459,6 @@ function createButterflyKnife(skinId) {
   g.scale.set(1.4, 1.4, 1.4);
   return g;
 }
-
 function updateKnifeAnimation(dt) {
   if (!player || !player.knifeModel) return;
   const k = player.knifeModel;
@@ -506,7 +467,6 @@ function updateKnifeAnimation(dt) {
   data.openness += (target - data.openness) * Math.min(1, dt * 8);
   data.blade.rotation.y = data.openness * Math.PI;
 }
-
 function toggleKnife() {
   if (!player) return;
   currentWeaponMode = currentWeaponMode === 'knife' ? 'gun' : 'knife';
@@ -515,7 +475,6 @@ function toggleKnife() {
   if (currentWeaponMode === 'knife' && player.knifeModel) player.knifeModel.userData.isOpen = true;
   updateWeaponUI();
 }
-
 function knifeAttack() {
   if (!player || !player.knifeModel || !player.knifeModel.userData.isOpen) return;
   const now = performance.now();
@@ -532,12 +491,10 @@ function knifeAttack() {
     if (dot > 0.5) { b.hp -= 100; if (b.hp <= 0) killBot(b); }
   }
 }
-
 function updateBalanceUI() {
   const el = document.getElementById('balance-display');
   if (el) el.textContent = balance;
 }
-
 function initSkinsUI() {
   const grid = document.getElementById('skins-grid');
   if (!grid) return;
@@ -562,7 +519,6 @@ function initSkinsUI() {
       '</div>';
   }).join('');
 }
-
 async function handleSkinClick(skinId) {
   const skin = KNIFE_SKINS.find(s => s.id === skinId);
   if (!skin) return;
@@ -583,7 +539,6 @@ async function handleSkinClick(skinId) {
   const equipped = await equipSkinOnServer(skinId);
   if (equipped) { initSkinsUI(); updateBalanceUI(); }
 }
-
 function switchTab(tab) {
   document.querySelectorAll('.tabs button').forEach((b, i) => {
     b.classList.toggle('active', (i === 0 && tab === 'play') || (i === 1 && tab === 'skins'));
@@ -592,24 +547,20 @@ function switchTab(tab) {
   document.getElementById('tab-skins').classList.toggle('hidden', tab !== 'skins');
   if (tab === 'skins') initSkinsUI();
 }
-
 function initWeaponsUI() {
   const grid = document.getElementById('weapons-grid');
   if (!grid) return;
   grid.innerHTML = WEAPONS.map((w, i) =>
     '<div class="weapon-card ' + (i===0?'sel':'') + '" onclick="selectWeapon(' + i + ')" data-i="' + i + '">' +
     '<span class="emoji">' + w.emoji + '</span>' + w.name +
-    '<div class="wpn-stats">' + w.damage + ' DMG</div>' +
-    '</div>'
+    '<div class="wpn-stats">' + w.damage + ' DMG</div></div>'
   ).join('');
 }
-
 function selectWeapon(i) {
   selectedWeapon = i;
   document.querySelectorAll('.weapon-card').forEach(el =>
     el.classList.toggle('sel', parseInt(el.dataset.i) === i));
 }
-
 function updateWeaponUI() {
   const el = document.getElementById('wpn-name');
   if (!el) return;
@@ -620,7 +571,6 @@ function updateWeaponUI() {
     el.textContent = player ? player.weapon.name : WEAPONS[selectedWeapon].name;
   }
 }
-
 function createPlayer(x, y) {
   const wpn = WEAPONS[selectedWeapon];
   const weaponModel = createWeaponModel(wpn);
@@ -639,7 +589,7 @@ function createPlayer(x, y) {
   };
 }
 
-// ★★★★★ ИСПРАВЛЕНО: боты спавнятся ДАЛЕКО от игрока
+// ============ БОТ ============
 function createBot(minDistFromPlayer) {
   const wpn = WEAPONS[Math.floor(Math.random() * WEAPONS.length)];
   const group = new THREE.Group();
@@ -660,8 +610,6 @@ function createBot(minDistFromPlayer) {
   const wpnMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.7), new THREE.MeshLambertMaterial({color: wpn.color}));
   wpnMesh.position.set(0.35, 1.1, -0.4); group.add(wpnMesh);
   group.userData = {legL, legR, armL, armR};
-  
-  // ★★★★★ Спавн ДАЛЕКО от игрока
   let x, y, tries = 0;
   const px = player ? player.x : MAP_SIZE/2;
   const py = player ? player.y : MAP_SIZE/2;
@@ -671,7 +619,6 @@ function createBot(minDistFromPlayer) {
     y = 5 + Math.random() * (MAP_SIZE - 10);
     tries++;
   } while (tries < 100 && (collides(x, y, 0.5) || Math.hypot(x - px, y - py) < minDist));
-  
   group.position.set(x, 0, y);
   scene.add(group);
   return {
@@ -684,13 +631,13 @@ function createBot(minDistFromPlayer) {
   };
 }
 
+// ============ СТРЕЛЬБА ============
 function startFire() {
   isFiring = true;
   if (currentWeaponMode === 'knife') knifeAttack();
   else fire();
 }
 function stopFire() { isFiring = false; }
-
 function fire() {
   if (!player || gameState !== 'playing') return;
   if (currentWeaponMode === 'knife') { knifeAttack(); return; }
@@ -714,7 +661,6 @@ function fire() {
     setTimeout(() => { if (isFiring && gameState === 'playing') fire(); }, wpn.rate);
   }
 }
-
 function shootRay(wpn, fromX, fromY, fromZ, yaw, pitch) {
   const spread = wpn.spread;
   const ry = yaw + (Math.random() - 0.5) * spread * 2;
@@ -745,7 +691,6 @@ function shootRay(wpn, fromX, fromY, fromZ, yaw, pitch) {
     createImpact(endX, endY, endZ);
   }
 }
-
 function raySphere(ox, oy, oz, dx, dy, dz, sx, sy, sz, r) {
   const a = dx*dx + dy*dy + dz*dz;
   const b = 2 * (dx*(ox-sx) + dy*(oy-sy) + dz*(oz-sz));
@@ -757,7 +702,6 @@ function raySphere(ox, oy, oz, dx, dy, dz, sx, sy, sz, r) {
   if (t < 0) return null;
   return t;
 }
-
 function rayBox(ox, oy, oz, dx, dy, dz, box) {
   const minX = box.x, maxX = box.x + box.w;
   const minY = 0, maxY = box.h3;
@@ -776,7 +720,6 @@ function rayBox(ox, oy, oz, dx, dy, dz, box) {
   if (tzmax < tmax) tmax = tzmax;
   return tmin > 0 ? tmin : (tmax > 0 ? tmax : null);
 }
-
 function createTracer(x1, y1, z1, x2, y2, z2) {
   const geo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x1, y1, z1), new THREE.Vector3(x2, y2, z2)]);
   const mat = new THREE.LineBasicMaterial({color: 0xffee88, transparent: true, opacity: 0.9});
@@ -784,7 +727,6 @@ function createTracer(x1, y1, z1, x2, y2, z2) {
   scene.add(line);
   tracers.push({line, life: 5});
 }
-
 function createImpact(x, y, z) {
   const geo = new THREE.SphereGeometry(0.08, 4, 4);
   const mat = new THREE.MeshBasicMaterial({color: 0xffdd44});
@@ -793,13 +735,11 @@ function createImpact(x, y, z) {
   scene.add(mesh);
   impacts.push({mesh, life: 8});
 }
-
 function showHitmarker() {
   const el = document.getElementById('hitmarker');
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 100);
 }
-
 function killBot(bot) {
   bot.alive = false;
   player.kills++;
@@ -817,7 +757,6 @@ function killBot(bot) {
     if (idx !== -1) { bots.splice(idx, 1); bots.push(createBot(20)); }
   }, 2000);
 }
-
 function doReload() {
   if (!player || player.isReloading) return;
   if (currentWeaponMode === 'knife') return;
@@ -834,22 +773,19 @@ function doReload() {
     updateAmmoUI();
   }, player.weapon.reloadTime);
 }
-
 function updateAmmoUI() {
   if (!player) return;
   const el = document.getElementById('ammo');
   if (el) el.textContent = player.ammo + ' / ' + player.reserve;
 }
-
 function updateHpUI() {
   if (!player) return;
   const el = document.getElementById('hp');
   if (el) el.textContent = Math.max(0, Math.round(player.hp));
 }
 
-// ============ ЦИКЛ ============
+// ============ ИГРОВОЙ ЦИКЛ ============
 let lastTime = 0;
-
 function gameLoop() {
   requestAnimationFrame(gameLoop);
   const now = performance.now();
@@ -861,7 +797,6 @@ function gameLoop() {
     updateBulletsVisual(dt);
     updateKnifeAnimation(dt);
     updateCamera();
-    // ★ Миникарта реже
     if (now - minimapLastUpdate > MINIMAP_INTERVAL) {
       minimapLastUpdate = now;
       updateMinimap();
@@ -870,21 +805,33 @@ function gameLoop() {
   if (renderer && scene && camera) renderer.render(scene, camera);
 }
 
+// ★★★★★ ИСПРАВЛЕНО: движение относительно направления камеры
 function updatePlayer(dt) {
-  let dx = 0, dy = 0;
-  if (joyState.active) { dx += joyState.dx; dy += joyState.dy; }
-  if (keys['w'] || keys['arrowup'] || keys['ц']) dy -= 1;
-  if (keys['s'] || keys['arrowdown'] || keys['ы']) dy += 1;
-  if (keys['a'] || keys['arrowleft'] || keys['ф']) dx -= 1;
-  if (keys['d'] || keys['arrowright'] || keys['в']) dx += 1;
-  const len = Math.sqrt(dx*dx + dy*dy);
-  if (len > 1) { dx /= len; dy /= len; }
+  let forward = 0, side = 0;
+  if (joyState.active) { 
+    forward = -joyState.dy; 
+    side = joyState.dx; 
+  }
+  if (keys['w'] || keys['arrowup'] || keys['ц']) forward += 1;
+  if (keys['s'] || keys['arrowdown'] || keys['ы']) forward -= 1;
+  if (keys['d'] || keys['arrowright'] || keys['в']) side += 1;
+  if (keys['a'] || keys['arrowleft'] || keys['ф']) side -= 1;
+  
+  const len = Math.sqrt(forward*forward + side*side);
+  if (len > 1) { forward /= len; side /= len; }
+  
   let speed = player.speed;
   if (player.isCrouching) speed *= 0.5;
   if (player.isSprinting) speed *= 1.6;
-  tryMove(player, dx * speed * dt, dy * speed * dt);
-  if (Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01) player.bobTime += dt * 10;
+  
+  // ★ ДВИЖЕНИЕ ОТНОСИТЕЛЬНО КАМЕРЫ
+  const moveX = Math.sin(player.yaw) * forward * speed * dt + Math.cos(player.yaw) * side * speed * dt;
+  const moveZ = Math.cos(player.yaw) * forward * speed * dt - Math.sin(player.yaw) * side * speed * dt;
+  tryMove(player, moveX, moveZ);
+  
+  if (Math.abs(forward) > 0.01 || Math.abs(side) > 0.01) player.bobTime += dt * 10;
   else player.bobTime *= 0.9;
+  
   if (player.isJumping) {
     player.velocityY -= 15 * dt;
     player.z += player.velocityY * dt;
@@ -895,7 +842,7 @@ function updatePlayer(dt) {
     }
   }
   
-  // ★★★★★ АВТОПРИЦЕЛ ТОЛЬКО НА МОБИЛЬНЫХ (строго)
+  // ★ АВТОПРИЦЕЛ ТОЛЬКО НА МОБИЛЬНЫХ
   if (!isPC) {
     let nearest = null, minDist = 999;
     for (const b of bots) {
@@ -910,7 +857,7 @@ function updatePlayer(dt) {
       while (diff < -Math.PI) diff += Math.PI * 2;
       player.yaw += diff * Math.min(1, dt * 5);
     } else if (joyState.active && len > 0.3) {
-      player.yaw = Math.atan2(dx, dy);
+      player.yaw = Math.atan2(joyState.dx, -joyState.dy);
     }
   }
   
@@ -920,12 +867,13 @@ function updatePlayer(dt) {
   }
 }
 
+// ★★★★★ ИСПРАВЛЕНО: убрано +Math.PI в камере
 function updateCamera() {
   if (!player || !camera) return;
   const bob = Math.sin(player.bobTime) * 0.04;
   const bobX = Math.cos(player.bobTime * 0.5) * 0.03;
   camera.position.set(player.x + bobX, player.z + bob, player.y);
-  camera.rotation.y = player.yaw + Math.PI;
+  camera.rotation.y = player.yaw;
   camera.rotation.x = player.pitch;
 }
 
@@ -934,7 +882,6 @@ function updateBots(dt) {
     if (!bot.alive) continue;
     const distToPlayer = Math.hypot(player.x - bot.x, player.y - bot.y);
     bot.angle = Math.atan2(player.x - bot.x, player.y - bot.y);
-    // ★ Боты агрессивны только в радиусе 20
     if (distToPlayer < 20 && distToPlayer > 4) {
       const strafe = Math.sin(performance.now() / 800 + bot.x) * 0.5;
       const moveX = Math.sin(bot.angle) * bot.speed * 0.7 + Math.cos(bot.angle) * strafe;
@@ -954,7 +901,7 @@ function updateBots(dt) {
       bot.walkTime += dt * 6;
     }
     bot.mesh.position.set(bot.x, 0, bot.y);
-    bot.mesh.rotation.y = bot.angle + Math.PI;
+    bot.mesh.rotation.y = bot.angle;
     const swing = Math.sin(bot.walkTime) * 0.4;
     if (bot.mesh.userData.legL) {
       bot.mesh.userData.legL.rotation.x = swing;
@@ -964,13 +911,12 @@ function updateBots(dt) {
     }
   }
 }
-
 function botFire(bot) {
   const now = performance.now();
-  if (now - bot.lastShot < 1200) return; // ★ реже стреляют
+  if (now - bot.lastShot < 1200) return;
   bot.lastShot = now;
   const dist = Math.hypot(player.x - bot.x, player.y - bot.y);
-  const hitChance = Math.max(0.1, 1 - dist / 30) * 0.5; // ★ меньше урона
+  const hitChance = Math.max(0.1, 1 - dist / 30) * 0.5;
   if (Math.random() < hitChance) {
     player.hp -= 5 + Math.random() * 5;
     document.getElementById('damage-flash').classList.add('show');
@@ -980,7 +926,6 @@ function botFire(bot) {
   }
   createTracer(bot.x, 1.1, bot.y, player.x, PLAYER_HEIGHT, player.y);
 }
-
 function killPlayer(killerName) {
   gameState = 'dead';
   player.deaths++;
@@ -993,7 +938,6 @@ function killPlayer(killerName) {
     setTimeout(() => endMatch(false), 1500);
   }
 }
-
 function updateBulletsVisual(dt) {
   for (let i = tracers.length - 1; i >= 0; i--) {
     tracers[i].life -= dt * 30;
@@ -1006,7 +950,6 @@ function updateBulletsVisual(dt) {
     if (impacts[i].life <= 0) { scene.remove(impacts[i].mesh); impacts.splice(i, 1); }
   }
 }
-
 function updateMinimap() {
   const mm = document.getElementById('minimap');
   if (!mm || !player) return;
@@ -1117,12 +1060,11 @@ function initControls() {
 
   document.addEventListener('mousemove', e => {
     if (document.pointerLockElement === canvasEl && player) {
-      player.yaw -= e.movementX * 0.002;
-      player.pitch -= e.movementY * 0.002;
+      player.yaw -= e.movementX * 0.0015;
+      player.pitch -= e.movementY * 0.0015;
       player.pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, player.pitch));
     }
   });
-
   document.addEventListener('mousedown', e => {
     if (gameState === 'playing' && e.button === 0 && document.pointerLockElement === canvasEl) {
       startFire();
@@ -1131,11 +1073,9 @@ function initControls() {
   document.addEventListener('mouseup', e => {
     if (e.button === 0) stopFire();
   });
-
   document.addEventListener('contextmenu', e => {
     if (gameState === 'playing') e.preventDefault();
   });
-
   document.addEventListener('pointerlockchange', () => {
     if (gameState === 'playing' && isPC) {
       if (!document.pointerLockElement) {
@@ -1145,19 +1085,16 @@ function initControls() {
       }
     }
   });
-
   document.getElementById('knife-btn').addEventListener('click', toggleKnife);
   document.getElementById('wpn-switch').addEventListener('click', cycleWeapon);
   document.getElementById('reload').addEventListener('click', doReload);
   document.getElementById('jump-btn').addEventListener('click', jump);
 }
-
 function jump() {
   if (!player || player.isJumping) return;
   player.isJumping = true;
   player.velocityY = 6;
 }
-
 function cycleWeapon() {
   if (!player || currentWeaponMode === 'knife') return;
   selectedWeapon = (selectedWeapon + 1) % WEAPONS.length;
@@ -1183,7 +1120,6 @@ async function startSolo() {
   matchActive = false;
   startGameInternal();
 }
-
 async function startMatch() {
   myName = (document.getElementById('m-name').value || 'Игрок').slice(0, 20);
   currentPlayerName = myName;
@@ -1192,7 +1128,6 @@ async function startMatch() {
   matchActive = true;
   startGameInternal();
 }
-
 function startGameInternal() {
   document.getElementById('loading').classList.add('on');
   document.getElementById('loading-text').textContent = 'Загрузка игры...';
@@ -1212,7 +1147,6 @@ function startGameInternal() {
     player = createPlayer(MAP_SIZE/2, MAP_SIZE/2);
     player.name = myName;
     player.deaths = 0; player.kills = 0;
-    // ★★★★★ Боты спавнятся ДАЛЕКО от игрока (мин 25м)
     for (let i = 0; i < 6; i++) bots.push(createBot(25));
     currentWeaponMode = 'gun';
     player.weaponModel.visible = true;
@@ -1225,14 +1159,24 @@ function startGameInternal() {
     gameState = 'playing';
     lastTime = performance.now();
     document.getElementById('loading').classList.remove('on');
-    if (isPC) document.getElementById('pc-hint').classList.add('on');
+    
+    // ★ Автозахват мыши при старте
+    if (isPC) {
+      document.getElementById('pc-hint').classList.add('on');
+      setTimeout(() => {
+        const cv = document.getElementById('canvas3d');
+        if (cv && gameState === 'playing' && cv.requestPointerLock) {
+          try { cv.requestPointerLock(); document.getElementById('pc-hint').classList.remove('on'); } catch(e) {}
+        }
+      }, 800);
+    }
+    
     if (!window._gameLoopStarted) {
       window._gameLoopStarted = true;
       requestAnimationFrame(gameLoop);
     }
   }, 500);
 }
-
 function respawn() {
   document.getElementById('death').classList.remove('open');
   if (!player) return;
@@ -1243,7 +1187,6 @@ function respawn() {
   player.hp = player.maxHp;
   player.ammo = player.weapon.mag;
   player.reserve = player.weapon.reserve;
-  // ★ Убираем ботов подальше
   for (const b of bots) {
     if (Math.hypot(b.x - x, b.y - y) < 15) {
       b.x = 5 + Math.random() * (MAP_SIZE - 10);
@@ -1252,9 +1195,14 @@ function respawn() {
   }
   gameState = 'playing';
   updateHpUI(); updateAmmoUI();
-  if (isPC) document.getElementById('pc-hint').classList.add('on');
+  if (isPC) {
+    document.getElementById('pc-hint').classList.add('on');
+    setTimeout(() => {
+      const cv = document.getElementById('canvas3d');
+      if (cv && cv.requestPointerLock) { try { cv.requestPointerLock(); document.getElementById('pc-hint').classList.remove('on'); } catch(e) {} }
+    }, 500);
+  }
 }
-
 async function endMatch(won) {
   gameState = 'menu';
   matchActive = false;
@@ -1271,7 +1219,6 @@ async function endMatch(won) {
   document.getElementById('match-end').classList.add('open');
   updateBalanceUI();
 }
-
 function backToMenu() {
   document.getElementById('match-end').classList.remove('open');
   document.getElementById('game').classList.remove('on');
@@ -1280,13 +1227,11 @@ function backToMenu() {
   gameState = 'menu';
   if (document.pointerLockElement) document.exitPointerLock();
 }
-
 setInterval(() => {
   if (gameState === 'playing' && matchActive && player) {
     if (player.kills >= MATCH_KILLS_TO_WIN) endMatch(true);
   }
 }, 1000);
-
 window.addEventListener('load', () => {
   initWeaponsUI();
   initControls();
