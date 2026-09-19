@@ -361,7 +361,7 @@ async function poll(){
   try{
     const r=await fetch('/messages?since='+lastTimestamp+'&user='+encodeURIComponent(myName));
     const data=await r.json();
-    if(data.banned){document.getElementById('banned-screen').classList.add('on');document.getElementById('ban-reason').textContent=data.reason||'Забанены';return}
+    if(data.banned===true){document.getElementById('banned-screen').classList.add('on');document.getElementById('ban-reason').textContent=data.reason||'Забанены';return}
     document.getElementById('banned-screen').classList.remove('on');
     statusEl.textContent='✅ онлайн';statusEl.style.color='#a6e3a1';
     onlineUsers=data.online||[];
