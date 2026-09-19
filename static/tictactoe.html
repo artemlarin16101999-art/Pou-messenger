@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Pou — Крестики-нолики</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:linear-gradient(135deg,#1a1a2e,#0a0a14);color:#cdd6f4}
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:20px;gap:15px;overflow-y:auto}
+.box{background:#1e1e2e;padding:25px;border-radius:16px;width:420px;max-width:100%;box-shadow:0 10px 40px rgba(137,180,250,.2);text-align:center}
+h1{color:#89b4fa;font-size:32px;margin-bottom:6px}
+.sub{color:#6c7086;font-size:12px;margin-bottom:20px}
+.pours{background:linear-gradient(135deg,#f9e2af,#e0b84a);color:#1e1e2e;font-weight:bold;padding:10px;border-radius:10px;margin-bottom:15px;font-size:16px}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#89b4fa,#5a7fc4);color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:15px;cursor:pointer;margin-bottom:8px;letter-spacing:1px;transition:.2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(137,180,250,.4)}
+.btn.sec{background:#313244;color:#cdd6f4}
+.btn.win{background:linear-gradient(135deg,#a6e3a1,#5a9a55)}
+input{width:100%;padding:12px;margin-bottom:10px;background:#313244;border:1px solid #45475a;border-radius:8px;color:#cdd6f4;font-size:14px;outline:none;text-align:center}
+input:focus{border-color:#89b4fa}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px auto;max-width:320px;width:100%}
+.cell{aspect-ratio:1;background:#313244;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:bold;cursor:pointer;transition:.15s}
+.cell:hover{background:#45475a}
+.cell.x{color:#89b4fa}
+.cell.o{color:#f38ba8}
+.cell.win{background:#a6e3a1;color:#1e1e2e;animation:pulse .5s}
+@keyframes pulse{50%{transform:scale(1.1)}}
+.status{color:#89b4fa;font-size:18px;font-weight:bold;margin:12px 0;min-height:24px}
+.difficulty{display:flex;gap:8px;margin-bottom:15px}
+.difficulty button{flex:1;padding:10px;background:#313244;color:#cdd6f4;border:2px solid transparent;border-radius:8px;font-size:13px;cursor:pointer;font-weight:bold}
+.difficulty button.active{background:#89b4fa;color:#1e1e2e;border-color:#f9e2af}
+.back{position:fixed;top:15px;left:15px;background:#313244;color:#cdd6f4;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;z-index:10}
+.modal-result{position:fixed;inset:0;background:rgba(10,10,20,.9);display:none;align-items:center;justify-content:center;flex-direction:column;gap:15px;z-index:100;padding:20px}
+.modal-result.on{display:flex}
+.modal-result h2{font-size:52px;letter-spacing:3px}
+.modal-result h2.win{color:#a6e3a1;text-shadow:0 0 30px #a6e3a1}
+.modal-result h2.lose{color:#f38ba8;text-shadow:0 0 30px #f38ba8}
+.modal-result h2.draw{color:#f9e2af;text-shadow:0 0 30px #f9e2af}
+.modal-result .reward-text{background:#313244;padding:15px 30px;border-radius:10px;font-size:20px;border:2px solid #f9e2af}
+.modal-result .reward-text b.plus{color:#a6e3a1}
+.modal-result .reward-text b.minus{color:#f38ba8}
+</style>
+</head>
+<body>
+
+<button class="back" onclick="location.href='/'">← Назад</button>
+
+<div class="screen">
+  <div class="box">
+    <h1>⭕ Крестики-нолики</h1>
+    <div class="sub">◆ Играй и зарабатывай Pours ◆</div>
+
+    <div class="pours" id="pours-display">💰 Pours: ...</div>
+
+    <div id="game-setup">
+      <div style="color:#6c7086;font-size:13px;margin-bottom:10px">Выберите сложность:</div>
+      <div class="difficulty">
+        <button class="active" data-diff="easy" onclick="selectDifficulty('easy')">😊 Легко</button>
+        <button data-diff="medium" onclick="selectDifficulty('medium')">😐 Средне</button>
+        <button data-diff="hard" onclick="selectDifficulty('hard')">😈 Сложно</button>
+      </div>
+      <div style="color:#6c7086;font-size:11px;margin-bottom:15px;line-height:1.5">
+        🏆 Победа: <b style="color:#a6e3a1">+30 Pours</b><br>
+        🤝 Ничья: <b style="color:#f9e2af">0 Pours</b><br>
+        💀 Поражение: <b style="color:#f38ba8">−15 Pours</b>
+      </div>
+      <button class="btn win" onclick="startGame()">🎮 НАЧАТЬ ИГРУ</button>
+    </div>
+
+    <div id="game-area" style="display:none">
+      <div class="status" id="status">Ваш ход</div>
+      <div class="board" id="board">
+        <div class="cell" data-i="0"></div>
+        <div class="cell" data-i="1"></div>
+        <div class="cell" data-i="2"></div>
+        <div class="cell" data-i="3"></div>
+        <div class="cell" data-i="4"></div>
+        <div class="cell" data-i="5"></div>
+        <div class="cell" data-i="6"></div>
+        <div class="cell" data-i="7"></div>
+        <div class="cell" data-i="8"></div>
+      </div>
+      <button class="btn sec" onclick="restartGame()">🔄 Заново</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-result" id="result-modal">
+  <h2 id="result-title">ПОБЕДА</h2>
+  <div class="reward-text" id="result-reward">+30 Pours</div>
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <button class="btn" onclick="closeResult()" style="width:auto;padding:12px 24px">▶ ЕЩЁ РАЗ</button>
+    <button class="btn sec" onclick="location.href='/'" style="width:auto;padding:12px 24px">🏠 В МЕНЮ</button>
+  </div>
+</div>
+
+<script>
+let myName = localStorage.getItem('pou_current') || null;
+let pours = 0;
+let board = ['', '', '', '', '', '', '', '', ''];
+let playerSymbol = 'X';
+let botSymbol = 'O';
+let gameOver = false;
+let myTurn = true;
+let difficulty = 'medium';
+
+if (!myName) {
+  myName = prompt('Введите ваш ник (как в мессенджере):', 'Игрок') || 'Игрок';
+  localStorage.setItem('pou_current', myName);
+}
+
+async function loadProfile() {
+  try {
+    const r = await fetch('/api/get-profile', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: myName})
+    });
+    const data = await r.json();
+    if (data.ok) {
+      pours = data.pours;
+      updatePoursDisplay();
+    } else {
+      document.getElementById('pours-display').textContent = '⚠ Игрок не найден';
+    }
+  } catch (e) {
+    document.getElementById('pours-display').textContent = '⚠ Ошибка сети';
+  }
+}
+
+function updatePoursDisplay() {
+  document.getElementById('pours-display').textContent = '💰 Pours: ' + pours;
+}
+
+function selectDifficulty(d) {
+  difficulty = d;
+  document.querySelectorAll('.difficulty button').forEach(b => {
+    b.classList.toggle('active', b.dataset.diff === d);
+  });
+}
+
+function startGame() {
+  board = ['', '', '', '', '', '', '', '', ''];
+  gameOver = false;
+  myTurn = true;
+  document.getElementById('game-setup').style.display = 'none';
+  document.getElementById('game-area').style.display = 'block';
+  document.getElementById('status').textContent = 'Ваш ход';
+  renderBoard();
+}
+
+function restartGame() {
+  document.getElementById('result-modal').classList.remove('on');
+  document.getElementById('game-setup').style.display = 'block';
+  document.getElementById('game-area').style.display = 'none';
+  loadProfile();
+}
+
+function closeResult() {
+  document.getElementById('result-modal').classList.remove('on');
+  restartGame();
+}
+
+function renderBoard() {
+  const cells = document.querySelectorAll('.cell');
+  cells.forEach((c, i) => {
+    c.textContent = board[i];
+    c.className = 'cell' + (board[i] === 'X' ? ' x' : board[i] === 'O' ? ' o' : '');
+  });
+}
+
+document.getElementById('board').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cell');
+  if (!cell || gameOver || !myTurn) return;
+  const i = parseInt(cell.dataset.i);
+  if (board[i] !== '') return;
+
+  board[i] = playerSymbol;
+  renderBoard();
+
+  const win = checkWin(playerSymbol);
+  if (win) {
+    highlightWin(win);
+    gameOver = true;
+    document.getElementById('status').textContent = '🏆 Вы победили!';
+    setTimeout(() => finishGame('win'), 500);
+    return;
+  }
+  if (isFull()) {
+    gameOver = true;
+    document.getElementById('status').textContent = '🤝 Ничья';
+    setTimeout(() => finishGame('draw'), 500);
+    return;
+  }
+
+  myTurn = false;
+  document.getElementById('status').textContent = 'Ход бота...';
+  setTimeout(() => botMove(), 400);
+});
+
+function botMove() {
+  if (gameOver) return;
+  let move = -1;
+
+  if (difficulty === 'easy') {
+    const empty = board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+    move = empty[Math.floor(Math.random() * empty.length)];
+  } else if (difficulty === 'medium') {
+    if (Math.random() < 0.5) {
+      move = findBestMove();
+    } else {
+      const empty = board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+      move = empty[Math.floor(Math.random() * empty.length)];
+    }
+  } else {
+    move = findBestMove();
+  }
+
+  if (move === -1 || board[move] !== '') return;
+  board[move] = botSymbol;
+  renderBoard();
+
+  const win = checkWin(botSymbol);
+  if (win) {
+    highlightWin(win);
+    gameOver = true;
+    document.getElementById('status').textContent = '💀 Вы проиграли';
+    setTimeout(() => finishGame('lose'), 500);
+    return;
+  }
+  if (isFull()) {
+    gameOver = true;
+    document.getElementById('status').textContent = '🤝 Ничья';
+    setTimeout(() => finishGame('draw'), 500);
+    return;
+  }
+
+  myTurn = true;
+  document.getElementById('status').textContent = 'Ваш ход';
+}
+
+function findBestMove() {
+  let bestScore = -Infinity;
+  let bestMove = -1;
+  for (let i = 0; i < 9; i++) {
+    if (board[i] !== '') continue;
+    board[i] = botSymbol;
+    const score = minimax(board, 0, false);
+    board[i] = '';
+    if (score > bestScore) {
+      bestScore = score;
+      bestMove = i;
+    }
+  }
+  return bestMove;
+}
+
+function minimax(b, depth, isMax) {
+  const winO = checkWin('O');
+  const winX = checkWin('X');
+  if (winO) return 10 - depth;
+  if (winX) return -10 + depth;
+  if (isFull()) return 0;
+
+  if (isMax) {
+    let best = -Infinity;
+    for (let i = 0; i < 9; i++) {
+      if (b[i] !== '') continue;
+      b[i] = 'O';
+      best = Math.max(best, minimax(b, depth + 1, false));
+      b[i] = '';
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (let i = 0; i < 9; i++) {
+      if (b[i] !== '') continue;
+      b[i] = 'X';
+      best = Math.min(best, minimax(b, depth + 1, true));
+      b[i] = '';
+    }
+    return best;
+  }
+}
+
+function checkWin(s) {
+  const lines = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for (const l of lines) {
+    if (board[l[0]] === s && board[l[1]] === s && board[l[2]] === s) return l;
+  }
+  return null;
+}
+
+function highlightWin(line) {
+  line.forEach(i => {
+    const cell = document.querySelector('.cell[data-i="' + i + '"]');
+    if (cell) cell.classList.add('win');
+  });
+}
+
+function isFull() {
+  return board.every(c => c !== '');
+}
+
+async function finishGame(result) {
+  try {
+    const r = await fetch('/api/ttt-result', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username: myName, result: result})
+    });
+    const data = await r.json();
+    if (data.ok) {
+      pours = data.pours;
+      updatePoursDisplay();
+
+      const title = document.getElementById('result-title');
+      const reward = document.getElementById('result-reward');
+      title.className = result;
+      if (result === 'win') {
+        title.textContent = '🏆 ПОБЕДА!';
+        reward.innerHTML = 'Награда: <b class="plus">+30 Pours</b>';
+      } else if (result === 'lose') {
+        title.textContent = '💀 ПОРАЖЕНИЕ';
+        reward.innerHTML = 'Награда: <b class="minus">−15 Pours</b>';
+      } else {
+        title.textContent = '🤝 НИЧЬЯ';
+        reward.innerHTML = 'Награда: <b>0 Pours</b>';
+      }
+      document.getElementById('result-modal').classList.add('on');
+    }
+  } catch (e) {
+    console.error(e);
+    closeResult();
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>
