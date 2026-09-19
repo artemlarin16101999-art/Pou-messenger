@@ -83,7 +83,7 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 .pours-bar b{font-size:16px}
 .pours-bar .btns{display:flex;gap:4px;flex-wrap:wrap}
 .pours-bar button{background:#1e1e2e;color:#f9e2af;border:none;padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:bold}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;backdrop-filter:blur(4px)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
 .modal.open{display:flex}
 .modal-box{background:#181825;border-radius:14px;padding:20px;max-width:500px;width:100%;max-height:88vh;overflow-y:auto;position:relative}
 .modal-box h2{color:#f9e2af;font-size:22px;margin-bottom:15px}
@@ -96,10 +96,6 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 .gift-card .emoji{font-size:26px;display:block;margin-bottom:3px}
 .gift-card .name{font-size:10px;margin-bottom:2px}
 .gift-card .price{color:#f9e2af;font-size:10px;font-weight:bold}
-.buy-pours-card{background:linear-gradient(135deg,#f9e2af,#e0b84a);border-radius:12px;padding:24px 16px;text-align:center;margin:15px 0}
-.buy-pours-card .card-title{color:#1e1e2e;font-size:14px;font-weight:bold;margin-bottom:15px;letter-spacing:2px}
-.buy-pours-card .card-number{background:#1e1e2e;color:#f9e2af;font-size:22px;font-weight:bold;letter-spacing:3px;padding:16px 10px;border-radius:10px;margin:12px 0;font-family:monospace}
-.buy-pours-card .rate{color:#1e1e2e;font-size:13px;font-weight:bold;margin-top:12px}
 .call-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0a0a14);display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:300;padding:20px;text-align:center}
 .call-overlay.on{display:flex}
 .call-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#89b4fa,#5a7fc4);display:flex;align-items:center;justify-content:center;font-size:60px}
@@ -110,7 +106,7 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 .call-btn.accept{background:linear-gradient(135deg,#a6e3a1,#5a9a55)}
 .call-btn.reject,.call-btn.end{background:linear-gradient(135deg,#f38ba8,#c25a7a)}
 .call-timer{color:#a6e3a1;font-size:16px;font-family:monospace}
-@media (max-width:600px){.sidebar{width:200px}.chat-item .preview{display:none}.pours-bar{font-size:11px;padding:6px 8px}.pours-bar button{font-size:10px;padding:5px 7px}.buy-pours-card .card-number{font-size:18px}}
+@media (max-width:600px){.sidebar{width:200px}.chat-item .preview{display:none}.pours-bar{font-size:11px;padding:6px 8px}.pours-bar button{font-size:10px;padding:5px 7px}}
 </style>
 </head>
 <body>
@@ -143,7 +139,6 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
       <span>💰 Pours: <b id="my-pours">0</b></span>
       <div class="btns">
         <button onclick="claimFree()">🎁 Получить</button>
-        <button onclick="openBuyPours()">💳 Купить</button>
         <button onclick="openGifts()">🎀 Подарить</button>
         <button onclick="openTicTacToe()">🎮 Крестики</button>
       </div>
@@ -228,19 +223,6 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
   </div>
 </div>
 
-<div id="buy-pours-modal" class="modal">
-  <div class="modal-box">
-    <button class="close-btn" onclick="closeModal('buy-pours-modal')">✕</button>
-    <h2>💳 Купить Pours</h2>
-    <div class="buy-pours-card">
-      <div class="card-title">💳 ПЕРЕВОД НА КАРТУ</div>
-      <div class="card-number">2200 2480 3597 4046</div>
-      <div class="rate">донать сюда,<br>курс 1 руб = 10 поурс</div>
-    </div>
-    <div style="color:#6c7086;font-size:11px;text-align:center;margin-top:10px">После перевода напишите администратору</div>
-  </div>
-</div>
-
 <div id="claim-modal" class="modal">
   <div class="modal-box" style="text-align:center">
     <button class="close-btn" onclick="closeModal('claim-modal')">✕</button>
@@ -266,7 +248,6 @@ footer button.small{padding:8px 10px;background:#313244;color:#cdd6f4;font-size:
 <audio id="remote-audio" autoplay></audio>
 
 <script>
-// ===== АВТОРИЗАЦИЯ =====
 function getSaved(){try{return JSON.parse(localStorage.getItem('pou_saved')||'[]')}catch{return[]}}
 function saveAcc(n){let s=getSaved();if(!s.includes(n)){s.push(n);localStorage.setItem('pou_saved',JSON.stringify(s))}}
 function renderSaved(){
@@ -456,7 +437,6 @@ async function adminCmd(action){
 
 function openModal(id){document.getElementById(id).classList.add('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
-function openBuyPours(){openModal('buy-pours-modal')}
 function openGifts(){openModal('gifts-modal');loadGifts()}
 async function loadGifts(){
   try{
@@ -464,10 +444,7 @@ async function loadGifts(){
     const data=await r.json();
     if(data.ok){
       const grid=document.getElementById('gifts-grid');
-      grid.innerHTML=data.gifts.map(g=>{
-        const can=g.price<=myPours;
-        return '<div class="gift-card'+(can?'':' disabled')+'" onclick="sendGift(\''+g.id+'\')"><span class="emoji">'+g.emoji+'</span><div class="name">'+g.name+'</div><div class="price">'+g.price+'💰</div></div>';
-      }).join('');
+      grid.innerHTML=data.gifts.map(g=>'<div class="gift-card" onclick="sendGift(\''+g.id+'\')"><span class="emoji">'+g.emoji+'</span><div class="name">'+g.name+'</div><div class="price">'+g.price+'💰</div></div>').join('');
     }
   }catch(e){document.getElementById('gifts-grid').textContent='Ошибка'}
 }
@@ -496,7 +473,6 @@ async function doClaimFree(){
 function openTicTacToe(){window.open('/tictactoe.html','_blank')}
 
 let peerConnection=null,localStream=null,callTimerInterval=null,callStartTime=0;
-
 async function startCall(){
   let to=currentChat;
   if(!to){to=prompt('Кому позвонить?','');if(!to)return}
