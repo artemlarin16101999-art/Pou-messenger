@@ -23,7 +23,11 @@ muted_users = {}
 user_info = {}
 registered_users = {}
 active_calls = {}
-sessions = {}  # токены сессий
+sessions = {}
+
+# === POUS GARDEN ONLINE ===
+garden_players = {}
+GARDEN_TIMEOUT = 10
 
 # ============ 21 ПОДАРОК ============
 GIFTS = [
@@ -245,6 +249,14 @@ async def gamestrel(request):
 
 async def tictactoe(request):
     path = os.path.join(os.path.dirname(__file__), 'static', 'tictactoe.html')
+    return web.FileResponse(path)
+
+async def poublox(request):
+    path = os.path.join(os.path.dirname(__file__), 'static', 'poublox.html')
+    return web.FileResponse(path)
+
+async def garden(request):
+    path = os.path.join(os.path.dirname(__file__), 'static', 'garden.html')
     return web.FileResponse(path)
 
 # ============ АВТОРИЗАЦИЯ ============
@@ -585,6 +597,58 @@ async def get_history(request):
             'am_admin': user == ADMIN_NAME
         })
 
+async def jitsi_room(request):
+    a = request.query.get('a', 'user1')
+    b = request.query.get('b', 'user2')
+    names = sorted([a, b])
+    room = 'pou-' + names[0] + '-' + names[1]
+    room = ''.join(c if c.isalnum() or c == '-' else '-' for c in room)
+    return web.json_response({'room': room})
+
+# ============ POUS GARDEN ONLINE API ============
+async def garden_update(request):
+    try:
+        data = await request.json()
+    except:
+        return web.json_response({'ok': False, 'error': 'bad json'})
+    name = (data.get('name') or '').strip()
+    if not name:
+        return web.json_response({'ok': False, 'error': 'no name'})
+    async with lock:
+        now = time.time()
+        garden_players[name] = {
+            'x': float(data.get('x', 0)),
+            'z': float(data.get('z', 0)),
+            'yaw': float(data.get('yaw', 0)),
+            'skin': data.get('skin', '🐧'),
+            'coins': int(data.get('coins', 0)),
+            'time': now
+        }
+        expired = [n for n, p in garden_players.items() if now - p['time'] > GARDEN_TIMEOUT]
+        for n in expired:
+            del garden_players[n]
+        others = []
+        for n, p in garden_players.items():
+            if n == name:
+                continue
+            others.append({
+                'name': n,
+                'x': p['x'],
+                'z': p['z'],
+                'yaw': p['yaw'],
+                'skin': p['skin'],
+                'coins': p['coins']
+            })
+        return web.json_response({'ok': True, 'others': others})
+
+async def garden_stats(request):
+    async with lock:
+        return web.json_response({
+            'ok': True,
+            'online': len(garden_players),
+            'players': [{'name': n, 'coins': p.get('coins', 0)} for n, p in garden_players.items()]
+        })
+
 # ============ API ПРОФИЛЯ ============
 async def get_profile(request):
     data = await request.json()
@@ -823,12 +887,17 @@ async def main():
     app.router.add_get('/index.html', index)
     app.router.add_get('/gamestrel.html', gamestrel)
     app.router.add_get('/tictactoe.html', tictactoe)
+    app.router.add_get('/poublox.html', poublox)
+    app.router.add_get('/garden.html', garden)
     app.router.add_post('/auth', auth)
     app.router.add_post('/api/check-token', check_token)
     app.router.add_post('/api/logout', logout_session)
     app.router.add_post('/send', send_message)
     app.router.add_get('/messages', get_messages)
     app.router.add_get('/history', get_history)
+    app.router.add_get('/room', jitsi_room)
+    app.router.add_post('/api/garden/update', garden_update)
+    app.router.add_get('/api/garden/stats', garden_stats)
     app.router.add_post('/api/get-profile', get_profile)
     app.router.add_get('/api/gifts', get_gifts)
     app.router.add_post('/api/send-gift', send_gift)
@@ -845,6 +914,7 @@ async def main():
     port = int(os.environ.get('PORT', 8080))
     print(f'[POU] Запуск на порту {port}')
     print(f'[POU] Админ: {ADMIN_NAME}')
+    print('[POU] Pous Garden online API: ON')
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', port)
@@ -865,6 +935,9 @@ async def main():
                 old_calls = [c for c, v in active_calls.items() if now - v['time'] > 60]
                 for c in old_calls:
                     del active_calls[c]
+                g_expired = [n for n, p in garden_players.items() if now - p['time'] > GARDEN_TIMEOUT]
+                for n in g_expired:
+                    del garden_players[n]
     asyncio.create_task(cleanup())
 
     async def autosave():
