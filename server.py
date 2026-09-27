@@ -1,953 +1,924 @@
-from aiohttp import web
-import json
-import os
-import time
-import asyncio
-import hashlib
-from datetime import datetime
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Pous Garden 3D Online</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif;user-select:none;-webkit-user-select:none}
+body{touch-action:none;overflow:hidden;width:100%;height:100%;background:#87ceeb;color:#cdd6f4}
+canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:8px;flex-wrap:wrap;z-index:10;pointer-events:none}
+.hud-box{background:rgba(0,0,0,.65);color:#fff;padding:8px 14px;border-radius:10px;font-size:14px;backdrop-filter:blur(4px)}
+.hud-box b{color:#ffd93d}
+#joy{position:fixed;left:20px;bottom:20px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.3);border:2px solid #fff;z-index:20;touch-action:none}
+#joy-stick{position:absolute;left:45px;top:45px;width:40px;height:40px;border-radius:50%;background:#fff}
+#btn-action{position:fixed;right:25px;bottom:25px;width:80px;height:80px;border-radius:50%;background:rgba(166,227,161,.9);border:3px solid #fff;font-size:32px;z-index:20;display:flex;align-items:center;justify-content:center;font-weight:bold;touch-action:none}
+#btn-shop{position:fixed;right:115px;bottom:25px;width:60px;height:60px;border-radius:50%;background:rgba(255,217,61,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
+#btn-pets{position:fixed;right:115px;bottom:95px;width:60px;height:60px;border-radius:50%;background:rgba(203,166,247,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
+#info{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:5px 12px;border-radius:10px;font-size:10px;z-index:10;text-align:center;max-width:90%}
 
-DATA_FILE = 'pou_data.json'
-lock = asyncio.Lock()
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:15px;touch-action:pan-y}
+.modal.on{display:flex}
+.modal-box{background:#1e1e2e;border-radius:16px;padding:18px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:2px solid #89b4fa;position:relative;touch-action:pan-y}
+.modal-box h2{color:#f9e2af;font-size:18px;margin-bottom:12px;text-align:center;position:sticky;top:-18px;background:#1e1e2e;padding:12px 0;z-index:5;border-bottom:1px solid #313244}
+.close{position:sticky;top:0;float:right;background:rgba(30,30,46,.95);color:#fff;font-size:22px;border:2px solid #f38ba8;cursor:pointer;padding:4px 12px;z-index:10;border-radius:10px;margin-bottom:10px;font-weight:bold}
+.seeds-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;touch-action:pan-y}
+.seed-card{background:#313244;border:2px solid transparent;border-radius:10px;padding:10px;text-align:center;cursor:pointer}
+.seed-card:active{transform:scale(.97)}
+.seed-card.cant{opacity:.4;cursor:not-allowed}
+.seed-card .emo{font-size:32px;display:block;margin-bottom:4px}
+.seed-card .name{color:#cdd6f4;font-weight:bold;font-size:12px;margin-bottom:4px}
+.seed-card .info{color:#6c7086;font-size:10px;margin-bottom:4px}
+.seed-card .price{color:#f9e2af;font-size:12px;font-weight:bold}
+.inv{background:#313244;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;min-height:40px}
+.inv-item{background:#45475a;padding:6px 10px;border-radius:8px;font-size:12px;color:#fff;cursor:pointer;border:2px solid transparent}
+.inv-item.sel{border-color:#f9e2af;background:#585b70}
+.inv-empty{color:#6c7086;font-size:12px;padding:4px}
+.action-buttons{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+.action-buttons button{padding:14px;background:linear-gradient(135deg,#89b4fa,#5a7fc4);color:#fff;border:none;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer}
+.action-buttons button.green{background:linear-gradient(135deg,#a6e3a1,#5a9a55);color:#1e1e2e}
+.action-buttons button.red{background:linear-gradient(135deg,#f38ba8,#c25a7a)}
+.action-buttons button.gold{background:linear-gradient(135deg,#f9e2af,#e0b84a);color:#1e1e2e}
+.action-buttons button:active{transform:scale(.97)}
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:bold;border:2px solid #89b4fa;z-index:200;opacity:0;transition:.3s;pointer-events:none;max-width:90%}
+#toast.on{opacity:1}
+#toast.good{border-color:#a6e3a1;color:#a6e3a1}
+#toast.bad{border-color:#f38ba8;color:#f38ba8}
 
-ONLINE_TIMEOUT = 30
-MAX_HISTORY = 500
-ADMIN_NAME = 'POUADMINISTRATOR'
-ADMIN_PASSWORD = 'admin123'
+/* ЧАТ */
+#chat-toggle{position:fixed;left:20px;top:60px;width:50px;height:50px;border-radius:50%;background:rgba(137,180,250,.9);border:2px solid #fff;font-size:24px;z-index:25;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none}
+#chat-toggle .badge{position:absolute;top:-4px;right:-4px;background:#f38ba8;color:#fff;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;min-width:18px;text-align:center;display:none}
+#chat-toggle .badge.on{display:block}
+#chat-panel{position:fixed;left:10px;top:120px;width:290px;max-width:92vw;height:320px;background:rgba(24,24,37,.95);border:2px solid #89b4fa;border-radius:12px;z-index:30;display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(6px)}
+#chat-panel.on{display:flex}
+#chat-header{background:#313244;color:#89b4fa;font-weight:bold;padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #45475a}
+#chat-header span:last-child{cursor:pointer;font-size:18px;color:#f38ba8}
+#chat-messages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;font-size:12px;line-height:1.4;touch-action:pan-y}
+#chat-messages .msg{margin-bottom:5px;word-wrap:break-word}
+#chat-messages .msg .name{font-weight:bold;margin-right:4px}
+#chat-messages .msg .time{color:#6c7086;font-size:10px;margin-right:4px}
+#chat-messages .msg.sys{color:#6c7086;font-style:italic;text-align:center;font-size:11px;margin:6px 0}
+#chat-input-row{display:flex;border-top:1px solid #45475a}
+#chat-input{flex:1;background:#1e1e2e;color:#cdd6f4;border:none;outline:none;padding:10px;font-size:13px}
+#chat-input-row button{background:#89b4fa;color:#1e1e2e;border:none;padding:10px 14px;font-weight:bold;font-size:16px;cursor:pointer}
 
-# ============ ХРАНИЛИЩЕ ============
-messages = []
-users_online = {}
-verified_users = set()
-banned_users = set()
-muted_users = {}
-user_info = {}
-registered_users = {}
-active_calls = {}
-sessions = {}
+#login{position:fixed;inset:0;background:linear-gradient(135deg,#1a2e1a,#0a0a14);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;z-index:300;text-align:center;overflow-y:auto}
+#login h1{color:#a6e3a1;font-size:38px;letter-spacing:3px;text-shadow:0 0 30px rgba(166,227,161,.7);margin-bottom:8px}
+#login .sub{color:#6c7086;font-size:12px;letter-spacing:2px;margin-bottom:25px}
+#login input{width:280px;max-width:90%;padding:14px;font-size:16px;border:2px solid #89b4fa;border-radius:12px;background:#1e1e2e;color:#fff;outline:none;text-align:center}
+#login input:focus{border-color:#a6e3a1}
+#login button{margin-top:15px;padding:14px 40px;background:linear-gradient(135deg,#a6e3a1,#5a9a55);color:#1e1e2e;border:none;border-radius:14px;font-weight:bold;font-size:16px;letter-spacing:1px;cursor:pointer}
+#login .hint{color:#6c7086;font-size:11px;margin-top:15px;line-height:1.6}
+#login .skin-row{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;justify-content:center}
+#login .skin-opt{width:56px;height:56px;background:#313244;border:3px solid transparent;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer}
+#login .skin-opt.sel{border-color:#f9e2af}
+</style>
+</head>
+<body>
 
-# === POUS GARDEN ONLINE ===
-garden_players = {}
-GARDEN_TIMEOUT = 10
+<div id="login">
+  <h1>🌱 POUS GARDEN 3D</h1>
+  <div class="sub">◆ ОНЛАЙН-ФЕРМА ◆</div>
+  <input id="name-input" placeholder="Введи своё имя" maxlength="15">
+  <div style="color:#6c7086;font-size:11px;margin-top:15px">Выбери персонажа:</div>
+  <div class="skin-row" id="skin-row"></div>
+  <button onclick="startGame()">▶ ВОЙТИ В САД</button>
+  <div class="hint">Джойстик — ходьба | Свайп — камера | 🌱 — действие</div>
+</div>
 
-# ============ 21 ПОДАРОК ============
-GIFTS = [
-    {'id': 'coffee',    'name': 'Кофе',       'emoji': '☕',  'price': 5},
-    {'id': 'burger',    'name': 'Бургер',     'emoji': '🍔',  'price': 10},
-    {'id': 'ball',      'name': 'Мяч',        'emoji': '⚽',  'price': 10},
-    {'id': 'pizza',     'name': 'Пицца',      'emoji': '🍕',  'price': 15},
-    {'id': 'dice',      'name': 'Кубик',      'emoji': '🎲',  'price': 15},
-    {'id': 'rose',      'name': 'Роза',       'emoji': '🌹',  'price': 20},
-    {'id': 'sushi',     'name': 'Суши',       'emoji': '🍣',  'price': 25},
-    {'id': 'tulip',     'name': 'Тюльпан',    'emoji': '🌷',  'price': 25},
-    {'id': 'cake',      'name': 'Торт',       'emoji': '🎂',  'price': 30},
-    {'id': 'sunflower', 'name': 'Подсолнух',  'emoji': '🌻',  'price': 35},
-    {'id': 'bouquet',   'name': 'Букет',      'emoji': '💐',  'price': 40},
-    {'id': 'teddy',     'name': 'Мишка',      'emoji': '🧸',  'price': 50},
-    {'id': 'robot',     'name': 'Робот',      'emoji': '🤖',  'price': 80},
-    {'id': 'penguin',   'name': 'Пингвин',    'emoji': '🐧',  'price': 100},
-    {'id': 'rocket',    'name': 'Ракета',     'emoji': '🚀',  'price': 300},
-    {'id': 'bomb',      'name': 'Пушка',      'emoji': '💣',  'price': 500},
-    {'id': 'space',     'name': 'Космос',     'emoji': '🌌',  'price': 700},
-    {'id': 'ring',      'name': 'Кольцо',     'emoji': '💍',  'price': 800},
-    {'id': 'crown',     'name': 'Корона',     'emoji': '👑',  'price': 1500},
-    {'id': 'diamond',   'name': 'Алмаз',      'emoji': '💎',  'price': 3000},
-    {'id': 'pou',       'name': 'САМ ПУ',     'emoji': '🐧',  'price': 10000}
-]
+<div id="hud">
+  <div class="hud-box">💰 <b id="coins">500</b></div>
+  <div class="hud-box">👥 <span id="online-count">1</span></div>
+  <div class="hud-box" id="pets-box" style="display:none">🐾 <span id="pet-name">—</span></div>
+</div>
 
-# ============ СОХРАНЕНИЕ ============
-def save_data():
-    try:
-        data = {
-            'messages': messages[-MAX_HISTORY:],
-            'verified_users': list(verified_users),
-            'banned_users': list(banned_users),
-            'muted_users': {u: t for u, t in muted_users.items()},
-            'user_info': user_info,
-            'registered_users': registered_users
+<div id="joy"><div id="joy-stick"></div></div>
+<button id="btn-shop">🏪</button>
+<button id="btn-pets">🐾</button>
+<button id="btn-action">🌱</button>
+<div id="info">Джойстик — ходьба | Свайп — камера | 🌱 — действие</div>
+<div id="toast"></div>
+
+<!-- ЧАТ -->
+<div id="chat-toggle" onclick="toggleChat()">💬<span class="badge" id="chat-badge">0</span></div>
+<div id="chat-panel">
+  <div id="chat-header">
+    <span>💬 ЧАТ САДА</span>
+    <span id="chat-close" onclick="toggleChat()">✕</span>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-row">
+    <input id="chat-input" placeholder="Сообщение..." maxlength="200">
+    <button onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<div id="shop-modal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeModal('shop-modal')">✕</button>
+    <h2>🏪 МАГАЗИН СЕМЯН</h2>
+    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Все семена открыты</div>
+    <div class="seeds-grid" id="seeds-grid"></div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<div id="pets-modal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeModal('pets-modal')">✕</button>
+    <h2>🐾 ПИТОМЦЫ</h2>
+    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Бонус к продаже</div>
+    <div class="seeds-grid" id="pets-grid"></div>
+  </div>
+</div>
+
+<div id="action-modal" class="modal">
+  <div class="modal-box">
+    <button class="close" onclick="closeModal('action-modal')">✕</button>
+    <h2 id="action-title">Грядка</h2>
+    <div id="action-info" style="text-align:center;color:#cdd6f4;margin-bottom:10px;font-size:13px"></div>
+    <div class="inv" id="inv-list"></div>
+    <div class="action-buttons" id="action-buttons"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ============ 28 СЕМЯН ============
+const SEEDS = [
+  {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a},
+  {id:'potato', name:'Картошка', emoji:'🥔', price:15, sell:21, time:18, color:0xc8a165},
+  {id:'onion', name:'Лук', emoji:'🧅', price:20, sell:28, time:20, color:0xd4a373},
+  {id:'tomato', name:'Помидор', emoji:'🍅', price:30, sell:42, time:25, color:0xff3a3a},
+  {id:'cucumber', name:'Огурец', emoji:'🥒', price:40, sell:56, time:28, color:0x4a8a3a},
+  {id:'lettuce', name:'Салат', emoji:'🥬', price:50, sell:71, time:30, color:0x7fbf5f},
+  {id:'pepper', name:'Перец', emoji:'🌶️', price:65, sell:93, time:32, color:0xd63031},
+  {id:'corn', name:'Кукуруза', emoji:'🌽', price:80, sell:115, time:35, color:0xffd700},
+  {id:'eggplant', name:'Баклажан', emoji:'🍆', price:100, sell:145, time:38, color:0x6a3d9a},
+  {id:'broccoli', name:'Брокколи', emoji:'🥦', price:130, sell:190, time:42, color:0x2e8b2e},
+  {id:'garlic', name:'Чеснок', emoji:'🧄', price:170, sell:250, time:45, color:0xf0e8d8},
+  {id:'strawberry', name:'Клубника', emoji:'🍓', price:220, sell:325, time:48, color:0xff4d5e},
+  {id:'grape', name:'Виноград', emoji:'🍇', price:280, sell:415, time:52, color:0x9b59b6},
+  {id:'watermelon', name:'Арбуз', emoji:'🍉', price:360, sell:540, time:55, color:0x2ecc40},
+  {id:'pineapple', name:'Ананас', emoji:'🍍', price:450, sell:680, time:58, color:0xf1c40f},
+  {id:'mushroom', name:'Гриб', emoji:'🍄', price:550, sell:840, time:60, color:0xd94a4a},
+  {id:'coconut', name:'Кокос', emoji:'🥥', price:680, sell:1040, time:63, color:0x8b5a2b},
+  {id:'avocado', name:'Авокадо', emoji:'🥑', price:820, sell:1260, time:66, color:0x5f8a3a},
+  {id:'sunflower', name:'Подсолнух', emoji:'🌻', price:1000, sell:1550, time:70, color:0xffd93d},
+  {id:'rose', name:'Роза', emoji:'🌹', price:1250, sell:1950, time:74, color:0xe0115f},
+  {id:'tulip', name:'Тюльпан', emoji:'🌷', price:1500, sell:2350, time:78, color:0xff69b4},
+  {id:'bamboo', name:'Бамбук', emoji:'🎋', price:1800, sell:2850, time:82, color:0x50c878},
+  {id:'cactus', name:'Кактус', emoji:'🌵', price:2200, sell:3500, time:86, color:0x3a8a3a},
+  {id:'palm', name:'Пальма', emoji:'🌴', price:2700, sell:4300, time:90, color:0x2e8b2e},
+  {id:'cherry', name:'Сакура', emoji:'🌸', price:3300, sell:5300, time:95, color:0xffb7c5},
+  {id:'crystal', name:'Кристалл', emoji:'💎', price:5000, sell:8500, time:110, color:0x89dceb},
+  {id:'star', name:'Звезда', emoji:'⭐', price:7500, sell:13000, time:130, color:0xffd700},
+  {id:'cosmic', name:'Космос', emoji:'🌌', price:12000, sell:22000, time:150, color:0x9370db}
+];
+
+const PETS = [
+  {id:'rabbit', name:'Кролик', emoji:'🐰', price:200, bonus:0.05},
+  {id:'cat', name:'Кот', emoji:'🐱', price:500, bonus:0.10},
+  {id:'dog', name:'Пёс', emoji:'🐶', price:1000, bonus:0.15},
+  {id:'fox', name:'Лис', emoji:'🦊', price:2500, bonus:0.25},
+  {id:'panda', name:'Панда', emoji:'🐼', price:5000, bonus:0.35},
+  {id:'dragon', name:'Дракон', emoji:'🐲', price:15000, bonus:0.50}
+];
+
+const SKINS_LIST = [
+  {emoji:'🐧', color:0x1e1e2e, belly:0xffffff},
+  {emoji:'🐻', color:0x8b5a2b, belly:0xd4a373},
+  {emoji:'🐰', color:0xffffff, belly:0xffb7c5},
+  {emoji:'🐱', color:0xffa500, belly:0xffffff},
+  {emoji:'🐸', color:0x4a8a3a, belly:0xa6e3a1},
+  {emoji:'🦊', color:0xff7f2a, belly:0xffffff}
+];
+
+function getSeed(id) { return SEEDS.find(s => s.id === id); }
+function getPet(id) { return PETS.find(p => p.id === id); }
+
+// ============ СОХРАНЕНИЕ ============
+const KEY = 'pous_garden_v3';
+let SAVE = {coins: 500, inventory: {}, plants: {}, pets: [], pet: null, skin: 0};
+try {
+  const s = localStorage.getItem(KEY);
+  if (s) SAVE = Object.assign(SAVE, JSON.parse(s));
+} catch(e) {}
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e) {}
+}
+
+function toast(text, type) {
+  const el = document.getElementById('toast');
+  el.textContent = text;
+  el.className = 'on ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 2200);
+}
+
+// ============ СКИНЫ ============
+let selectedSkin = 0;
+const skinRow = document.getElementById('skin-row');
+SKINS_LIST.forEach((s, i) => {
+  const d = document.createElement('div');
+  d.className = 'skin-opt' + (i === 0 ? ' sel' : '');
+  d.textContent = s.emoji;
+  d.onclick = () => {
+    selectedSkin = i;
+    document.querySelectorAll('.skin-opt').forEach(x => x.classList.remove('sel'));
+    d.classList.add('sel');
+  };
+  skinRow.appendChild(d);
+});
+
+// ============ 3D ============
+let scene, camera, renderer;
+let otherPlayersMeshes = {};
+let plots = [];
+
+function init3D() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87ceeb);
+  scene.fog = new THREE.Fog(0x87ceeb, 20, 60);
+
+  camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 200);
+  camera.rotation.order = 'YXZ';
+
+  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  document.body.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  const sun = new THREE.DirectionalLight(0xfff5d1, 0.9);
+  sun.position.set(10, 20, 10);
+  scene.add(sun);
+
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(60, 60),
+    new THREE.MeshLambertMaterial({color: 0x5a9e3a})
+  );
+  ground.rotation.x = -Math.PI / 2;
+  scene.add(ground);
+
+  const PS = 1.4, GAP = 0.2, GRID = 5;
+  const total = GRID * PS + (GRID - 1) * GAP;
+  const start = -total / 2 + PS / 2;
+  for (let i = 0; i < GRID; i++) {
+    for (let j = 0; j < GRID; j++) {
+      const x = start + i * (PS + GAP);
+      const z = start + j * (PS + GAP);
+      const plot = new THREE.Mesh(
+        new THREE.BoxGeometry(PS, 0.2, PS),
+        new THREE.MeshLambertMaterial({color: 0x6b4423})
+      );
+      plot.position.set(x, 0.1, z);
+      scene.add(plot);
+      plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id: i * GRID + j, plantedAt: 0});
+    }
+  }
+
+  for (let i = 0; i < 12; i++) {
+    const tx = (Math.random() - 0.5) * 45;
+    const tz = (Math.random() - 0.5) * 45;
+    if (Math.abs(tx) < 8 && Math.abs(tz) < 8) continue;
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.2, 0.3, 2, 6),
+      new THREE.MeshLambertMaterial({color: 0x6b4226})
+    );
+    trunk.position.set(tx, 1, tz);
+    scene.add(trunk);
+    const leaves = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 8, 8),
+      new THREE.MeshLambertMaterial({color: 0x2e8b2e})
+    );
+    leaves.position.set(tx, 2.7, tz);
+    scene.add(leaves);
+  }
+
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+}
+
+function createCharacter(skinIdx) {
+  const skin = SKINS_LIST[skinIdx] || SKINS_LIST[0];
+  const group = new THREE.Group();
+  const bodyMat = new THREE.MeshLambertMaterial({color: skin.color});
+  const bellyMat = new THREE.MeshLambertMaterial({color: skin.belly});
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), bodyMat);
+  body.position.y = 0.55; group.add(body);
+
+  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.05), bellyMat);
+  belly.position.set(0, 0.5, 0.21); group.add(belly);
+
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.4), bodyMat);
+  head.position.y = 1.1; group.add(head);
+
+  const eyeMat = new THREE.MeshBasicMaterial({color: 0x000000});
+  const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
+  eyeL.position.set(-0.1, 1.15, 0.21); group.add(eyeL);
+  const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
+  eyeR.position.set(0.1, 1.15, 0.21); group.add(eyeR);
+
+  const beak = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.15), new THREE.MeshLambertMaterial({color: 0xffa500}));
+  beak.position.set(0, 1.0, 0.22); group.add(beak);
+
+  const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
+  armL.position.set(-0.35, 0.6, 0); group.add(armL);
+  const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
+  armR.position.set(0.35, 0.6, 0); group.add(armR);
+
+  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
+  legL.position.set(-0.12, 0.2, 0); group.add(legL);
+  const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
+  legR.position.set(0.12, 0.2, 0); group.add(legR);
+
+  return group;
+}
+
+function createPlantMesh(seed, x, z) {
+  const group = new THREE.Group();
+  const mat = new THREE.MeshLambertMaterial({color: seed.color});
+  const stem = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
+  switch(seed.id) {
+    case 'carrot': case 'cucumber': case 'eggplant':
+      group.add(box(0.15, 0.5, 0.15, mat, 0, 0.3, 0)); break;
+    case 'tomato': case 'pepper': case 'strawberry':
+      group.add(box(0.08, 0.6, 0.08, stem, 0, 0.3, 0));
+      group.add(sph(0.2, mat, 0, 0.7, 0)); break;
+    case 'corn': case 'bamboo': case 'palm':
+      group.add(box(0.12, 1.2, 0.12, mat, 0, 0.6, 0)); break;
+    case 'potato': case 'onion': case 'garlic': case 'coconut':
+      group.add(box(0.05, 0.5, 0.05, stem, 0, 0.25, 0));
+      group.add(sph(0.25, mat, 0, 0.55, 0)); break;
+    case 'lettuce': case 'broccoli':
+      group.add(sph(0.35, mat, 0, 0.35, 0)); break;
+    case 'watermelon': case 'pineapple':
+      group.add(sph(0.4, mat, 0, 0.4, 0)); break;
+    case 'mushroom':
+      group.add(box(0.12, 0.4, 0.12, new THREE.MeshLambertMaterial({color:0xf5e6d3}), 0, 0.2, 0));
+      group.add(sph(0.3, mat, 0, 0.55, 0)); break;
+    case 'avocado': case 'sunflower': case 'rose': case 'tulip': case 'cherry':
+      group.add(box(0.08, 0.8, 0.08, stem, 0, 0.4, 0));
+      group.add(sph(0.28, mat, 0, 0.9, 0)); break;
+    case 'cactus':
+      group.add(box(0.3, 0.9, 0.3, mat, 0, 0.45, 0));
+      group.add(box(0.2, 0.2, 0.2, mat, 0.25, 0.6, 0)); break;
+    case 'crystal': case 'star': case 'cosmic':
+      const oct = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), mat);
+      oct.position.y = 0.5;
+      group.add(oct); break;
+  }
+  group.position.set(x, 0.2, z);
+  return group;
+}
+
+function box(w, h, d, mat, x, y, z) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y, z); return m;
+}
+function sph(r, mat, x, y, z) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 10), mat);
+  m.position.set(x, y, z); return m;
+}
+
+// ============ ИГРОК ============
+let yaw = 0, pitch = 0;
+let joyX = 0, joyY = 0;
+let joyActive = false;
+let playerX = 0, playerZ = 8;
+let myName = '';
+let onlineOthers = [];
+let updateTimer = 0;
+
+// ============ ДЖОЙСТИК ============
+const joy = document.getElementById('joy');
+const stick = document.getElementById('joy-stick');
+let joyCenter = {x: 0, y: 0};
+
+joy.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const r = joy.getBoundingClientRect();
+  joyCenter = {x: r.left + r.width/2, y: r.top + r.height/2};
+  joyActive = true;
+  moveJoy(e.touches[0]);
+});
+joy.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches[0]) moveJoy(e.touches[0]);
+});
+joy.addEventListener('touchend', e => {
+  e.preventDefault();
+  joyActive = false; joyX = joyY = 0;
+  stick.style.transform = 'translate(0, 0)';
+});
+
+function moveJoy(t) {
+  let dx = t.clientX - joyCenter.x;
+  let dy = t.clientY - joyCenter.y;
+  const d = Math.sqrt(dx*dx + dy*dy);
+  const max = 50;
+  if (d > max) { dx = dx/d*max; dy = dy/d*max; }
+  stick.style.transform = `translate(${dx}px, ${dy}px)`;
+  joyX = dx / max; joyY = dy / max;
+}
+
+// ============ КАМЕРА ============
+let lookActive = false;
+let lookLast = {x: 0, y: 0};
+
+function setupCameraControls() {
+  const canvas = renderer.domElement;
+  canvas.addEventListener('touchstart', e => {
+    if (e.target === canvas) {
+      lookActive = true;
+      lookLast = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+    }
+  });
+  canvas.addEventListener('touchmove', e => {
+    if (lookActive && e.touches[0]) {
+      yaw -= (e.touches[0].clientX - lookLast.x) * 0.008;
+      pitch -= (e.touches[0].clientY - lookLast.y) * 0.008;
+      pitch = Math.max(-1.4, Math.min(1.4, pitch));
+      lookLast = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+    }
+  });
+  canvas.addEventListener('touchend', () => { lookActive = false; });
+
+  canvas.addEventListener('mousedown', e => {
+    lookActive = true; lookLast = {x: e.clientX, y: e.clientY};
+  });
+  canvas.addEventListener('mousemove', e => {
+    if (lookActive) {
+      yaw -= (e.clientX - lookLast.x) * 0.008;
+      pitch -= (e.clientY - lookLast.y) * 0.008;
+      pitch = Math.max(-1.4, Math.min(1.4, pitch));
+      lookLast = {x: e.clientX, y: e.clientY};
+    }
+  });
+  canvas.addEventListener('mouseup', () => { lookActive = false; });
+}
+
+const keys = {};
+document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// ============ МАГАЗИН ============
+document.getElementById('btn-shop').onclick = openShop;
+
+function openShop() {
+  const grid = document.getElementById('seeds-grid');
+  grid.innerHTML = '';
+  SEEDS.forEach(seed => {
+    const can = SAVE.coins >= seed.price;
+    const card = document.createElement('div');
+    card.className = 'seed-card' + (can ? '' : ' cant');
+    card.innerHTML = `
+      <span class="emo">${seed.emoji}</span>
+      <div class="name">${seed.name}</div>
+      <div class="info">⏱ ${seed.time}с → +${seed.sell}💰</div>
+      <div class="price">💰 ${seed.price}</div>
+    `;
+    if (can) card.onclick = () => buySeed(seed);
+    grid.appendChild(card);
+  });
+  document.getElementById('shop-modal').classList.add('on');
+}
+
+function buySeed(seed) {
+  if (SAVE.coins < seed.price) return;
+  SAVE.coins -= seed.price;
+  SAVE.inventory[seed.id] = (SAVE.inventory[seed.id] || 0) + 1;
+  save(); updateHud();
+  openShop();
+  toast('Куплено: ' + seed.emoji + ' ' + seed.name, 'good');
+}
+
+// ============ ПИТОМЦЫ ============
+document.getElementById('btn-pets').onclick = openPets;
+
+function openPets() {
+  const grid = document.getElementById('pets-grid');
+  grid.innerHTML = '';
+  PETS.forEach(pet => {
+    const owned = SAVE.pets.includes(pet.id);
+    const can = SAVE.coins >= pet.price;
+    const card = document.createElement('div');
+    card.className = 'seed-card' + ((owned || can) ? '' : ' cant');
+    card.innerHTML = `
+      <span class="emo">${pet.emoji}</span>
+      <div class="name">${pet.name}</div>
+      <div class="info">+${Math.round(pet.bonus*100)}% к продаже</div>
+      <div class="price">${owned ? (SAVE.pet === pet.id ? '✅ ОДЕТ' : 'НАДЕТЬ') : '💰 ' + pet.price}</div>
+    `;
+    if (owned || can) {
+      card.onclick = () => {
+        if (!owned) {
+          if (SAVE.coins < pet.price) return;
+          SAVE.coins -= pet.price;
+          SAVE.pets.push(pet.id);
+          toast('Куплен: ' + pet.emoji + ' ' + pet.name, 'good');
         }
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f'[POU] Ошибка сохранения: {e}')
-
-def load_data():
-    global messages, verified_users, banned_users, muted_users, user_info, registered_users
-    if not os.path.exists(DATA_FILE):
-        print('[POU] Старт с нуля')
-        return
-    try:
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        messages = data.get('messages', [])
-        verified_users = set(data.get('verified_users', []))
-        banned_users = set(data.get('banned_users', []))
-        muted_users = data.get('muted_users', {})
-        user_info = data.get('user_info', {})
-        registered_users = data.get('registered_users', {})
-        banned_users.discard(ADMIN_NAME)
-        for username in list(registered_users.keys()):
-            ensure_user_data(username)
-        print(f'[POU] Загружено: {len(registered_users)} юзеров')
-    except Exception as e:
-        print(f'[POU] Ошибка загрузки: {e}')
-
-def hash_password(password, salt=None):
-    if salt is None:
-        salt = os.urandom(16).hex()
-    h = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 100000)
-    return h.hex(), salt
-
-def create_session_token(username):
-    token = os.urandom(32).hex()
-    sessions[token] = {'username': username, 'time': time.time()}
-    return token
-
-def check_session_token(token):
-    if not token:
-        return None
-    sess = sessions.get(token)
-    if not sess:
-        return None
-    if time.time() - sess['time'] > 30 * 86400:
-        del sessions[token]
-        return None
-    return sess['username']
-
-# ============ ИГРОВЫЕ ДАННЫЕ ============
-def ensure_user_data(username):
-    if username not in registered_users:
-        return
-    u = registered_users[username]
-    if 'pours' not in u:
-        u['pours'] = 9999999 if username == ADMIN_NAME else 0
-    if 'owned_skins' not in u:
-        u['owned_skins'] = ['default']
-    if 'equipped_skin' not in u:
-        u['equipped_skin'] = 'default'
-    if 'gifts_received' not in u:
-        u['gifts_received'] = []
-    if 'gifts_sent' not in u:
-        u['gifts_sent'] = []
-    if 'ttt_wins' not in u:
-        u['ttt_wins'] = 0
-    if 'ttt_losses' not in u:
-        u['ttt_losses'] = 0
-    if 'ttt_draws' not in u:
-        u['ttt_draws'] = 0
-    if 'last_free_pours' not in u:
-        u['last_free_pours'] = 0
-
-def ensure_admin_exists():
-    if ADMIN_NAME not in registered_users:
-        registered_users[ADMIN_NAME] = {
-            'password_hash': '', 'salt': '',
-            'created': time.time(),
-            'verified': True, 'banned': False,
-            'pours': 9999999,
-            'owned_skins': ['default', 'gold', 'ruby', 'emerald', 'sapphire',
-                            'neon', 'fire', 'ice', 'rainbow', 'cristal'],
-            'equipped_skin': 'gold',
-            'gifts_received': [], 'gifts_sent': [],
-            'ttt_wins': 0, 'ttt_losses': 0, 'ttt_draws': 0,
-            'last_free_pours': 0
-        }
-    else:
-        registered_users[ADMIN_NAME]['pours'] = 9999999
-        registered_users[ADMIN_NAME]['verified'] = True
-        registered_users[ADMIN_NAME]['banned'] = False
-
-def get_user_game_data(username):
-    if username == ADMIN_NAME:
-        ensure_admin_exists()
-    if username not in registered_users:
-        return None
-    ensure_user_data(username)
-    return registered_users[username]
-
-# ============ УТИЛИТЫ ============
-def is_muted(user):
-    if user == ADMIN_NAME:
-        return False
-    until = muted_users.get(user)
-    if until is None:
-        return False
-    if until == 0:
-        return True
-    if time.time() > until:
-        del muted_users[user]
-        save_data()
-        return False
-    return True
-
-def mute_info(user):
-    until = muted_users.get(user)
-    if until is None:
-        return None
-    if until == 0:
-        return 'навсегда'
-    left = int(until - time.time())
-    if left < 60:
-        return f'{left} сек'
-    if left < 3600:
-        return f'{left // 60} мин'
-    return f'{left // 3600} ч'
-
-def time_ago(ts):
-    if not ts:
-        return 'никогда'
-    diff = int(time.time() - ts)
-    if diff < 60:
-        return f'{diff} сек назад'
-    if diff < 3600:
-        return f'{diff // 60} мин назад'
-    if diff < 86400:
-        return f'{diff // 3600} ч назад'
-    return f'{diff // 86400} дн назад'
-
-def fmt_time(ts):
-    if not ts:
-        return '—'
-    return datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M')
-
-def get_client_ip(request):
-    for h in ('X-Forwarded-For', 'X-Real-IP', 'CF-Connecting-IP'):
-        val = request.headers.get(h)
-        if val:
-            return val.split(',')[0].strip()
-    peer = request.transport.get_extra_info('peername')
-    if peer:
-        return peer[0]
-    return 'неизвестен'
-
-def register_user(request, name):
-    if not name:
-        return
-    ip = get_client_ip(request)
-    ua = request.headers.get('User-Agent', 'неизвестно')[:200]
-    now = time.time()
-    if name not in user_info:
-        user_info[name] = {
-            'first_seen': now, 'last_seen': now,
-            'msg_count': 0, 'ip': ip, 'ua': ua, 'sessions': 1
-        }
-    else:
-        info = user_info[name]
-        if now - info['last_seen'] > ONLINE_TIMEOUT:
-            info['sessions'] += 1
-        info['last_seen'] = now
-        info['ip'] = ip
-        info['ua'] = ua
-
-# ============ РОУТЫ HTML ============
-async def index(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'index.html')
-    return web.FileResponse(path)
-
-async def gamestrel(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'gamestrel.html')
-    return web.FileResponse(path)
-
-async def tictactoe(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'tictactoe.html')
-    return web.FileResponse(path)
-
-async def poublox(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'poublox.html')
-    return web.FileResponse(path)
-
-async def garden(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'garden.html')
-    return web.FileResponse(path)
-
-# ============ АВТОРИЗАЦИЯ ============
-async def auth(request):
-    data = await request.json()
-    action = data.get('action')
-    username = (data.get('username') or '').strip()
-    password = data.get('password') or ''
-    if not username or not password:
-        return web.json_response({'ok': False, 'error': 'Заполните все поля'})
-    if len(username) > 30 or len(password) > 100:
-        return web.json_response({'ok': False, 'error': 'Слишком длинные данные'})
-
-    async with lock:
-        if action == 'register':
-            if username == ADMIN_NAME:
-                return web.json_response({'ok': False, 'error': 'Имя зарезервировано'})
-            if username in registered_users:
-                return web.json_response({'ok': False, 'error': 'Имя уже занято'})
-            pw_hash, salt = hash_password(password)
-            registered_users[username] = {
-                'password_hash': pw_hash, 'salt': salt,
-                'created': time.time(),
-                'verified': False, 'banned': False,
-                'pours': 0,
-                'owned_skins': ['default'],
-                'equipped_skin': 'default',
-                'gifts_received': [], 'gifts_sent': [],
-                'ttt_wins': 0, 'ttt_losses': 0, 'ttt_draws': 0,
-                'last_free_pours': 0
-            }
-            save_data()
-            return web.json_response({'ok': True, 'message': 'Регистрация успешна'})
-
-        elif action == 'login':
-            if username == ADMIN_NAME:
-                if password == ADMIN_PASSWORD:
-                    ensure_admin_exists()
-                    token = create_session_token(ADMIN_NAME)
-                    save_data()
-                    return web.json_response({'ok': True, 'is_admin': True, 'token': token})
-                return web.json_response({'ok': False, 'error': 'Неверный пароль админа'})
-
-            if username not in registered_users:
-                return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
-            u = registered_users[username]
-            if u.get('banned') or username in banned_users:
-                return web.json_response({'ok': False, 'error': 'Вы забанены'})
-            pw_hash, _ = hash_password(password, u['salt'])
-            if pw_hash != u['password_hash']:
-                return web.json_response({'ok': False, 'error': 'Неверный пароль'})
-            token = create_session_token(username)
-            return web.json_response({'ok': True, 'token': token})
-
-        return web.json_response({'ok': False, 'error': 'Неизвестное действие'})
-
-async def check_token(request):
-    data = await request.json()
-    token = (data.get('token') or '').strip()
-    if not token:
-        return web.json_response({'ok': False})
-    username = check_session_token(token)
-    if username:
-        return web.json_response({'ok': True, 'username': username, 'is_admin': username == ADMIN_NAME})
-    return web.json_response({'ok': False})
-
-async def logout_session(request):
-    data = await request.json()
-    token = (data.get('token') or '').strip()
-    if token in sessions:
-        del sessions[token]
-    return web.json_response({'ok': True})
-
-# ============ СООБЩЕНИЯ ============
-async def send_message(request):
-    data = await request.json()
-    sender = data.get('from', 'Guest')
-    text = data.get('text', '')
-    target = data.get('to')
-
-    async with lock:
-        register_user(request, sender)
-        if sender in banned_users and sender != ADMIN_NAME:
-            return web.json_response({'ok': False, 'error': 'Вы забанены'})
-
-        if sender == ADMIN_NAME and text.startswith('/'):
-            reply = await handle_admin_command(text, sender)
-            if reply:
-                return web.json_response({'ok': True, 'system_reply': reply})
-
-        if is_muted(sender):
-            return web.json_response({'ok': False, 'error': f'Вы в муте ({mute_info(sender)})'})
-
-        msg = {
-            'from': sender, 'text': text,
-            'time': datetime.now().strftime('%H:%M:%S'),
-            'timestamp': time.time(), 'to': target,
-            'verified': sender in verified_users
-        }
-        messages.append(msg)
-        if len(messages) > MAX_HISTORY:
-            messages[:] = messages[-MAX_HISTORY:]
-        if sender in user_info:
-            user_info[sender]['msg_count'] += 1
-        users_online[sender] = time.time()
-        save_data()
-
-    return web.json_response({'ok': True})
-
-async def handle_admin_command(text, admin):
-    parts = text.strip().split()
-    cmd = parts[0].lower()
-
-    if cmd == '/help':
-        return ('👑 КОМАНДЫ:\n'
-                '/ban <имя> | /unban <имя>\n'
-                '/mute <имя> [сек] | /unmute <имя>\n'
-                '/kick <имя>\n'
-                '/verify <имя> | /unverify <имя>\n'
-                '/verified | /banned | /muted | /users\n'
-                '/clearchat [имя]\n'
-                '/info <имя>\n'
-                '/givepours <имя> <сумма>')
-
-    if cmd == '/ban' and len(parts) >= 2:
-        u = parts[1]
-        if u == ADMIN_NAME:
-            return '❌ Нельзя забанить админа'
-        banned_users.add(u)
-        if u in registered_users:
-            registered_users[u]['banned'] = True
-        users_online.pop(u, None)
-        save_data()
-        return f'🚫 {u} забанен'
-
-    if cmd == '/unban' and len(parts) >= 2:
-        banned_users.discard(parts[1])
-        if parts[1] in registered_users:
-            registered_users[parts[1]]['banned'] = False
-        save_data()
-        return f'✅ {parts[1]} разбанен'
-
-    if cmd == '/banned':
-        return '🚫 Забанены: ' + (', '.join(sorted(banned_users)) if banned_users else 'пусто')
-
-    if cmd == '/mute' and len(parts) >= 2:
-        u = parts[1]
-        if u == ADMIN_NAME:
-            return '❌ Нельзя замутить админа'
-        dur = 0
-        if len(parts) >= 3:
-            try:
-                dur = int(parts[2])
-            except:
-                return '❌ Секунды числом'
-        muted_users[u] = 0 if dur == 0 else time.time() + dur
-        save_data()
-        return f'🔇 {u} в муте' + ('' if dur else ' навсегда')
-
-    if cmd == '/unmute' and len(parts) >= 2:
-        muted_users.pop(parts[1], None)
-        save_data()
-        return f'🔊 {parts[1]} размучен'
-
-    if cmd == '/muted':
-        if muted_users:
-            return '🔇 В муте: ' + ', '.join(f'{u}({mute_info(u)})' for u in sorted(muted_users))
-        return 'Список пуст'
-
-    if cmd == '/kick' and len(parts) >= 2:
-        u = parts[1]
-        if u == ADMIN_NAME:
-            return '❌ Нельзя'
-        if u in users_online:
-            users_online.pop(u, None)
-            return f'👢 {u} кикнут'
-        return f'⚠ {u} не в сети'
-
-    if cmd == '/verify' and len(parts) >= 2:
-        verified_users.add(parts[1])
-        if parts[1] in registered_users:
-            registered_users[parts[1]]['verified'] = True
-        save_data()
-        return f'✅ {parts[1]} верифицирован'
-
-    if cmd == '/unverify' and len(parts) >= 2:
-        verified_users.discard(parts[1])
-        if parts[1] in registered_users:
-            registered_users[parts[1]]['verified'] = False
-        save_data()
-        return f'❌ {parts[1]} лишён'
-
-    if cmd == '/verified':
-        return '✅ Верифицированы: ' + (', '.join(sorted(verified_users)) if verified_users else 'пусто')
-
-    if cmd == '/clearchat':
-        if len(parts) >= 2:
-            u = parts[1]
-            before = len(messages)
-            messages[:] = [m for m in messages if not (
-                (m.get('from') == u and m.get('to')) or (m.get('to') == u)
-            )]
-            save_data()
-            return f'🗑 Удалено {before - len(messages)} сообщений с {u}'
-        count = len(messages)
-        messages.clear()
-        save_data()
-        return f'🗑 Очищено {count} сообщений'
-
-    if cmd == '/users':
-        return '👥 Онлайн: ' + (', '.join(sorted(users_online)) if users_online else 'никого')
-
-    if cmd == '/givepours' and len(parts) >= 3:
-        u = parts[1]
-        try:
-            amount = int(parts[2])
-        except:
-            return '❌ Сумма числом'
-        if u not in registered_users:
-            return f'❓ {u} не найден'
-        ensure_user_data(u)
-        registered_users[u]['pours'] = max(0, registered_users[u].get('pours', 0) + amount)
-        save_data()
-        return f'💰 {u} получил {amount} Pours (итого: {registered_users[u]["pours"]})'
-
-    if cmd == '/info' and len(parts) >= 2:
-        u = parts[1]
-        info = user_info.get(u)
-        if not info:
-            return f'❓ {u} не найден'
-        L = []
-        L.append(f'📋 ИНФО: {u}')
-        L.append('━━━━━━━━━━━━━━━━━')
-        L.append(f'🌐 Статус: {"онлайн" if u in users_online else "офлайн"}')
-        if u == ADMIN_NAME:
-            L.append('👑 Админ')
-        if u in verified_users:
-            L.append('✅ Верифицирован')
-        if u in banned_users:
-            L.append('🚫 ЗАБАНЕН')
-        if is_muted(u):
-            L.append(f'🔇 Мут: {mute_info(u)}')
-        game = get_user_game_data(u)
-        if game:
-            L.append(f'💰 Pours: {game.get("pours", 0)}')
-            L.append(f'🎮 Крестики: 🏆 {game.get("ttt_wins", 0)} | 💀 {game.get("ttt_losses", 0)} | 🤝 {game.get("ttt_draws", 0)}')
-        L.append(f'📅 Первый вход: {fmt_time(info["first_seen"])}')
-        L.append(f'🕐 Активность: {time_ago(info["last_seen"])}')
-        L.append(f'💬 Сообщений: {info["msg_count"]}')
-        L.append('━━━━━━━━━━━━━━━━━')
-        L.append(f'🌐 IP: {info["ip"]}')
-        ua = info['ua']
-        if 'Android' in ua:
-            dev = 'Android'
-        elif 'iPhone' in ua or 'iPad' in ua:
-            dev = 'iOS'
-        elif 'Windows' in ua:
-            dev = 'Windows'
-        elif 'Mac' in ua:
-            dev = 'Mac'
-        elif 'Linux' in ua:
-            dev = 'Linux'
-        else:
-            dev = ua[:40]
-        L.append(f'🖥 Устройство: {dev}')
-        return '\n'.join(L)
-
-    return None
-
-async def get_messages(request):
-    try:
-        since = float(request.query.get('since', 0))
-    except ValueError:
-        since = 0
-    user = request.query.get('user', '')
-
-    async with lock:
-        if user:
-            register_user(request, user)
-            if user in banned_users and user != ADMIN_NAME:
-                return web.json_response({'banned': True, 'reason': 'Вы забанены'})
-            users_online[user] = time.time()
-
-        now = time.time()
-        expired = [u for u, t in users_online.items() if now - t > ONLINE_TIMEOUT]
-        for u in expired:
-            del users_online[u]
-
-        new_msgs = []
-        for m in messages:
-            if m['timestamp'] <= since:
-                continue
-            if m.get('system') and m.get('to') != user:
-                continue
-            if m.get('to') is None or m.get('system'):
-                new_msgs.append(m)
-            elif m['to'] == user or m['from'] == user:
-                new_msgs.append(m)
-
-        incoming = None
-        for caller, call in list(active_calls.items()):
-            if call['to'] == user and call['status'] == 'ringing':
-                if now - call['time'] < 30:
-                    incoming = {'from': caller, 'time': call['time']}
-                else:
-                    del active_calls[caller]
-
-        outgoing = None
-        if user in active_calls:
-            call = active_calls[user]
-            if now - call['time'] > 60:
-                del active_calls[user]
-            else:
-                outgoing = call
-
-        return web.json_response({
-            'messages': new_msgs,
-            'online': list(users_online.keys()),
-            'verified': list(verified_users),
-            'banned': list(banned_users),
-            'muted': {u: mute_info(u) for u in muted_users},
-            'now': now,
-            'am_admin': user == ADMIN_NAME,
-            'am_banned': user in banned_users and user != ADMIN_NAME,
-            'am_muted': is_muted(user),
-            'incoming_call': incoming,
-            'outgoing_call': outgoing
-        })
-
-async def get_history(request):
-    user = request.query.get('user', '')
-    async with lock:
-        register_user(request, user)
-        hist = [m for m in messages if not m.get('system') or m.get('to') == user]
-        return web.json_response({
-            'messages': hist[-300:],
-            'verified': list(verified_users),
-            'am_admin': user == ADMIN_NAME
-        })
-
-async def jitsi_room(request):
-    a = request.query.get('a', 'user1')
-    b = request.query.get('b', 'user2')
-    names = sorted([a, b])
-    room = 'pou-' + names[0] + '-' + names[1]
-    room = ''.join(c if c.isalnum() or c == '-' else '-' for c in room)
-    return web.json_response({'room': room})
-
-# ============ POUS GARDEN ONLINE API ============
-async def garden_update(request):
-    try:
-        data = await request.json()
-    except:
-        return web.json_response({'ok': False, 'error': 'bad json'})
-    name = (data.get('name') or '').strip()
-    if not name:
-        return web.json_response({'ok': False, 'error': 'no name'})
-    async with lock:
-        now = time.time()
-        garden_players[name] = {
-            'x': float(data.get('x', 0)),
-            'z': float(data.get('z', 0)),
-            'yaw': float(data.get('yaw', 0)),
-            'skin': data.get('skin', '🐧'),
-            'coins': int(data.get('coins', 0)),
-            'time': now
-        }
-        expired = [n for n, p in garden_players.items() if now - p['time'] > GARDEN_TIMEOUT]
-        for n in expired:
-            del garden_players[n]
-        others = []
-        for n, p in garden_players.items():
-            if n == name:
-                continue
-            others.append({
-                'name': n,
-                'x': p['x'],
-                'z': p['z'],
-                'yaw': p['yaw'],
-                'skin': p['skin'],
-                'coins': p['coins']
-            })
-        return web.json_response({'ok': True, 'others': others})
-
-async def garden_stats(request):
-    async with lock:
-        return web.json_response({
-            'ok': True,
-            'online': len(garden_players),
-            'players': [{'name': n, 'coins': p.get('coins', 0)} for n, p in garden_players.items()]
-        })
-
-# ============ API ПРОФИЛЯ ============
-async def get_profile(request):
-    data = await request.json()
-    username = (data.get('username') or '').strip()
-    if not username:
-        return web.json_response({'ok': False, 'error': 'Не указано имя'})
-    async with lock:
-        game = get_user_game_data(username)
-        if game is None:
-            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
-        save_data()
-        return web.json_response({
-            'ok': True,
-            'pours': game.get('pours', 0),
-            'gifts_received': game.get('gifts_received', []),
-            'gifts_sent': game.get('gifts_sent', []),
-            'ttt_wins': game.get('ttt_wins', 0),
-            'ttt_losses': game.get('ttt_losses', 0),
-            'ttt_draws': game.get('ttt_draws', 0),
-            'last_free_pours': game.get('last_free_pours', 0)
-        })
-
-# ============ API ПОДАРКОВ ============
-async def get_gifts(request):
-    return web.json_response({'ok': True, 'gifts': GIFTS})
-
-async def send_gift(request):
-    data = await request.json()
-    sender = (data.get('from') or '').strip()
-    recipient = (data.get('to') or '').strip()
-    gift_id = (data.get('gift_id') or '').strip()
-    message = (data.get('message') or '').strip()[:200]
-
-    if not sender or not recipient or not gift_id:
-        return web.json_response({'ok': False, 'error': 'Заполните все поля'})
-    if sender == recipient:
-        return web.json_response({'ok': False, 'error': 'Нельзя подарить себе'})
-
-    gift = next((g for g in GIFTS if g['id'] == gift_id), None)
-    if not gift:
-        return web.json_response({'ok': False, 'error': 'Подарок не найден'})
-
-    async with lock:
-        s = get_user_game_data(sender)
-        r = get_user_game_data(recipient)
-        if s is None:
-            return web.json_response({'ok': False, 'error': 'Отправитель не найден'})
-        if r is None:
-            return web.json_response({'ok': False, 'error': 'Получатель не найден'})
-
-        if s.get('pours', 0) < gift['price']:
-            return web.json_response({'ok': False, 'error': f'Не хватает {gift["price"] - s["pours"]} Pours'})
-
-        s['pours'] -= gift['price']
-        gift_record = {
-            'gift_id': gift_id, 'from': sender,
-            'time': time.time(), 'message': message
-        }
-        r.setdefault('gifts_received', []).append(gift_record)
-        s.setdefault('gifts_sent', []).append({
-            'gift_id': gift_id, 'to': recipient,
-            'time': time.time(), 'message': message
-        })
-
-        msg = {
-            'from': 'СИСТЕМА',
-            'text': f'🎁 {sender} подарил вам {gift["emoji"]} {gift["name"]}!' + (f'\n💬 "{message}"' if message else ''),
-            'time': datetime.now().strftime('%H:%M:%S'),
-            'timestamp': time.time(),
-            'to': recipient, 'system': True
-        }
-        messages.append(msg)
-        if len(messages) > MAX_HISTORY:
-            messages[:] = messages[-MAX_HISTORY:]
-
-        save_data()
-        return web.json_response({'ok': True, 'gift': gift, 'pours': s['pours']})
-
-# ============ API «ПОЛУЧИТЬ POURS» ============
-async def claim_free(request):
-    data = await request.json()
-    username = (data.get('username') or '').strip()
-    if not username:
-        return web.json_response({'ok': False, 'error': 'Не указано имя'})
-
-    async with lock:
-        game = get_user_game_data(username)
-        if game is None:
-            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
-
-        now = time.time()
-        last = game.get('last_free_pours', 0)
-        cooldown = 3600
-        if now - last < cooldown:
-            left = int(cooldown - (now - last))
-            return web.json_response({'ok': False, 'error': 'Подожди', 'cooldown': left})
-
-        game['pours'] = game.get('pours', 0) + 10
-        game['last_free_pours'] = now
-        save_data()
-        return web.json_response({'ok': True, 'pours': game['pours'], 'reward': 10})
-
-# ============ API КРЕСТИКОВ ============
-async def ttt_result(request):
-    data = await request.json()
-    username = (data.get('username') or '').strip()
-    result = (data.get('result') or '').strip()
-
-    if not username:
-        return web.json_response({'ok': False, 'error': 'Не указано имя'})
-    if result not in ('win', 'lose', 'draw'):
-        return web.json_response({'ok': False, 'error': 'Неверный результат'})
-
-    async with lock:
-        game = get_user_game_data(username)
-        if game is None:
-            return web.json_response({'ok': False, 'error': 'Пользователь не найден'})
-
-        reward = 0
-        if result == 'win':
-            game['pours'] = game.get('pours', 0) + 30
-            game['ttt_wins'] = game.get('ttt_wins', 0) + 1
-            reward = 30
-        elif result == 'lose':
-            game['pours'] = max(0, game.get('pours', 0) - 15)
-            game['ttt_losses'] = game.get('ttt_losses', 0) + 1
-            reward = -15
-        else:
-            game['ttt_draws'] = game.get('ttt_draws', 0) + 1
-            reward = 0
-
-        save_data()
-        return web.json_response({
-            'ok': True, 'reward': reward, 'pours': game['pours'],
-            'wins': game.get('ttt_wins', 0),
-            'losses': game.get('ttt_losses', 0),
-            'draws': game.get('ttt_draws', 0)
-        })
-
-# ============ API ЗВОНКОВ ============
-async def call_start(request):
-    data = await request.json()
-    caller = (data.get('from') or '').strip()
-    recipient = (data.get('to') or '').strip()
-    if not caller or not recipient or caller == recipient:
-        return web.json_response({'ok': False, 'error': 'Неверные данные'})
-    async with lock:
-        active_calls[caller] = {'to': recipient, 'status': 'ringing', 'time': time.time()}
-    return web.json_response({'ok': True})
-
-async def call_accept(request):
-    data = await request.json()
-    caller = (data.get('caller') or '').strip()
-    async with lock:
-        if caller in active_calls:
-            active_calls[caller]['status'] = 'accepted'
-            return web.json_response({'ok': True})
-    return web.json_response({'ok': False, 'error': 'Звонок не найден'})
-
-async def call_reject(request):
-    data = await request.json()
-    caller = (data.get('caller') or '').strip()
-    async with lock:
-        if caller in active_calls:
-            del active_calls[caller]
-    return web.json_response({'ok': True})
-
-async def call_end(request):
-    data = await request.json()
-    user = (data.get('user') or '').strip()
-    async with lock:
-        if user in active_calls:
-            del active_calls[user]
-        for caller, call in list(active_calls.items()):
-            if call['to'] == user:
-                del active_calls[caller]
-    return web.json_response({'ok': True})
-
-# ============ API ИГРЫ ============
-async def buy_skin(request):
-    data = await request.json()
-    username = (data.get('username') or '').strip()
-    skin_id = (data.get('skin_id') or '').strip()
-    price = int(data.get('price', 0))
-    async with lock:
-        game = get_user_game_data(username)
-        if game is None:
-            return web.json_response({'ok': False, 'error': 'Не найден'})
-        if skin_id in game.get('owned_skins', []):
-            return web.json_response({'ok': False, 'error': 'Уже куплен'})
-        if game.get('pours', 0) < price:
-            return web.json_response({'ok': False, 'error': 'Недостаточно Pours'})
-        game['pours'] -= price
-        game['owned_skins'].append(skin_id)
-        save_data()
-        return web.json_response({'ok': True, 'pours': game['pours'], 'owned_skins': game['owned_skins']})
-
-async def equip_skin(request):
-    data = await request.json()
-    username = (data.get('username') or '').strip()
-    skin_id = (data.get('skin_id') or '').strip()
-    async with lock:
-        game = get_user_game_data(username)
-        if game is None:
-            return web.json_response({'ok': False, 'error': 'Не найден'})
-        if skin_id not in game.get('owned_skins', []):
-            return web.json_response({'ok': False, 'error': 'Скин не куплен'})
-        game['equipped_skin'] = skin_id
-        save_data()
-        return web.json_response({'ok': True, 'equipped_skin': skin_id})
-
-async def match_result(request):
-    data = await request.json()
-    username = (data.get('username') or '').strip()
-    won = bool(data.get('won', False))
-    kills = int(data.get('kills', 0))
-    deaths = int(data.get('deaths', 0))
-    async with lock:
-        game = get_user_game_data(username)
-        if game is None:
-            return web.json_response({'ok': False, 'error': 'Не найден'})
-        reward = 20 if won else 5
-        game['pours'] = game.get('pours', 0) + reward
-        save_data()
-        return web.json_response({'ok': True, 'reward': reward, 'pours': game['pours']})
-
-# ============ ЗАПУСК ============
-async def main():
-    load_data()
-    ensure_admin_exists()
-    banned_users.discard(ADMIN_NAME)
-    save_data()
-
-    app = web.Application()
-    app.router.add_get('/', index)
-    app.router.add_get('/index.html', index)
-    app.router.add_get('/gamestrel.html', gamestrel)
-    app.router.add_get('/tictactoe.html', tictactoe)
-    app.router.add_get('/poublox.html', poublox)
-    app.router.add_get('/garden.html', garden)
-    app.router.add_post('/auth', auth)
-    app.router.add_post('/api/check-token', check_token)
-    app.router.add_post('/api/logout', logout_session)
-    app.router.add_post('/send', send_message)
-    app.router.add_get('/messages', get_messages)
-    app.router.add_get('/history', get_history)
-    app.router.add_get('/room', jitsi_room)
-    app.router.add_post('/api/garden/update', garden_update)
-    app.router.add_get('/api/garden/stats', garden_stats)
-    app.router.add_post('/api/get-profile', get_profile)
-    app.router.add_get('/api/gifts', get_gifts)
-    app.router.add_post('/api/send-gift', send_gift)
-    app.router.add_post('/api/claim-free', claim_free)
-    app.router.add_post('/api/ttt-result', ttt_result)
-    app.router.add_post('/api/call/start', call_start)
-    app.router.add_post('/api/call/accept', call_accept)
-    app.router.add_post('/api/call/reject', call_reject)
-    app.router.add_post('/api/call/end', call_end)
-    app.router.add_post('/api/buy-skin', buy_skin)
-    app.router.add_post('/api/equip-skin', equip_skin)
-    app.router.add_post('/api/match-result', match_result)
-
-    port = int(os.environ.get('PORT', 8080))
-    print(f'[POU] Запуск на порту {port}')
-    print(f'[POU] Админ: {ADMIN_NAME}')
-    print('[POU] Pous Garden online API: ON')
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', port)
-    await site.start()
-    print('[POU] Сервер готов')
-
-    async def cleanup():
-        while True:
-            await asyncio.sleep(10)
-            async with lock:
-                now = time.time()
-                expired = [u for u, t in users_online.items() if now - t > ONLINE_TIMEOUT]
-                for u in expired:
-                    del users_online[u]
-                expired_mutes = [u for u, t in muted_users.items() if t != 0 and now > t]
-                for u in expired_mutes:
-                    del muted_users[u]
-                old_calls = [c for c, v in active_calls.items() if now - v['time'] > 60]
-                for c in old_calls:
-                    del active_calls[c]
-                g_expired = [n for n, p in garden_players.items() if now - p['time'] > GARDEN_TIMEOUT]
-                for n in g_expired:
-                    del garden_players[n]
-    asyncio.create_task(cleanup())
-
-    async def autosave():
-        while True:
-            await asyncio.sleep(30)
-            async with lock:
-                save_data()
-    asyncio.create_task(autosave())
-
-    await asyncio.Future()
-
-if __name__ == '__main__':
-    asyncio.run(main())
+        SAVE.pet = pet.id;
+        save(); updateHud();
+        openPets();
+      };
+    }
+    grid.appendChild(card);
+  });
+  document.getElementById('pets-modal').classList.add('on');
+}
+
+// ============ ДЕЙСТВИЕ ============
+document.getElementById('btn-action').onclick = actionTap;
+let currentPlot = null;
+let selectedSeed = null;
+
+function actionTap() {
+  const ray = new THREE.Raycaster();
+  ray.setFromCamera({x: 0, y: 0}, camera);
+  const hits = ray.intersectObjects(plots.map(p => p.mesh));
+  if (!hits.length || hits[0].distance > 5) { toast('Подойди к грядке', 'bad'); return; }
+  const plot = plots.find(p => p.mesh === hits[0].object);
+  if (plot) openPlotMenu(plot);
+}
+
+function openPlotMenu(plot) {
+  currentPlot = plot;
+  selectedSeed = null;
+  const title = document.getElementById('action-title');
+  const info = document.getElementById('action-info');
+  const invEl = document.getElementById('inv-list');
+  const btns = document.getElementById('action-buttons');
+  title.textContent = '🌱 Грядка #' + (plot.id + 1);
+  btns.innerHTML = '';
+
+  if (plot.plant) {
+    const seed = getSeed(plot.plantSeed);
+    const elapsed = (Date.now() - plot.plantedAt) / 1000;
+    const left = Math.max(0, seed.time - elapsed);
+    if (left > 0) {
+      info.innerHTML = seed.emoji + ' <b>' + seed.name + '</b><br>Осталось <b>' + Math.ceil(left) + 'с</b>';
+      invEl.style.display = 'none';
+    } else {
+      const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
+      const total = Math.floor(seed.sell * (1 + bonus));
+      info.innerHTML = '✅ <b>' + seed.emoji + ' ' + seed.name + '</b> готов!<br>Продажа: <b>+' + total + '💰</b>';
+      invEl.style.display = 'none';
+      const b = document.createElement('button');
+      b.className = 'green';
+      b.textContent = '🌾 Собрать (+' + total + '💰)';
+      b.onclick = () => harvest(plot);
+      btns.appendChild(b);
+    }
+  } else {
+    info.textContent = 'Выбери семечко:';
+    invEl.style.display = 'flex';
+    invEl.innerHTML = '';
+    const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
+    if (!entries.length) {
+      invEl.innerHTML = '<div class="inv-empty">Нет семян. Купи в 🏪</div>';
+    } else {
+      entries.forEach(([id, count]) => {
+        const seed = getSeed(id);
+        const item = document.createElement('div');
+        item.className = 'inv-item';
+        item.textContent = seed.emoji + ' ' + seed.name + ' (' + count + ')';
+        item.onclick = () => {
+          selectedSeed = id;
+          document.querySelectorAll('.inv-item').forEach(x => x.classList.remove('sel'));
+          item.classList.add('sel');
+          updatePlantBtn();
+        };
+        invEl.appendChild(item);
+      });
+    }
+    const b = document.createElement('button');
+    b.className = 'green';
+    b.id = 'plant-btn';
+    b.textContent = 'Выбери семечко';
+    b.disabled = true;
+    b.style.opacity = '0.5';
+    b.onclick = () => { if (selectedSeed) plantSeed(plot, selectedSeed); };
+    btns.appendChild(b);
+  }
+
+  document.getElementById('action-modal').classList.add('on');
+}
+
+function updatePlantBtn() {
+  const b = document.getElementById('plant-btn');
+  if (!b) return;
+  if (selectedSeed) {
+    const seed = getSeed(selectedSeed);
+    b.textContent = '🌱 Посадить ' + seed.emoji + ' ' + seed.name;
+    b.disabled = false;
+    b.style.opacity = '1';
+  }
+}
+
+function plantSeed(plot, seedId) {
+  if (!SAVE.inventory[seedId]) return;
+  SAVE.inventory[seedId]--;
+  if (SAVE.inventory[seedId] === 0) delete SAVE.inventory[seedId];
+  const seed = getSeed(seedId);
+  plot.plantSeed = seedId;
+  plot.plantedAt = Date.now();
+  plot.plant = createPlantMesh(seed, plot.x, plot.z);
+  scene.add(plot.plant);
+  save(); updateHud();
+  closeModal('action-modal');
+  toast('Посажено: ' + seed.emoji + ' ' + seed.name, 'good');
+}
+
+function harvest(plot) {
+  const seed = getSeed(plot.plantSeed);
+  const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
+  const total = Math.floor(seed.sell * (1 + bonus));
+  SAVE.coins += total;
+  if (plot.plant) { scene.remove(plot.plant); plot.plant = null; }
+  plot.plantSeed = null; plot.plantedAt = 0;
+  save(); updateHud();
+  closeModal('action-modal');
+  toast('+ ' + total + '💰 за ' + seed.emoji, 'good');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('on');
+}
+
+// ============ HUD ============
+function updateHud() {
+  document.getElementById('coins').textContent = Math.floor(SAVE.coins);
+  const petsBox = document.getElementById('pets-box');
+  if (SAVE.pet) {
+    const pet = getPet(SAVE.pet);
+    document.getElementById('pet-name').textContent = pet.emoji + ' ' + pet.name;
+    petsBox.style.display = 'block';
+  } else {
+    petsBox.style.display = 'none';
+  }
+}
+
+// ============ ОНЛАЙН ============
+async function sendPosition() {
+  if (!myName) return;
+  try {
+    const r = await fetch('/api/garden/update', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name: myName,
+        x: playerX, z: playerZ, yaw: yaw,
+        coins: Math.floor(SAVE.coins)
+      })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      onlineOthers = data.others || [];
+      document.getElementById('online-count').textContent = onlineOthers.length + 1;
+      updateOtherPlayers();
+    }
+  } catch(e) {}
+}
+
+function updateOtherPlayers() {
+  const seen = new Set();
+  onlineOthers.forEach(p => {
+    seen.add(p.name);
+    if (!otherPlayersMeshes[p.name]) {
+      const mesh = createCharacter(0);
+      mesh.position.set(p.x, 0, p.z);
+      const cv = document.createElement('canvas');
+      cv.width = 256; cv.height = 64;
+      const c = cv.getContext('2d');
+      c.fillStyle = 'rgba(0,0,0,0.7)';
+      c.fillRect(0, 0, 256, 64);
+      c.fillStyle = '#fff';
+      c.font = 'bold 32px Arial';
+      c.textAlign = 'center';
+      c.fillText(p.name, 128, 45);
+      const tex = new THREE.CanvasTexture(cv);
+      const spr = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
+      spr.scale.set(2, 0.5, 1);
+      spr.position.y = 1.9;
+      mesh.add(spr);
+      scene.add(mesh);
+      otherPlayersMeshes[p.name] = mesh;
+    }
+    const mesh = otherPlayersMeshes[p.name];
+    mesh.position.x += (p.x - mesh.position.x) * 0.3;
+    mesh.position.z += (p.z - mesh.position.z) * 0.3;
+    mesh.rotation.y = p.yaw;
+  });
+  Object.keys(otherPlayersMeshes).forEach(n => {
+    if (!seen.has(n)) {
+      scene.remove(otherPlayersMeshes[n]);
+      delete otherPlayersMeshes[n];
+    }
+  });
+}
+
+// ============ ВОССТАНОВЛЕНИЕ ============
+function restorePlants() {
+  plots.forEach(plot => {
+    const saved = SAVE.plants[plot.id];
+    if (saved && saved.seed) {
+      const seed = getSeed(saved.seed);
+      if (!seed) return;
+      plot.plant = createPlantMesh(seed, plot.x, plot.z);
+      scene.add(plot.plant);
+      plot.plantSeed = saved.seed;
+      plot.plantedAt = saved.plantedAt || Date.now();
+    }
+  });
+}
+
+// ============ ЦИКЛ ============
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(0.05, clock.getDelta());
+
+  let mx = joyX, mz = joyY;
+  if (keys['w']) mz -= 1;
+  if (keys['s']) mz += 1;
+  if (keys['a']) mx -= 1;
+  if (keys['d']) mx += 1;
+
+  const len = Math.sqrt(mx*mx + mz*mz);
+  if (len > 1) { mx /= len; mz /= len; }
+
+  const speed = 4;
+  const cos = Math.cos(yaw), sin = Math.sin(yaw);
+  playerX += (mx * cos + mz * sin) * speed * dt;
+  playerZ += (-mx * sin + mz * cos) * speed * dt;
+
+  playerX = Math.max(-20, Math.min(20, playerX));
+  playerZ = Math.max(-20, Math.min(20, playerZ));
+
+  camera.position.set(playerX, 1.7, playerZ);
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+
+  plots.forEach(p => {
+    if (p.plant && p.plantSeed) {
+      const seed = getSeed(p.plantSeed);
+      const elapsed = (Date.now() - p.plantedAt) / 1000;
+      const progress = Math.min(elapsed / seed.time, 1);
+      const scale = 0.4 + progress * 0.6;
+      p.plant.scale.set(scale, scale, scale);
+    }
+  });
+
+  updateTimer += dt;
+  if (updateTimer > 0.5) {
+    updateTimer = 0;
+    sendPosition();
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ============ СТАРТ ============
+function startGame() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) { toast('Введи имя!', 'bad'); return; }
+  myName = name;
+  SAVE.skin = selectedSkin;
+  save();
+  localStorage.setItem('pous_garden_name', name);
+
+  document.getElementById('login').style.display = 'none';
+
+  init3D();
+  setupCameraControls();
+  restorePlants();
+  updateHud();
+  animate();
+}
+
+setInterval(() => {
+  if (!myName) return;
+  SAVE.plants = {};
+  plots.forEach(p => {
+    if (p.plantSeed) SAVE.plants[p.id] = {seed: p.plantSeed, plantedAt: p.plantedAt};
+  });
+  save();
+}, 5000);
+
+const savedName = localStorage.getItem('pous_garden_name');
+if (savedName) document.getElementById('name-input').value = savedName;
+
+// ============ ЧАТ ============
+let chatOpen = false;
+let lastChatTime = 0;
+let chatPollTimer = null;
+let unreadChat = 0;
+let chatVisible = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chat-panel');
+  if (chatOpen) {
+    panel.classList.add('on');
+    unreadChat = 0;
+    updateChatBadge();
+    loadChat();
+    if (!chatPollTimer) {
+      chatPollTimer = setInterval(loadChat, 1500);
+    }
+    setTimeout(() => {
+      const ci = document.getElementById('chat-input');
+      if (ci) ci.focus();
+    }, 300);
+  } else {
+    panel.classList.remove('on');
+  }
+}
+
+function updateChatBadge() {
+  const badge = document.getElementById('chat-badge');
+  if (unreadChat > 0) {
+    badge.textContent = unreadChat > 9 ? '9+' : unreadChat;
+    badge.classList.add('on');
+  } else {
+    badge.classList.remove('on');
+  }
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || !myName) return;
+  inp.value = '';
+  try {
+    await fetch('/api/garden/chat/send', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: myName, text: text})
+    });
+    loadChat();
+  } catch(e) {}
+}
+
+async function loadChat() {
+  try {
+    const r = await fetch('/api/garden/chat/get?since=' + lastChatTime);
+    const data = await r.json();
+    if (!data.ok) return;
+    const box = document.getElementById('chat-messages');
+    let scrolled = false;
+    data.messages.forEach(m => {
+      lastChatTime = Math.max(lastChatTime, m.time);
+      const d = document.createElement('div');
+      d.className = 'msg';
+      const t = new Date(m.time * 1000);
+      const timeStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+      d.innerHTML = '<span class="time">' + timeStr + '</span>' +
+                    '<span class="name" style="color:' + m.color + '">' + escapeHtml(m.name) + ':</span> ' +
+                    escapeHtml(m.text);
+      box.appendChild(d);
+      scrolled = true;
+      // Счётчик непрочитанных
+      if (!chatOpen && m.name !== myName) {
+        unreadChat++;
+        updateChatBadge();
+      }
+    });
+    while (box.children.length > 50) {
+      box.removeChild(box.firstChild);
+    }
+    if (scrolled) box.scrollTop = box.scrollHeight;
+  } catch(e) {}
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+setTimeout(() => {
+  const ci = document.getElementById('chat-input');
+  if (ci) {
+    ci.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); sendChat(); }
+    });
+  }
+}, 500);
+
+// Фоновый опрос чата (даже когда закрыт — для счётчика)
+setInterval(() => {
+  if (!chatOpen) loadChat();
+}, 3000);
+</script>
+</body>
+</html>
