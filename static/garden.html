@@ -46,7 +46,6 @@ canvas{display:block;width:100%;height:100%}
 #toast.good{border-color:#a6e3a1;color:#a6e3a1}
 #toast.bad{border-color:#f38ba8;color:#f38ba8}
 
-/* ЧАТ */
 #chat-toggle{position:fixed;left:20px;top:60px;width:50px;height:50px;border-radius:50%;background:rgba(137,180,250,.9);border:2px solid #fff;font-size:24px;z-index:25;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none}
 #chat-toggle .badge{position:absolute;top:-4px;right:-4px;background:#f38ba8;color:#fff;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;min-width:18px;text-align:center;display:none}
 #chat-toggle .badge.on{display:block}
@@ -100,7 +99,6 @@ canvas{display:block;width:100%;height:100%}
 <div id="info">Джойстик — ходьба | Свайп — камера | 🌱 — действие</div>
 <div id="toast"></div>
 
-<!-- ЧАТ -->
 <div id="chat-toggle" onclick="toggleChat()">💬<span class="badge" id="chat-badge">0</span></div>
 <div id="chat-panel">
   <div id="chat-header">
@@ -145,6 +143,115 @@ canvas{display:block;width:100%;height:100%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// ============ ГЕНЕРАТОР ТЕКСТУР ============
+function makeGrassTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 256;
+  const ctx = c.getContext('2d');
+  // Базовый зелёный
+  ctx.fillStyle = '#5a9e3a';
+  ctx.fillRect(0, 0, 256, 256);
+  // Тёмные пятна
+  for (let i = 0; i < 500; i++) {
+    ctx.fillStyle = `rgba(40, ${70 + Math.random() * 40 | 0}, 30, ${0.1 + Math.random() * 0.3})`;
+    ctx.fillRect(Math.random() * 256, Math.random() * 256, 2 + Math.random() * 6, 2 + Math.random() * 6);
+  }
+  // Светлые травинки
+  for (let i = 0; i < 800; i++) {
+    ctx.fillStyle = `rgba(${120 + Math.random() * 80 | 0}, ${180 + Math.random() * 50 | 0}, 60, ${0.3 + Math.random() * 0.5})`;
+    const x = Math.random() * 256;
+    const y = Math.random() * 256;
+    ctx.fillRect(x, y, 1, 3 + Math.random() * 3);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(10, 10);
+  return tex;
+}
+
+function makeDirtTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  // База — земля
+  ctx.fillStyle = '#6b4423';
+  ctx.fillRect(0, 0, 128, 128);
+  // Тёмные пятна
+  for (let i = 0; i < 200; i++) {
+    ctx.fillStyle = `rgba(${40 + Math.random() * 40 | 0}, ${25 + Math.random() * 20 | 0}, ${10 + Math.random() * 10 | 0}, 0.6)`;
+    ctx.beginPath();
+    ctx.arc(Math.random() * 128, Math.random() * 128, 1 + Math.random() * 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Светлые камушки
+  for (let i = 0; i < 50; i++) {
+    ctx.fillStyle = `rgba(${150 + Math.random() * 50 | 0}, ${120 + Math.random() * 40 | 0}, 90, 0.5)`;
+    ctx.fillRect(Math.random() * 128, Math.random() * 128, 2, 2);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+function makeWoodTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  // База — коричневое дерево
+  ctx.fillStyle = '#6b4226';
+  ctx.fillRect(0, 0, 128, 128);
+  // Полосы — кольца
+  for (let y = 0; y < 128; y += 4) {
+    ctx.strokeStyle = `rgba(${80 + Math.random() * 40 | 0}, ${50 + Math.random() * 30 | 0}, ${20 + Math.random() * 20 | 0}, 0.7)`;
+    ctx.lineWidth = 1 + Math.random() * 2;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.bezierCurveTo(40, y + Math.random() * 3 - 2, 90, y + Math.random() * 3 - 2, 128, y);
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+function makeRoofTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#a0392e';
+  ctx.fillRect(0, 0, 128, 128);
+  for (let y = 0; y < 128; y += 16) {
+    for (let x = 0; x < 128; x += 16) {
+      const off = (y / 16) % 2 ? 8 : 0;
+      ctx.fillStyle = `rgba(${140 + Math.random() * 40 | 0}, ${50 + Math.random() * 30 | 0}, ${40 + Math.random() * 20 | 0}, 1)`;
+      ctx.fillRect(x + off, y, 14, 14);
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.strokeRect(x + off, y, 14, 14);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+function makeCloudTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, 256, 128);
+  for (let i = 0; i < 8; i++) {
+    const g = ctx.createRadialGradient(
+      Math.random() * 256, Math.random() * 128, 5,
+      Math.random() * 256, Math.random() * 128, 40
+    );
+    g.addColorStop(0, 'rgba(255,255,255,0.95)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 256, 128);
+  }
+  return new THREE.CanvasTexture(c);
+}
+
 // ============ 28 СЕМЯН ============
 const SEEDS = [
   {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a},
@@ -198,11 +305,16 @@ const SKINS_LIST = [
 function getSeed(id) { return SEEDS.find(s => s.id === id); }
 function getPet(id) { return PETS.find(p => p.id === id); }
 
-const KEY = 'pous_garden_v3';
+const KEY = 'pous_garden_v4';
 let SAVE = {coins: 500, inventory: {}, plants: {}, pets: [], pet: null, skin: 0};
 try {
   const s = localStorage.getItem(KEY);
   if (s) SAVE = Object.assign(SAVE, JSON.parse(s));
+  else {
+    // Перенос из v3
+    const old = localStorage.getItem('pous_garden_v3');
+    if (old) SAVE = Object.assign(SAVE, JSON.parse(old));
+  }
 } catch(e) {}
 
 function save() {
@@ -231,63 +343,113 @@ SKINS_LIST.forEach((s, i) => {
   skinRow.appendChild(d);
 });
 
+// ============ 3D СЦЕНА (Roblox-стиль) ============
 let scene, camera, renderer;
 let otherPlayersMeshes = {};
 let plots = [];
+let plantsAnimating = [];
+let clouds = [];
 
 function init3D() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87ceeb);
-  scene.fog = new THREE.Fog(0x87ceeb, 20, 60);
+  scene.fog = new THREE.Fog(0x87ceeb, 25, 70);
+
   camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 200);
   camera.rotation.order = 'YXZ';
+
   renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(innerWidth, innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  // ★★★ ВКЛЮЧАЕМ ТЕНИ ★★★
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-  const sun = new THREE.DirectionalLight(0xfff5d1, 0.9);
-  sun.position.set(10, 20, 10);
+
+  // Освещение
+  const amb = new THREE.AmbientLight(0xffffff, 0.55);
+  scene.add(amb);
+
+  // Солнце с тенями
+  const sun = new THREE.DirectionalLight(0xfff5d1, 1.0);
+  sun.position.set(20, 40, 15);
+  sun.castShadow = true;
+  sun.shadow.mapSize.width = 2048;
+  sun.shadow.mapSize.height = 2048;
+  sun.shadow.camera.left = -40;
+  sun.shadow.camera.right = 40;
+  sun.shadow.camera.top = 40;
+  sun.shadow.camera.bottom = -40;
+  sun.shadow.camera.near = 0.5;
+  sun.shadow.camera.far = 100;
+  sun.shadow.bias = -0.0005;
   scene.add(sun);
+
+  // Полусферический свет (небо + земля)
+  const hemi = new THREE.HemisphereLight(0x87ceeb, 0x5a9e3a, 0.5);
+  scene.add(hemi);
+
+  // Земля с текстурой травы
+  const grassTex = makeGrassTexture();
   const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(60, 60),
-    new THREE.MeshLambertMaterial({color: 0x5a9e3a})
+    new THREE.PlaneGeometry(80, 80, 20, 20),
+    new THREE.MeshLambertMaterial({map: grassTex})
   );
   ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
   scene.add(ground);
+
+  // Грядки 5×5 с текстурой земли
   const PS = 1.4, GAP = 0.2, GRID = 5;
   const total = GRID * PS + (GRID - 1) * GAP;
   const start = -total / 2 + PS / 2;
+
+  const dirtTex = makeDirtTexture();
+  dirtTex.repeat.set(2, 2);
+
   for (let i = 0; i < GRID; i++) {
     for (let j = 0; j < GRID; j++) {
       const x = start + i * (PS + GAP);
       const z = start + j * (PS + GAP);
       const plot = new THREE.Mesh(
         new THREE.BoxGeometry(PS, 0.2, PS),
-        new THREE.MeshLambertMaterial({color: 0x6b4423})
+        new THREE.MeshLambertMaterial({map: dirtTex.clone()})
       );
       plot.position.set(x, 0.1, z);
+      plot.castShadow = true;
+      plot.receiveShadow = true;
       scene.add(plot);
       plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id: i * GRID + j, plantedAt: 0});
     }
   }
-  for (let i = 0; i < 12; i++) {
-    const tx = (Math.random() - 0.5) * 45;
-    const tz = (Math.random() - 0.5) * 45;
-    if (Math.abs(tx) < 8 && Math.abs(tz) < 8) continue;
-    const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.2, 0.3, 2, 6),
-      new THREE.MeshLambertMaterial({color: 0x6b4226})
-    );
-    trunk.position.set(tx, 1, tz);
-    scene.add(trunk);
-    const leaves = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 8, 8),
-      new THREE.MeshLambertMaterial({color: 0x2e8b2e})
-    );
-    leaves.position.set(tx, 2.7, tz);
-    scene.add(leaves);
+
+  // Деревья с тенями и текстурой дерева
+  const woodTex = makeWoodTexture();
+  for (let i = 0; i < 14; i++) {
+    const tx = (Math.random() - 0.5) * 55;
+    const tz = (Math.random() - 0.5) * 55;
+    if (Math.abs(tx) < 9 && Math.abs(tz) < 9) continue;
+    createTree(tx, tz, woodTex);
   }
+
+  // Облака
+  const cloudTex = makeCloudTexture();
+  for (let i = 0; i < 8; i++) {
+    const cloudMat = new THREE.SpriteMaterial({map: cloudTex, transparent: true, opacity: 0.85});
+    const cloud = new THREE.Sprite(cloudMat);
+    cloud.position.set(
+      (Math.random() - 0.5) * 100,
+      25 + Math.random() * 15,
+      (Math.random() - 0.5) * 100
+    );
+    cloud.scale.set(20, 10, 1);
+    scene.add(cloud);
+    clouds.push(cloud);
+  }
+
+  // Домик-декор
+  createHouse(-18, -18, woodTex);
+
   window.addEventListener('resize', () => {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
@@ -295,32 +457,123 @@ function init3D() {
   });
 }
 
+function createTree(x, z, woodTex) {
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.25, 0.4, 2.5, 8),
+    new THREE.MeshLambertMaterial({map: woodTex.clone()})
+  );
+  trunk.position.set(x, 1.25, z);
+  trunk.castShadow = true;
+  trunk.receiveShadow = true;
+  scene.add(trunk);
+
+  // Листва — 3 шара для реалистичности
+  const leafMat = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
+  const leafMat2 = new THREE.MeshLambertMaterial({color: 0x3a9a3a});
+  const l1 = new THREE.Mesh(new THREE.SphereGeometry(1.6, 8, 8), leafMat);
+  l1.position.set(x, 3.2, z);
+  l1.castShadow = true;
+  scene.add(l1);
+
+  const l2 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), leafMat2);
+  l2.position.set(x + 0.7, 3.8, z + 0.4);
+  l2.castShadow = true;
+  scene.add(l2);
+
+  const l3 = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 8), leafMat2);
+  l3.position.set(x - 0.6, 4.0, z - 0.5);
+  l3.castShadow = true;
+  scene.add(l3);
+}
+
+function createHouse(x, z, woodTex) {
+  const roofTex = makeRoofTexture();
+
+  // Стены
+  const walls = new THREE.Mesh(
+    new THREE.BoxGeometry(4, 3, 4),
+    new THREE.MeshLambertMaterial({map: woodTex.clone()})
+  );
+  walls.position.set(x, 1.5, z);
+  walls.castShadow = true;
+  walls.receiveShadow = true;
+  scene.add(walls);
+
+  // Крыша
+  const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(3.2, 2, 4),
+    new THREE.MeshLambertMaterial({map: roofTex})
+  );
+  roof.rotation.y = Math.PI / 4;
+  roof.position.set(x, 4, z);
+  roof.castShadow = true;
+  scene.add(roof);
+
+  // Дверь
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 1.8, 0.1),
+    new THREE.MeshLambertMaterial({color: 0x4a2810})
+  );
+  door.position.set(x, 0.9, z + 2.05);
+  scene.add(door);
+
+  // Окно
+  const window1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.8, 0.8, 0.1),
+    new THREE.MeshLambertMaterial({color: 0x89dceb, emissive: 0x224466})
+  );
+  window1.position.set(x + 1.2, 2, z + 2.05);
+  scene.add(window1);
+}
+
 function createCharacter(skinIdx) {
   const skin = SKINS_LIST[skinIdx] || SKINS_LIST[0];
   const group = new THREE.Group();
   const bodyMat = new THREE.MeshLambertMaterial({color: skin.color});
   const bellyMat = new THREE.MeshLambertMaterial({color: skin.belly});
+
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), bodyMat);
-  body.position.y = 0.55; group.add(body);
+  body.position.y = 0.55;
+  body.castShadow = true;
+  group.add(body);
+
   const belly = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.05), bellyMat);
-  belly.position.set(0, 0.5, 0.21); group.add(belly);
+  belly.position.set(0, 0.5, 0.21);
+  group.add(belly);
+
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.4), bodyMat);
-  head.position.y = 1.1; group.add(head);
+  head.position.y = 1.1;
+  head.castShadow = true;
+  group.add(head);
+
   const eyeMat = new THREE.MeshBasicMaterial({color: 0x000000});
   const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
-  eyeL.position.set(-0.1, 1.15, 0.21); group.add(eyeL);
+  eyeL.position.set(-0.1, 1.15, 0.21);
+  group.add(eyeL);
   const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
-  eyeR.position.set(0.1, 1.15, 0.21); group.add(eyeR);
+  eyeR.position.set(0.1, 1.15, 0.21);
+  group.add(eyeR);
+
   const beak = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.15), new THREE.MeshLambertMaterial({color: 0xffa500}));
-  beak.position.set(0, 1.0, 0.22); group.add(beak);
+  beak.position.set(0, 1.0, 0.22);
+  group.add(beak);
+
   const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
-  armL.position.set(-0.35, 0.6, 0); group.add(armL);
+  armL.position.set(-0.35, 0.6, 0);
+  armL.castShadow = true;
+  group.add(armL);
   const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
-  armR.position.set(0.35, 0.6, 0); group.add(armR);
+  armR.position.set(0.35, 0.6, 0);
+  armR.castShadow = true;
+  group.add(armR);
+
   const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
-  legL.position.set(-0.12, 0.2, 0); group.add(legL);
+  legL.position.set(-0.12, 0.2, 0);
+  group.add(legL);
   const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
-  legR.position.set(0.12, 0.2, 0); group.add(legR);
+  legR.position.set(0.12, 0.2, 0);
+  group.add(legR);
+
   return group;
 }
 
@@ -358,6 +611,7 @@ function createPlantMesh(seed, x, z) {
       group.add(oct); break;
   }
   group.position.set(x, 0.2, z);
+  group.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return group;
 }
 
@@ -717,6 +971,7 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(0.05, clock.getDelta());
+  const time = clock.elapsedTime;
 
   let mx = joyX, mz = joyY;
   if (keys['w']) mz -= 1;
@@ -732,13 +987,14 @@ function animate() {
   playerX += (mx * cos + mz * sin) * speed * dt;
   playerZ += (-mx * sin + mz * cos) * speed * dt;
 
-  playerX = Math.max(-20, Math.min(20, playerX));
-  playerZ = Math.max(-20, Math.min(20, playerZ));
+  playerX = Math.max(-30, Math.min(30, playerX));
+  playerZ = Math.max(-30, Math.min(30, playerZ));
 
   camera.position.set(playerX, 1.7, playerZ);
   camera.rotation.y = yaw;
   camera.rotation.x = pitch;
 
+  // ★ Анимация покачивания растений
   plots.forEach(p => {
     if (p.plant && p.plantSeed) {
       const seed = getSeed(p.plantSeed);
@@ -746,7 +1002,16 @@ function animate() {
       const progress = Math.min(elapsed / seed.time, 1);
       const scale = 0.4 + progress * 0.6;
       p.plant.scale.set(scale, scale, scale);
+      // Ветер
+      p.plant.rotation.z = Math.sin(time * 1.5 + p.id) * 0.05 * progress;
+      p.plant.rotation.x = Math.cos(time * 1.2 + p.id) * 0.03 * progress;
     }
+  });
+
+  // ★ Облака плывут
+  clouds.forEach((cloud, i) => {
+    cloud.position.x += 0.03 * (1 + (i % 3) * 0.3);
+    if (cloud.position.x > 60) cloud.position.x = -60;
   });
 
   updateTimer += dt;
@@ -787,7 +1052,6 @@ setInterval(() => {
 const savedName = localStorage.getItem('pous_garden_name');
 if (savedName) document.getElementById('name-input').value = savedName;
 
-// ============ ЧАТ ============
 let chatOpen = false;
 let lastChatTime = 0;
 let chatPollTimer = null;
@@ -801,9 +1065,7 @@ function toggleChat() {
     unreadChat = 0;
     updateChatBadge();
     loadChat();
-    if (!chatPollTimer) {
-      chatPollTimer = setInterval(loadChat, 1500);
-    }
+    if (!chatPollTimer) chatPollTimer = setInterval(loadChat, 1500);
     setTimeout(() => {
       const ci = document.getElementById('chat-input');
       if (ci) ci.focus();
@@ -818,9 +1080,7 @@ function updateChatBadge() {
   if (unreadChat > 0) {
     badge.textContent = unreadChat > 9 ? '9+' : unreadChat;
     badge.classList.add('on');
-  } else {
-    badge.classList.remove('on');
-  }
+  } else badge.classList.remove('on');
 }
 
 async function sendChat() {
@@ -861,9 +1121,7 @@ async function loadChat() {
         updateChatBadge();
       }
     });
-    while (box.children.length > 50) {
-      box.removeChild(box.firstChild);
-    }
+    while (box.children.length > 50) box.removeChild(box.firstChild);
     if (scrolled) box.scrollTop = box.scrollHeight;
   } catch(e) {}
 }
@@ -888,4 +1146,4 @@ setInterval(() => {
 }, 3000);
 </script>
 </body>
-</html>
+  </html>
