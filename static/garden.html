@@ -45,6 +45,24 @@ canvas{display:block;width:100%;height:100%}
 #toast.on{opacity:1}
 #toast.good{border-color:#a6e3a1;color:#a6e3a1}
 #toast.bad{border-color:#f38ba8;color:#f38ba8}
+
+/* ЧАТ */
+#chat-toggle{position:fixed;left:20px;top:60px;width:50px;height:50px;border-radius:50%;background:rgba(137,180,250,.9);border:2px solid #fff;font-size:24px;z-index:25;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none}
+#chat-toggle .badge{position:absolute;top:-4px;right:-4px;background:#f38ba8;color:#fff;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;min-width:18px;text-align:center;display:none}
+#chat-toggle .badge.on{display:block}
+#chat-panel{position:fixed;left:10px;top:120px;width:290px;max-width:92vw;height:320px;background:rgba(24,24,37,.95);border:2px solid #89b4fa;border-radius:12px;z-index:30;display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(6px)}
+#chat-panel.on{display:flex}
+#chat-header{background:#313244;color:#89b4fa;font-weight:bold;padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #45475a}
+#chat-header span:last-child{cursor:pointer;font-size:18px;color:#f38ba8}
+#chat-messages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;font-size:12px;line-height:1.4;touch-action:pan-y}
+#chat-messages .msg{margin-bottom:5px;word-wrap:break-word}
+#chat-messages .msg .name{font-weight:bold;margin-right:4px}
+#chat-messages .msg .time{color:#6c7086;font-size:10px;margin-right:4px}
+#chat-messages .msg.sys{color:#6c7086;font-style:italic;text-align:center;font-size:11px;margin:6px 0}
+#chat-input-row{display:flex;border-top:1px solid #45475a}
+#chat-input{flex:1;background:#1e1e2e;color:#cdd6f4;border:none;outline:none;padding:10px;font-size:13px}
+#chat-input-row button{background:#89b4fa;color:#1e1e2e;border:none;padding:10px 14px;font-weight:bold;font-size:16px;cursor:pointer}
+
 #login{position:fixed;inset:0;background:linear-gradient(135deg,#1a2e1a,#0a0a14);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;z-index:300;text-align:center;overflow-y:auto}
 #login h1{color:#a6e3a1;font-size:38px;letter-spacing:3px;text-shadow:0 0 30px rgba(166,227,161,.7);margin-bottom:8px}
 #login .sub{color:#6c7086;font-size:12px;letter-spacing:2px;margin-bottom:25px}
@@ -81,6 +99,20 @@ canvas{display:block;width:100%;height:100%}
 <button id="btn-action">🌱</button>
 <div id="info">Джойстик — ходьба | Свайп — камера | 🌱 — действие</div>
 <div id="toast"></div>
+
+<!-- ЧАТ -->
+<div id="chat-toggle" onclick="toggleChat()">💬<span class="badge" id="chat-badge">0</span></div>
+<div id="chat-panel">
+  <div id="chat-header">
+    <span>💬 ЧАТ САДА</span>
+    <span id="chat-close" onclick="toggleChat()">✕</span>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-row">
+    <input id="chat-input" placeholder="Сообщение..." maxlength="200">
+    <button onclick="sendChat()">➤</button>
+  </div>
+</div>
 
 <div id="shop-modal" class="modal">
   <div class="modal-box">
@@ -166,7 +198,6 @@ const SKINS_LIST = [
 function getSeed(id) { return SEEDS.find(s => s.id === id); }
 function getPet(id) { return PETS.find(p => p.id === id); }
 
-// ============ СОХРАНЕНИЕ ============
 const KEY = 'pous_garden_v3';
 let SAVE = {coins: 500, inventory: {}, plants: {}, pets: [], pet: null, skin: 0};
 try {
@@ -186,7 +217,6 @@ function toast(text, type) {
   el._t = setTimeout(() => el.className = '', 2200);
 }
 
-// ============ ВЫБОР СКИНА ============
 let selectedSkin = 0;
 const skinRow = document.getElementById('skin-row');
 SKINS_LIST.forEach((s, i) => {
@@ -201,37 +231,30 @@ SKINS_LIST.forEach((s, i) => {
   skinRow.appendChild(d);
 });
 
-// ============ 3D ============
 let scene, camera, renderer;
-let playerMesh, otherPlayersMeshes = {};
+let otherPlayersMeshes = {};
 let plots = [];
 
 function init3D() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x87ceeb);
   scene.fog = new THREE.Fog(0x87ceeb, 20, 60);
-
   camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 200);
   camera.rotation.order = 'YXZ';
-
   renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(innerWidth, innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   document.body.appendChild(renderer.domElement);
-
   scene.add(new THREE.AmbientLight(0xffffff, 0.75));
   const sun = new THREE.DirectionalLight(0xfff5d1, 0.9);
   sun.position.set(10, 20, 10);
   scene.add(sun);
-
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(60, 60),
     new THREE.MeshLambertMaterial({color: 0x5a9e3a})
   );
   ground.rotation.x = -Math.PI / 2;
   scene.add(ground);
-
-  // Грядки 5×5
   const PS = 1.4, GAP = 0.2, GRID = 5;
   const total = GRID * PS + (GRID - 1) * GAP;
   const start = -total / 2 + PS / 2;
@@ -248,8 +271,6 @@ function init3D() {
       plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id: i * GRID + j, plantedAt: 0});
     }
   }
-
-  // Деревья
   for (let i = 0; i < 12; i++) {
     const tx = (Math.random() - 0.5) * 45;
     const tz = (Math.random() - 0.5) * 45;
@@ -267,7 +288,6 @@ function init3D() {
     leaves.position.set(tx, 2.7, tz);
     scene.add(leaves);
   }
-
   window.addEventListener('resize', () => {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
@@ -280,35 +300,27 @@ function createCharacter(skinIdx) {
   const group = new THREE.Group();
   const bodyMat = new THREE.MeshLambertMaterial({color: skin.color});
   const bellyMat = new THREE.MeshLambertMaterial({color: skin.belly});
-
   const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), bodyMat);
   body.position.y = 0.55; group.add(body);
-
   const belly = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.05), bellyMat);
   belly.position.set(0, 0.5, 0.21); group.add(belly);
-
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.4), bodyMat);
   head.position.y = 1.1; group.add(head);
-
   const eyeMat = new THREE.MeshBasicMaterial({color: 0x000000});
   const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
   eyeL.position.set(-0.1, 1.15, 0.21); group.add(eyeL);
   const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
   eyeR.position.set(0.1, 1.15, 0.21); group.add(eyeR);
-
   const beak = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.15), new THREE.MeshLambertMaterial({color: 0xffa500}));
   beak.position.set(0, 1.0, 0.22); group.add(beak);
-
   const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
   armL.position.set(-0.35, 0.6, 0); group.add(armL);
   const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
   armR.position.set(0.35, 0.6, 0); group.add(armR);
-
   const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
   legL.position.set(-0.12, 0.2, 0); group.add(legL);
   const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
   legR.position.set(0.12, 0.2, 0); group.add(legR);
-
   return group;
 }
 
@@ -316,7 +328,6 @@ function createPlantMesh(seed, x, z) {
   const group = new THREE.Group();
   const mat = new THREE.MeshLambertMaterial({color: seed.color});
   const stem = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
-
   switch(seed.id) {
     case 'carrot': case 'cucumber': case 'eggplant':
       group.add(box(0.15, 0.5, 0.15, mat, 0, 0.3, 0)); break;
@@ -346,7 +357,6 @@ function createPlantMesh(seed, x, z) {
       oct.position.y = 0.5;
       group.add(oct); break;
   }
-
   group.position.set(x, 0.2, z);
   return group;
 }
@@ -360,7 +370,6 @@ function sph(r, mat, x, y, z) {
   m.position.set(x, y, z); return m;
 }
 
-// ============ ИГРОК ============
 let yaw = 0, pitch = 0;
 let joyX = 0, joyY = 0;
 let joyActive = false;
@@ -369,7 +378,6 @@ let myName = '';
 let onlineOthers = [];
 let updateTimer = 0;
 
-// ============ ДЖОЙСТИК ============
 const joy = document.getElementById('joy');
 const stick = document.getElementById('joy-stick');
 let joyCenter = {x: 0, y: 0};
@@ -401,7 +409,6 @@ function moveJoy(t) {
   joyX = dx / max; joyY = dy / max;
 }
 
-// ============ КАМЕРА ============
 let lookActive = false;
 let lookLast = {x: 0, y: 0};
 
@@ -422,7 +429,6 @@ function setupCameraControls() {
     }
   });
   canvas.addEventListener('touchend', () => { lookActive = false; });
-
   canvas.addEventListener('mousedown', e => {
     lookActive = true; lookLast = {x: e.clientX, y: e.clientY};
   });
@@ -441,7 +447,6 @@ const keys = {};
 document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
 document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-// ============ МАГАЗИН ============
 document.getElementById('btn-shop').onclick = openShop;
 
 function openShop() {
@@ -472,7 +477,6 @@ function buySeed(seed) {
   toast('Куплено: ' + seed.emoji + ' ' + seed.name, 'good');
 }
 
-// ============ ПИТОМЦЫ ============
 document.getElementById('btn-pets').onclick = openPets;
 
 function openPets() {
@@ -507,7 +511,6 @@ function openPets() {
   document.getElementById('pets-modal').classList.add('on');
 }
 
-// ============ ДЕЙСТВИЕ ============
 document.getElementById('btn-action').onclick = actionTap;
 let currentPlot = null;
 let selectedSeed = null;
@@ -625,7 +628,6 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('on');
 }
 
-// ============ HUD ============
 function updateHud() {
   document.getElementById('coins').textContent = Math.floor(SAVE.coins);
   const petsBox = document.getElementById('pets-box');
@@ -638,7 +640,6 @@ function updateHud() {
   }
 }
 
-// ============ ОНЛАЙН ============
 async function sendPosition() {
   if (!myName) return;
   try {
@@ -667,7 +668,6 @@ function updateOtherPlayers() {
     if (!otherPlayersMeshes[p.name]) {
       const mesh = createCharacter(0);
       mesh.position.set(p.x, 0, p.z);
-      // Ник
       const cv = document.createElement('canvas');
       cv.width = 256; cv.height = 64;
       const c = cv.getContext('2d');
@@ -698,7 +698,6 @@ function updateOtherPlayers() {
   });
 }
 
-// ============ ВОССТАНОВЛЕНИЕ ============
 function restorePlants() {
   plots.forEach(plot => {
     const saved = SAVE.plants[plot.id];
@@ -713,7 +712,6 @@ function restorePlants() {
   });
 }
 
-// ============ ЦИКЛ ============
 const clock = new THREE.Clock();
 
 function animate() {
@@ -760,7 +758,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-// ============ СТАРТ ============
 function startGame() {
   const name = document.getElementById('name-input').value.trim();
   if (!name) { toast('Введи имя!', 'bad'); return; }
@@ -789,6 +786,106 @@ setInterval(() => {
 
 const savedName = localStorage.getItem('pous_garden_name');
 if (savedName) document.getElementById('name-input').value = savedName;
+
+// ============ ЧАТ ============
+let chatOpen = false;
+let lastChatTime = 0;
+let chatPollTimer = null;
+let unreadChat = 0;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chat-panel');
+  if (chatOpen) {
+    panel.classList.add('on');
+    unreadChat = 0;
+    updateChatBadge();
+    loadChat();
+    if (!chatPollTimer) {
+      chatPollTimer = setInterval(loadChat, 1500);
+    }
+    setTimeout(() => {
+      const ci = document.getElementById('chat-input');
+      if (ci) ci.focus();
+    }, 300);
+  } else {
+    panel.classList.remove('on');
+  }
+}
+
+function updateChatBadge() {
+  const badge = document.getElementById('chat-badge');
+  if (unreadChat > 0) {
+    badge.textContent = unreadChat > 9 ? '9+' : unreadChat;
+    badge.classList.add('on');
+  } else {
+    badge.classList.remove('on');
+  }
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || !myName) return;
+  inp.value = '';
+  try {
+    await fetch('/api/garden/chat/send', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: myName, text: text})
+    });
+    loadChat();
+  } catch(e) {}
+}
+
+async function loadChat() {
+  try {
+    const r = await fetch('/api/garden/chat/get?since=' + lastChatTime);
+    const data = await r.json();
+    if (!data.ok) return;
+    const box = document.getElementById('chat-messages');
+    let scrolled = false;
+    data.messages.forEach(m => {
+      lastChatTime = Math.max(lastChatTime, m.time);
+      const d = document.createElement('div');
+      d.className = 'msg';
+      const t = new Date(m.time * 1000);
+      const timeStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+      d.innerHTML = '<span class="time">' + timeStr + '</span>' +
+                    '<span class="name" style="color:' + m.color + '">' + escapeHtml(m.name) + ':</span> ' +
+                    escapeHtml(m.text);
+      box.appendChild(d);
+      scrolled = true;
+      if (!chatOpen && m.name !== myName) {
+        unreadChat++;
+        updateChatBadge();
+      }
+    });
+    while (box.children.length > 50) {
+      box.removeChild(box.firstChild);
+    }
+    if (scrolled) box.scrollTop = box.scrollHeight;
+  } catch(e) {}
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+setTimeout(() => {
+  const ci = document.getElementById('chat-input');
+  if (ci) {
+    ci.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); sendChat(); }
+    });
+  }
+}, 500);
+
+setInterval(() => {
+  if (!chatOpen) loadChat();
+}, 3000);
 </script>
 </body>
 </html>
