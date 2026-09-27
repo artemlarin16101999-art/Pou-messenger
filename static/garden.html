@@ -5,25 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>Pous Garden 3D Online</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#87ceeb;color:#cdd6f4}
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif;user-select:none;-webkit-user-select:none}
+body{touch-action:none;overflow:hidden;width:100%;height:100%;background:#87ceeb;color:#cdd6f4}
 canvas{display:block;width:100%;height:100%}
 #hud{position:fixed;top:10px;left:10px;right:10px;display:flex;gap:8px;flex-wrap:wrap;z-index:10;pointer-events:none}
 .hud-box{background:rgba(0,0,0,.65);color:#fff;padding:8px 14px;border-radius:10px;font-size:14px;backdrop-filter:blur(4px)}
 .hud-box b{color:#ffd93d}
-.hud-box.on{background:rgba(166,227,161,.85);color:#1e1e2e;font-weight:bold}
 #joy{position:fixed;left:20px;bottom:20px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.3);border:2px solid #fff;z-index:20;touch-action:none}
 #joy-stick{position:absolute;left:45px;top:45px;width:40px;height:40px;border-radius:50%;background:#fff}
 #btn-action{position:fixed;right:25px;bottom:25px;width:80px;height:80px;border-radius:50%;background:rgba(166,227,161,.9);border:3px solid #fff;font-size:32px;z-index:20;display:flex;align-items:center;justify-content:center;font-weight:bold;touch-action:none}
 #btn-shop{position:fixed;right:115px;bottom:25px;width:60px;height:60px;border-radius:50%;background:rgba(255,217,61,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
 #btn-pets{position:fixed;right:115px;bottom:95px;width:60px;height:60px;border-radius:50%;background:rgba(203,166,247,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
 #info{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:5px 12px;border-radius:10px;font-size:10px;z-index:10;text-align:center;max-width:90%}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:15px}
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:15px;touch-action:pan-y}
 .modal.on{display:flex}
-.modal-box{background:#1e1e2e;border-radius:16px;padding:18px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;border:2px solid #89b4fa;position:relative}
-.modal-box h2{color:#f9e2af;font-size:18px;margin-bottom:12px;text-align:center}
-.close{position:absolute;top:8px;right:8px;background:transparent;color:#fff;font-size:22px;border:none;cursor:pointer;padding:4px 10px}
-.seeds-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.modal-box{background:#1e1e2e;border-radius:16px;padding:18px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:2px solid #89b4fa;position:relative;touch-action:pan-y}
+.modal-box h2{color:#f9e2af;font-size:18px;margin-bottom:12px;text-align:center;position:sticky;top:-18px;background:#1e1e2e;padding:12px 0;z-index:5;border-bottom:1px solid #313244}
+.close{position:sticky;top:0;float:right;background:rgba(30,30,46,.95);color:#fff;font-size:22px;border:2px solid #f38ba8;cursor:pointer;padding:4px 12px;z-index:10;border-radius:10px;margin-bottom:10px;font-weight:bold}
+.seeds-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;touch-action:pan-y}
 .seed-card{background:#313244;border:2px solid transparent;border-radius:10px;padding:10px;text-align:center;cursor:pointer}
 .seed-card:active{transform:scale(.97)}
 .seed-card.cant{opacity:.4;cursor:not-allowed}
@@ -45,15 +45,15 @@ canvas{display:block;width:100%;height:100%}
 #toast.on{opacity:1}
 #toast.good{border-color:#a6e3a1;color:#a6e3a1}
 #toast.bad{border-color:#f38ba8;color:#f38ba8}
-#login{position:fixed;inset:0;background:linear-gradient(135deg,#1a2e1a,#0a0a14);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;z-index:300;text-align:center}
-#login h1{color:#a6e3a1;font-size:42px;letter-spacing:4px;text-shadow:0 0 30px rgba(166,227,161,.7);margin-bottom:8px}
-#login .sub{color:#6c7086;font-size:12px;letter-spacing:2px;margin-bottom:30px}
+#login{position:fixed;inset:0;background:linear-gradient(135deg,#1a2e1a,#0a0a14);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;z-index:300;text-align:center;overflow-y:auto}
+#login h1{color:#a6e3a1;font-size:38px;letter-spacing:3px;text-shadow:0 0 30px rgba(166,227,161,.7);margin-bottom:8px}
+#login .sub{color:#6c7086;font-size:12px;letter-spacing:2px;margin-bottom:25px}
 #login input{width:280px;max-width:90%;padding:14px;font-size:16px;border:2px solid #89b4fa;border-radius:12px;background:#1e1e2e;color:#fff;outline:none;text-align:center}
 #login input:focus{border-color:#a6e3a1}
 #login button{margin-top:15px;padding:14px 40px;background:linear-gradient(135deg,#a6e3a1,#5a9a55);color:#1e1e2e;border:none;border-radius:14px;font-weight:bold;font-size:16px;letter-spacing:1px;cursor:pointer}
 #login .hint{color:#6c7086;font-size:11px;margin-top:15px;line-height:1.6}
-#login .skin-row{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;justify-content:center}
-#login .skin-opt{width:60px;height:60px;background:#313244;border:3px solid transparent;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer}
+#login .skin-row{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;justify-content:center}
+#login .skin-opt{width:56px;height:56px;background:#313244;border:3px solid transparent;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer}
 #login .skin-opt.sel{border-color:#f9e2af}
 </style>
 </head>
@@ -66,12 +66,12 @@ canvas{display:block;width:100%;height:100%}
   <div style="color:#6c7086;font-size:11px;margin-top:15px">Выбери персонажа:</div>
   <div class="skin-row" id="skin-row"></div>
   <button onclick="startGame()">▶ ВОЙТИ В САД</button>
-  <div class="hint">Джойстик — ходьба<br>Свайп — камера<br>🌱 — действие с грядкой</div>
+  <div class="hint">Джойстик — ходьба | Свайп — камера | 🌱 — действие</div>
 </div>
 
 <div id="hud">
   <div class="hud-box">💰 <b id="coins">500</b></div>
-  <div class="hud-box">👥 <span id="online-count">0</span></div>
+  <div class="hud-box">👥 <span id="online-count">1</span></div>
   <div class="hud-box" id="pets-box" style="display:none">🐾 <span id="pet-name">—</span></div>
 </div>
 
@@ -86,8 +86,9 @@ canvas{display:block;width:100%;height:100%}
   <div class="modal-box">
     <button class="close" onclick="closeModal('shop-modal')">✕</button>
     <h2>🏪 МАГАЗИН СЕМЯН</h2>
-    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Все семена открыты — просто купи</div>
+    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Все семена открыты</div>
     <div class="seeds-grid" id="seeds-grid"></div>
+    <div style="height:20px"></div>
   </div>
 </div>
 
@@ -95,7 +96,7 @@ canvas{display:block;width:100%;height:100%}
   <div class="modal-box">
     <button class="close" onclick="closeModal('pets-modal')">✕</button>
     <h2>🐾 ПИТОМЦЫ</h2>
-    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Питомцы дают бонус к продаже</div>
+    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Бонус к продаже</div>
     <div class="seeds-grid" id="pets-grid"></div>
   </div>
 </div>
@@ -114,37 +115,36 @@ canvas{display:block;width:100%;height:100%}
 <script>
 // ============ 28 СЕМЯН ============
 const SEEDS = [
-  {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a, xp:2},
-  {id:'potato', name:'Картошка', emoji:'🥔', price:15, sell:21, time:18, color:0xc8a165, xp:3},
-  {id:'onion', name:'Лук', emoji:'🧅', price:20, sell:28, time:20, color:0xd4a373, xp:4},
-  {id:'tomato', name:'Помидор', emoji:'🍅', price:30, sell:42, time:25, color:0xff3a3a, xp:5},
-  {id:'cucumber', name:'Огурец', emoji:'🥒', price:40, sell:56, time:28, color:0x4a8a3a, xp:6},
-  {id:'lettuce', name:'Салат', emoji:'🥬', price:50, sell:71, time:30, color:0x7fbf5f, xp:8},
-  {id:'pepper', name:'Перец', emoji:'🌶️', price:65, sell:93, time:32, color:0xd63031, xp:10},
-  {id:'corn', name:'Кукуруза', emoji:'🌽', price:80, sell:115, time:35, color:0xffd700, xp:12},
-  {id:'eggplant', name:'Баклажан', emoji:'🍆', price:100, sell:145, time:38, color:0x6a3d9a, xp:15},
-  {id:'broccoli', name:'Брокколи', emoji:'🥦', price:130, sell:190, time:42, color:0x2e8b2e, xp:18},
-  {id:'garlic', name:'Чеснок', emoji:'🧄', price:170, sell:250, time:45, color:0xf0e8d8, xp:22},
-  {id:'strawberry', name:'Клубника', emoji:'🍓', price:220, sell:325, time:48, color:0xff4d5e, xp:28},
-  {id:'grape', name:'Виноград', emoji:'🍇', price:280, sell:415, time:52, color:0x9b59b6, xp:35},
-  {id:'watermelon', name:'Арбуз', emoji:'🍉', price:360, sell:540, time:55, color:0x2ecc40, xp:45},
-  {id:'pineapple', name:'Ананас', emoji:'🍍', price:450, sell:680, time:58, color:0xf1c40f, xp:55},
-  {id:'mushroom', name:'Гриб', emoji:'🍄', price:550, sell:840, time:60, color:0xd94a4a, xp:70},
-  {id:'coconut', name:'Кокос', emoji:'🥥', price:680, sell:1040, time:63, color:0x8b5a2b, xp:85},
-  {id:'avocado', name:'Авокадо', emoji:'🥑', price:820, sell:1260, time:66, color:0x5f8a3a, xp:105},
-  {id:'sunflower', name:'Подсолнух', emoji:'🌻', price:1000, sell:1550, time:70, color:0xffd93d, xp:130},
-  {id:'rose', name:'Роза', emoji:'🌹', price:1250, sell:1950, time:74, color:0xe0115f, xp:160},
-  {id:'tulip', name:'Тюльпан', emoji:'🌷', price:1500, sell:2350, time:78, color:0xff69b4, xp:195},
-  {id:'bamboo', name:'Бамбук', emoji:'🎋', price:1800, sell:2850, time:82, color:0x50c878, xp:240},
-  {id:'cactus', name:'Кактус', emoji:'🌵', price:2200, sell:3500, time:86, color:0x3a8a3a, xp:300},
-  {id:'palm', name:'Пальма', emoji:'🌴', price:2700, sell:4300, time:90, color:0x2e8b2e, xp:370},
-  {id:'cherry', name:'Сакура', emoji:'🌸', price:3300, sell:5300, time:95, color:0xffb7c5, xp:450},
-  {id:'crystal', name:'Кристалл', emoji:'💎', price:5000, sell:8500, time:110, color:0x89dceb, xp:600},
-  {id:'star', name:'Звезда', emoji:'⭐', price:7500, sell:13000, time:130, color:0xffd700, xp:800},
-  {id:'cosmic', name:'Космос', emoji:'🌌', price:12000, sell:22000, time:150, color:0x9370db, xp:1100}
+  {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a},
+  {id:'potato', name:'Картошка', emoji:'🥔', price:15, sell:21, time:18, color:0xc8a165},
+  {id:'onion', name:'Лук', emoji:'🧅', price:20, sell:28, time:20, color:0xd4a373},
+  {id:'tomato', name:'Помидор', emoji:'🍅', price:30, sell:42, time:25, color:0xff3a3a},
+  {id:'cucumber', name:'Огурец', emoji:'🥒', price:40, sell:56, time:28, color:0x4a8a3a},
+  {id:'lettuce', name:'Салат', emoji:'🥬', price:50, sell:71, time:30, color:0x7fbf5f},
+  {id:'pepper', name:'Перец', emoji:'🌶️', price:65, sell:93, time:32, color:0xd63031},
+  {id:'corn', name:'Кукуруза', emoji:'🌽', price:80, sell:115, time:35, color:0xffd700},
+  {id:'eggplant', name:'Баклажан', emoji:'🍆', price:100, sell:145, time:38, color:0x6a3d9a},
+  {id:'broccoli', name:'Брокколи', emoji:'🥦', price:130, sell:190, time:42, color:0x2e8b2e},
+  {id:'garlic', name:'Чеснок', emoji:'🧄', price:170, sell:250, time:45, color:0xf0e8d8},
+  {id:'strawberry', name:'Клубника', emoji:'🍓', price:220, sell:325, time:48, color:0xff4d5e},
+  {id:'grape', name:'Виноград', emoji:'🍇', price:280, sell:415, time:52, color:0x9b59b6},
+  {id:'watermelon', name:'Арбуз', emoji:'🍉', price:360, sell:540, time:55, color:0x2ecc40},
+  {id:'pineapple', name:'Ананас', emoji:'🍍', price:450, sell:680, time:58, color:0xf1c40f},
+  {id:'mushroom', name:'Гриб', emoji:'🍄', price:550, sell:840, time:60, color:0xd94a4a},
+  {id:'coconut', name:'Кокос', emoji:'🥥', price:680, sell:1040, time:63, color:0x8b5a2b},
+  {id:'avocado', name:'Авокадо', emoji:'🥑', price:820, sell:1260, time:66, color:0x5f8a3a},
+  {id:'sunflower', name:'Подсолнух', emoji:'🌻', price:1000, sell:1550, time:70, color:0xffd93d},
+  {id:'rose', name:'Роза', emoji:'🌹', price:1250, sell:1950, time:74, color:0xe0115f},
+  {id:'tulip', name:'Тюльпан', emoji:'🌷', price:1500, sell:2350, time:78, color:0xff69b4},
+  {id:'bamboo', name:'Бамбук', emoji:'🎋', price:1800, sell:2850, time:82, color:0x50c878},
+  {id:'cactus', name:'Кактус', emoji:'🌵', price:2200, sell:3500, time:86, color:0x3a8a3a},
+  {id:'palm', name:'Пальма', emoji:'🌴', price:2700, sell:4300, time:90, color:0x2e8b2e},
+  {id:'cherry', name:'Сакура', emoji:'🌸', price:3300, sell:5300, time:95, color:0xffb7c5},
+  {id:'crystal', name:'Кристалл', emoji:'💎', price:5000, sell:8500, time:110, color:0x89dceb},
+  {id:'star', name:'Звезда', emoji:'⭐', price:7500, sell:13000, time:130, color:0xffd700},
+  {id:'cosmic', name:'Космос', emoji:'🌌', price:12000, sell:22000, time:150, color:0x9370db}
 ];
 
-// ============ ПИТОМЦЫ ============
 const PETS = [
   {id:'rabbit', name:'Кролик', emoji:'🐰', price:200, bonus:0.05},
   {id:'cat', name:'Кот', emoji:'🐱', price:500, bonus:0.10},
@@ -154,19 +154,21 @@ const PETS = [
   {id:'dragon', name:'Дракон', emoji:'🐲', price:15000, bonus:0.50}
 ];
 
+const SKINS_LIST = [
+  {emoji:'🐧', color:0x1e1e2e, belly:0xffffff},
+  {emoji:'🐻', color:0x8b5a2b, belly:0xd4a373},
+  {emoji:'🐰', color:0xffffff, belly:0xffb7c5},
+  {emoji:'🐱', color:0xffa500, belly:0xffffff},
+  {emoji:'🐸', color:0x4a8a3a, belly:0xa6e3a1},
+  {emoji:'🦊', color:0xff7f2a, belly:0xffffff}
+];
+
 function getSeed(id) { return SEEDS.find(s => s.id === id); }
 function getPet(id) { return PETS.find(p => p.id === id); }
 
 // ============ СОХРАНЕНИЕ ============
-const KEY = 'pous_garden_v2';
-let SAVE = {
-  coins: 500,
-  inventory: {},
-  plants: {},
-  pets: [],
-  pet: null,
-  skin: 0
-};
+const KEY = 'pous_garden_v3';
+let SAVE = {coins: 500, inventory: {}, plants: {}, pets: [], pet: null, skin: 0};
 try {
   const s = localStorage.getItem(KEY);
   if (s) SAVE = Object.assign(SAVE, JSON.parse(s));
@@ -176,7 +178,6 @@ function save() {
   try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e) {}
 }
 
-// ============ УВЕДОМЛЕНИЯ ============
 function toast(text, type) {
   const el = document.getElementById('toast');
   el.textContent = text;
@@ -185,18 +186,8 @@ function toast(text, type) {
   el._t = setTimeout(() => el.className = '', 2200);
 }
 
-// ============ СКИНЫ ПЕРСОНАЖА ============
-const SKINS_LIST = [
-  {emoji:'🐧', color:0x1e1e2e, belly:0xffffff},
-  {emoji:'🐻', color:0x8b5a2b, belly:0xd4a373},
-  {emoji:'🐰', color:0xffffff, belly:0xffb7c5},
-  {emoji:'🐱', color:0xffa500, belly:0xffffff},
-  {emoji:'🐸', color:0x4a8a3a, belly:0xa6e3a1},
-  {emoji:'🦊', color:0xff7f2a, belly:0xffffff}
-];
+// ============ ВЫБОР СКИНА ============
 let selectedSkin = 0;
-
-// Инициализация выбора скинов в меню входа
 const skinRow = document.getElementById('skin-row');
 SKINS_LIST.forEach((s, i) => {
   const d = document.createElement('div');
@@ -210,11 +201,10 @@ SKINS_LIST.forEach((s, i) => {
   skinRow.appendChild(d);
 });
 
-// ============ 3D СЦЕНА ============
+// ============ 3D ============
 let scene, camera, renderer;
 let playerMesh, otherPlayersMeshes = {};
 let plots = [];
-let ground, sun;
 
 function init3D() {
   scene = new THREE.Scene();
@@ -230,12 +220,11 @@ function init3D() {
   document.body.appendChild(renderer.domElement);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-  sun = new THREE.DirectionalLight(0xfff5d1, 0.9);
+  const sun = new THREE.DirectionalLight(0xfff5d1, 0.9);
   sun.position.set(10, 20, 10);
   scene.add(sun);
 
-  // Земля
-  ground = new THREE.Mesh(
+  const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(60, 60),
     new THREE.MeshLambertMaterial({color: 0x5a9e3a})
   );
@@ -246,7 +235,6 @@ function init3D() {
   const PS = 1.4, GAP = 0.2, GRID = 5;
   const total = GRID * PS + (GRID - 1) * GAP;
   const start = -total / 2 + PS / 2;
-
   for (let i = 0; i < GRID; i++) {
     for (let j = 0; j < GRID; j++) {
       const x = start + i * (PS + GAP);
@@ -257,8 +245,7 @@ function init3D() {
       );
       plot.position.set(x, 0.1, z);
       scene.add(plot);
-      const id = i * GRID + j;
-      plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id, plantedAt: 0});
+      plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id: i * GRID + j, plantedAt: 0});
     }
   }
 
@@ -267,84 +254,60 @@ function init3D() {
     const tx = (Math.random() - 0.5) * 45;
     const tz = (Math.random() - 0.5) * 45;
     if (Math.abs(tx) < 8 && Math.abs(tz) < 8) continue;
-    createTree(tx, tz);
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.2, 0.3, 2, 6),
+      new THREE.MeshLambertMaterial({color: 0x6b4226})
+    );
+    trunk.position.set(tx, 1, tz);
+    scene.add(trunk);
+    const leaves = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 8, 8),
+      new THREE.MeshLambertMaterial({color: 0x2e8b2e})
+    );
+    leaves.position.set(tx, 2.7, tz);
+    scene.add(leaves);
   }
 
-  // Игрок
-  playerMesh = createCharacter(selectedSkin);
-  playerMesh.position.set(0, 0, 8);
-  playerMesh.visible = false; // от 1-го лица себя не видим
-  scene.add(playerMesh);
-
-  window.addEventListener('resize', onResize);
-}
-
-function createTree(x, z) {
-  const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.2, 0.3, 2, 6),
-    new THREE.MeshLambertMaterial({color: 0x6b4226})
-  );
-  trunk.position.set(x, 1, z);
-  scene.add(trunk);
-  const leaves = new THREE.Mesh(
-    new THREE.SphereGeometry(1.2, 8, 8),
-    new THREE.MeshLambertMaterial({color: 0x2e8b2e})
-  );
-  leaves.position.set(x, 2.7, z);
-  scene.add(leaves);
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
 }
 
 function createCharacter(skinIdx) {
   const skin = SKINS_LIST[skinIdx] || SKINS_LIST[0];
   const group = new THREE.Group();
-
-  // Тело — куб
   const bodyMat = new THREE.MeshLambertMaterial({color: skin.color});
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), bodyMat);
-  body.position.y = 0.55;
-  group.add(body);
-
-  // Живот
   const bellyMat = new THREE.MeshLambertMaterial({color: skin.belly});
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), bodyMat);
+  body.position.y = 0.55; group.add(body);
+
   const belly = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.05), bellyMat);
-  belly.position.set(0, 0.5, 0.21);
-  group.add(belly);
+  belly.position.set(0, 0.5, 0.21); group.add(belly);
 
-  // Голова
   const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.4), bodyMat);
-  head.position.y = 1.1;
-  group.add(head);
+  head.position.y = 1.1; group.add(head);
 
-  // Глаза
   const eyeMat = new THREE.MeshBasicMaterial({color: 0x000000});
   const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
-  eyeL.position.set(-0.1, 1.15, 0.21);
-  group.add(eyeL);
+  eyeL.position.set(-0.1, 1.15, 0.21); group.add(eyeL);
   const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), eyeMat);
-  eyeR.position.set(0.1, 1.15, 0.21);
-  group.add(eyeR);
+  eyeR.position.set(0.1, 1.15, 0.21); group.add(eyeR);
 
-  // Клюв
-  const beakMat = new THREE.MeshLambertMaterial({color: 0xffa500});
-  const beak = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.15), beakMat);
-  beak.position.set(0, 1.0, 0.22);
-  group.add(beak);
+  const beak = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.15), new THREE.MeshLambertMaterial({color: 0xffa500}));
+  beak.position.set(0, 1.0, 0.22); group.add(beak);
 
-  // Руки
   const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
-  armL.position.set(-0.35, 0.6, 0);
-  group.add(armL);
+  armL.position.set(-0.35, 0.6, 0); group.add(armL);
   const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bodyMat);
-  armR.position.set(0.35, 0.6, 0);
-  group.add(armR);
+  armR.position.set(0.35, 0.6, 0); group.add(armR);
 
-  // Ноги
   const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
-  legL.position.set(-0.12, 0.2, 0);
-  group.add(legL);
+  legL.position.set(-0.12, 0.2, 0); group.add(legL);
   const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bodyMat);
-  legR.position.set(0.12, 0.2, 0);
-  group.add(legR);
+  legR.position.set(0.12, 0.2, 0); group.add(legR);
 
   return group;
 }
@@ -352,17 +315,18 @@ function createCharacter(skinIdx) {
 function createPlantMesh(seed, x, z) {
   const group = new THREE.Group();
   const mat = new THREE.MeshLambertMaterial({color: seed.color});
+  const stem = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
 
   switch(seed.id) {
     case 'carrot': case 'cucumber': case 'eggplant':
       group.add(box(0.15, 0.5, 0.15, mat, 0, 0.3, 0)); break;
     case 'tomato': case 'pepper': case 'strawberry':
-      group.add(box(0.08, 0.6, 0.08, new THREE.MeshLambertMaterial({color:0x2e8b2e}), 0, 0.3, 0));
+      group.add(box(0.08, 0.6, 0.08, stem, 0, 0.3, 0));
       group.add(sph(0.2, mat, 0, 0.7, 0)); break;
     case 'corn': case 'bamboo': case 'palm':
       group.add(box(0.12, 1.2, 0.12, mat, 0, 0.6, 0)); break;
     case 'potato': case 'onion': case 'garlic': case 'coconut':
-      group.add(box(0.05, 0.5, 0.05, new THREE.MeshLambertMaterial({color:0x2e8b2e}), 0, 0.25, 0));
+      group.add(box(0.05, 0.5, 0.05, stem, 0, 0.25, 0));
       group.add(sph(0.25, mat, 0, 0.55, 0)); break;
     case 'lettuce': case 'broccoli':
       group.add(sph(0.35, mat, 0, 0.35, 0)); break;
@@ -372,14 +336,15 @@ function createPlantMesh(seed, x, z) {
       group.add(box(0.12, 0.4, 0.12, new THREE.MeshLambertMaterial({color:0xf5e6d3}), 0, 0.2, 0));
       group.add(sph(0.3, mat, 0, 0.55, 0)); break;
     case 'avocado': case 'sunflower': case 'rose': case 'tulip': case 'cherry':
-      group.add(box(0.08, 0.8, 0.08, new THREE.MeshLambertMaterial({color:0x2e8b2e}), 0, 0.4, 0));
+      group.add(box(0.08, 0.8, 0.08, stem, 0, 0.4, 0));
       group.add(sph(0.28, mat, 0, 0.9, 0)); break;
     case 'cactus':
       group.add(box(0.3, 0.9, 0.3, mat, 0, 0.45, 0));
       group.add(box(0.2, 0.2, 0.2, mat, 0.25, 0.6, 0)); break;
     case 'crystal': case 'star': case 'cosmic':
-      group.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.4), mat));
-      group.children[0].position.y = 0.5; break;
+      const oct = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), mat);
+      oct.position.y = 0.5;
+      group.add(oct); break;
   }
 
   group.position.set(x, 0.2, z);
@@ -388,20 +353,11 @@ function createPlantMesh(seed, x, z) {
 
 function box(w, h, d, mat, x, y, z) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-  m.position.set(x, y, z);
-  return m;
+  m.position.set(x, y, z); return m;
 }
-
 function sph(r, mat, x, y, z) {
   const m = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 10), mat);
-  m.position.set(x, y, z);
-  return m;
-}
-
-function onResize() {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+  m.position.set(x, y, z); return m;
 }
 
 // ============ ИГРОК ============
@@ -431,8 +387,7 @@ joy.addEventListener('touchmove', e => {
 });
 joy.addEventListener('touchend', e => {
   e.preventDefault();
-  joyActive = false;
-  joyX = joyY = 0;
+  joyActive = false; joyX = joyY = 0;
   stick.style.transform = 'translate(0, 0)';
 });
 
@@ -443,18 +398,15 @@ function moveJoy(t) {
   const max = 50;
   if (d > max) { dx = dx/d*max; dy = dy/d*max; }
   stick.style.transform = `translate(${dx}px, ${dy}px)`;
-  joyX = dx / max;
-  joyY = dy / max;
+  joyX = dx / max; joyY = dy / max;
 }
 
 // ============ КАМЕРА ============
 let lookActive = false;
 let lookLast = {x: 0, y: 0};
-let canvas;
 
 function setupCameraControls() {
-  canvas = renderer.domElement;
-
+  const canvas = renderer.domElement;
   canvas.addEventListener('touchstart', e => {
     if (e.target === canvas) {
       lookActive = true;
@@ -472,8 +424,7 @@ function setupCameraControls() {
   canvas.addEventListener('touchend', () => { lookActive = false; });
 
   canvas.addEventListener('mousedown', e => {
-    lookActive = true;
-    lookLast = {x: e.clientX, y: e.clientY};
+    lookActive = true; lookLast = {x: e.clientX, y: e.clientY};
   });
   canvas.addEventListener('mousemove', e => {
     if (lookActive) {
@@ -516,8 +467,7 @@ function buySeed(seed) {
   if (SAVE.coins < seed.price) return;
   SAVE.coins -= seed.price;
   SAVE.inventory[seed.id] = (SAVE.inventory[seed.id] || 0) + 1;
-  save();
-  updateHud();
+  save(); updateHud();
   openShop();
   toast('Куплено: ' + seed.emoji + ' ' + seed.name, 'good');
 }
@@ -548,8 +498,7 @@ function openPets() {
           toast('Куплен: ' + pet.emoji + ' ' + pet.name, 'good');
         }
         SAVE.pet = pet.id;
-        save();
-        updateHud();
+        save(); updateHud();
         openPets();
       };
     }
@@ -558,7 +507,7 @@ function openPets() {
   document.getElementById('pets-modal').classList.add('on');
 }
 
-// ============ ДЕЙСТВИЕ С ГРЯДКОЙ ============
+// ============ ДЕЙСТВИЕ ============
 document.getElementById('btn-action').onclick = actionTap;
 let currentPlot = null;
 let selectedSeed = null;
@@ -592,7 +541,7 @@ function openPlotMenu(plot) {
     } else {
       const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
       const total = Math.floor(seed.sell * (1 + bonus));
-      info.innerHTML = '✅ <b>' + seed.emoji + ' ' + seed.name + '</b> готов!<br>Продажа: <b>+' + total + '💰</b>' + (bonus ? ' (питомец +' + Math.round(bonus*100) + '%)' : '');
+      info.innerHTML = '✅ <b>' + seed.emoji + ' ' + seed.name + '</b> готов!<br>Продажа: <b>+' + total + '💰</b>';
       invEl.style.display = 'none';
       const b = document.createElement('button');
       b.className = 'green';
@@ -655,8 +604,7 @@ function plantSeed(plot, seedId) {
   plot.plantedAt = Date.now();
   plot.plant = createPlantMesh(seed, plot.x, plot.z);
   scene.add(plot.plant);
-  save();
-  updateHud();
+  save(); updateHud();
   closeModal('action-modal');
   toast('Посажено: ' + seed.emoji + ' ' + seed.name, 'good');
 }
@@ -667,10 +615,8 @@ function harvest(plot) {
   const total = Math.floor(seed.sell * (1 + bonus));
   SAVE.coins += total;
   if (plot.plant) { scene.remove(plot.plant); plot.plant = null; }
-  plot.plantSeed = null;
-  plot.plantedAt = 0;
-  save();
-  updateHud();
+  plot.plantSeed = null; plot.plantedAt = 0;
+  save(); updateHud();
   closeModal('action-modal');
   toast('+ ' + total + '💰 за ' + seed.emoji, 'good');
 }
@@ -719,35 +665,31 @@ function updateOtherPlayers() {
   onlineOthers.forEach(p => {
     seen.add(p.name);
     if (!otherPlayersMeshes[p.name]) {
-      // Создаём нового игрока
       const mesh = createCharacter(0);
       mesh.position.set(p.x, 0, p.z);
-      mesh.userData.name = p.name;
-      // Ник над головой
-      const canvas2 = document.createElement('canvas');
-      canvas2.width = 256; canvas2.height = 64;
-      const c = canvas2.getContext('2d');
+      // Ник
+      const cv = document.createElement('canvas');
+      cv.width = 256; cv.height = 64;
+      const c = cv.getContext('2d');
       c.fillStyle = 'rgba(0,0,0,0.7)';
       c.fillRect(0, 0, 256, 64);
       c.fillStyle = '#fff';
       c.font = 'bold 32px Arial';
       c.textAlign = 'center';
       c.fillText(p.name, 128, 45);
-      const tex = new THREE.CanvasTexture(canvas2);
-      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
-      sprite.scale.set(2, 0.5, 1);
-      sprite.position.y = 1.9;
-      mesh.add(sprite);
+      const tex = new THREE.CanvasTexture(cv);
+      const spr = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
+      spr.scale.set(2, 0.5, 1);
+      spr.position.y = 1.9;
+      mesh.add(spr);
       scene.add(mesh);
       otherPlayersMeshes[p.name] = mesh;
     }
-    // Обновляем позицию
     const mesh = otherPlayersMeshes[p.name];
     mesh.position.x += (p.x - mesh.position.x) * 0.3;
     mesh.position.z += (p.z - mesh.position.z) * 0.3;
     mesh.rotation.y = p.yaw;
   });
-  // Удаляем тех, кто ушёл
   Object.keys(otherPlayersMeshes).forEach(n => {
     if (!seen.has(n)) {
       scene.remove(otherPlayersMeshes[n]);
@@ -756,7 +698,7 @@ function updateOtherPlayers() {
   });
 }
 
-// ============ ВОССТАНОВЛЕНИЕ РАСТЕНИЙ ============
+// ============ ВОССТАНОВЛЕНИЕ ============
 function restorePlants() {
   plots.forEach(plot => {
     const saved = SAVE.plants[plot.id];
@@ -778,7 +720,6 @@ function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(0.05, clock.getDelta());
 
-  // Движение
   let mx = joyX, mz = joyY;
   if (keys['w']) mz -= 1;
   if (keys['s']) mz += 1;
@@ -800,7 +741,6 @@ function animate() {
   camera.rotation.y = yaw;
   camera.rotation.x = pitch;
 
-  // Растения растут
   plots.forEach(p => {
     if (p.plant && p.plantSeed) {
       const seed = getSeed(p.plantSeed);
@@ -811,7 +751,6 @@ function animate() {
     }
   });
 
-  // Онлайн — отправка раз в 0.5 сек
   updateTimer += dt;
   if (updateTimer > 0.5) {
     updateTimer = 0;
@@ -828,6 +767,7 @@ function startGame() {
   myName = name;
   SAVE.skin = selectedSkin;
   save();
+  localStorage.setItem('pous_garden_name', name);
 
   document.getElementById('login').style.display = 'none';
 
@@ -838,7 +778,6 @@ function startGame() {
   animate();
 }
 
-// Сохранение грядок
 setInterval(() => {
   if (!myName) return;
   SAVE.plants = {};
@@ -848,19 +787,8 @@ setInterval(() => {
   save();
 }, 5000);
 
-window.addEventListener('resize', () => {
-  if (camera) {
-    camera.aspect = innerWidth / innerHeight;
-    camera.updateProjectionMatrix();
-  }
-});
-
-// Автозаполнение имени
 const savedName = localStorage.getItem('pous_garden_name');
 if (savedName) document.getElementById('name-input').value = savedName;
-document.getElementById('name-input').addEventListener('change', e => {
-  localStorage.setItem('pous_garden_name', e.target.value);
-});
 </script>
 </body>
-  </html>
+</html>
