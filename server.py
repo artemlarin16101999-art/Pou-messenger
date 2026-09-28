@@ -11,7 +11,7 @@ GARDEN_FILE = 'garden_data.json'
 lock = asyncio.Lock()
 
 ADMIN_NAME = 'POUADMINISTRATOR'
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')  # вынеси в env!
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', '123fff123')
 GARDEN_ADMIN = 'gildi'
 
 # ============ POUS GARDEN ============
@@ -174,6 +174,42 @@ async def garden_check_session(request):
     })
 
 
+async def garden_get_coins(request):
+    data = await request.json()
+    token = (data.get('token') or '').strip()
+    name = garden_check_token(token)
+    if not name:
+        return web.json_response({'ok': False, 'error': 'Не авторизован'})
+    acc = garden_accounts.get(name)
+    if not acc:
+        return web.json_response({'ok': False, 'error': 'Аккаунт не найден'})
+    return web.json_response({'ok': True, 'coins': acc['coins']})
+
+
+async def garden_set_coins(request):
+    data = await request.json()
+    token = (data.get('token') or '').strip()
+    name = garden_check_token(token)
+    if not name:
+        return web.json_response({'ok': False, 'error': 'Не авторизован'})
+    try:
+        coins = int(data.get('coins', 0))
+    except (ValueError, TypeError):
+        return web.json_response({'ok': False, 'error': 'bad coins'})
+    if coins < 0:
+        coins = 0
+    async with lock:
+        acc = garden_accounts.get(name)
+        if not acc:
+            return web.json_response({'ok': False, 'error': 'Аккаунт не найден'})
+        # Не позволяем ставить монеты больше, чем есть + 1 миллион (античит-заглушка)
+        if coins > acc['coins'] + 1_000_000:
+            return web.json_response({'ok': False, 'error': 'Слишком много'})
+        acc['coins'] = coins
+        save_garden()
+    return web.json_response({'ok': True, 'coins': coins})
+
+
 # ============ GARDEN: АДМИН ============
 async def garden_admin_kick(request):
     data = await request.json()
@@ -196,7 +232,10 @@ async def garden_admin_give(request):
     if not is_admin(admin_name):
         return web.json_response({'ok': False, 'error': 'Нет доступа'})
     target = (data.get('target') or '').strip()
-    amount = int(data.get('amount', 0))
+    try:
+        amount = int(data.get('amount', 0))
+    except (ValueError, TypeError):
+        return web.json_response({'ok': False, 'error': 'bad amount'})
     async with lock:
         if target in garden_accounts:
             garden_accounts[target]['coins'] += amount
@@ -366,6 +405,8 @@ async def main():
     app.router.add_post('/api/garden/register', garden_register)
     app.router.add_post('/api/garden/login', garden_login)
     app.router.add_post('/api/garden/check-session', garden_check_session)
+    app.router.add_post('/api/garden/get-coins', garden_get_coins)
+    app.router.add_post('/api/garden/set-coins', garden_set_coins)
     app.router.add_post('/api/garden/update', garden_update)
     app.router.add_post('/api/garden/leave', garden_leave)
     app.router.add_get('/api/garden/stats', garden_stats)
