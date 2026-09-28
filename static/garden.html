@@ -567,8 +567,7 @@ function createCharacter(skinIdx) {
 }
 function createPlantMesh(seed, x, z) {
   const g = new THREE.Group();
-  const mat = new THREE.MeshLambert
-  ({color: seed.color});
+    const mat = new THREE.MeshLambertMaterial({color: seed.color});
   const stem = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
   const id = seed.id;
   if (['carrot','cucumber','eggplant'].includes(id)) g.add(box(0.15, 0.5, 0.15, mat, 0, 0.3, 0));
