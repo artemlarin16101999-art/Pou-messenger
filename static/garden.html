@@ -18,7 +18,7 @@ canvas{display:block;width:100%;height:100%}
 #btn-shop-sell{position:fixed;right:25px;bottom:115px;width:60px;height:60px;border-radius:50%;background:rgba(243,139,168,.95);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
 #btn-pets{position:fixed;right:115px;bottom:95px;width:60px;height:60px;border-radius:50%;background:rgba(203,166,247,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
 #btn-lab{position:fixed;right:195px;bottom:25px;width:60px;height:60px;border-radius:50%;background:rgba(166,227,161,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
-#hotkeys{position:fixed;right:20px;top:120px;background:rgba(0,0,0,.7);border-radius:10px;padding:8px 12px;font-size:11px;color:#cdd6f4;z-index:15;line-height:1.7;display:none}
+#hotkeys{position:fixed;right:20px;top:120px;background:rgba(0,0,0,.75);border-radius:10px;padding:10px 14px;font-size:11px;color:#cdd6f4;z-index:15;line-height:1.8;display:none;border:1px solid #45475a}
 #hotkeys.on{display:block}
 #hotkeys b{color:#f9e2af}
 #info{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:5px 12px;border-radius:10px;font-size:10px;z-index:10;text-align:center;max-width:90%}
@@ -110,10 +110,11 @@ canvas{display:block;width:100%;height:100%}
   <h1>🌱 POUS GARDEN 3D</h1>
   <div class="sub">◆ ОНЛАЙН-ФЕРМА + ГЕНЕТИКА ◆</div>
   <input id="name-input" placeholder="Введи своё имя" maxlength="15">
+  <input id="password-input" type="password" placeholder="Введи пароль" maxlength="30" style="margin-top:10px">
   <div style="color:#6c7086;font-size:11px;margin-top:15px">Выбери персонажа:</div>
   <div class="skin-row" id="skin-row"></div>
   <button onclick="startGame()">▶ ВОЙТИ В САД</button>
-  <div class="hint">ПК: WASD + мышь + E | Моб: джойстик + свайп</div>
+  <div class="hint">ПК: B=магазин, E=действие, P=питомцы, G=лаба, '=продажа, Tab=админ</div>
 </div>
 
 <div id="hud">
@@ -129,18 +130,19 @@ canvas{display:block;width:100%;height:100%}
 <button id="btn-shop-sell">💱</button>
 <button id="btn-pets">🐾</button>
 <button id="btn-action">🌱</button>
-<div id="info">ПК: WASD, мышь, E=действие, Q=чат, 1=магазин, 2=рынок, 3=лаба, 4=питомцы</div>
+<div id="info">ПК: B=магазин, E=действие, P=питомцы, G=лаба, '=продажа, Tab=админ | Моб: джойстик</div>
 <div id="toast"></div>
 
 <div id="hotkeys">
   <b>Хоткеи:</b><br>
-  1 — 🛒 Магазин покупки<br>
-  2 — 💱 Рынок продажи<br>
-  3 — 🧬 Лаборатория<br>
-  4 — 🐾 Питомцы<br>
-  E — 🌱 Действие<br>
+  B — 🛒 Магазин покупки<br>
+  ' — 💱 Рынок продажи<br>
+  G — 🧬 Лаборатория<br>
+  P — 🐾 Питомцы<br>
+  E / ЛКМ — 🌱 Действие<br>
   Q — 💬 Чат<br>
   R — ✋ Взять/убрать в руки<br>
+  Tab — 👑 Админка<br>
   Esc — отпустить мышь
 </div>
 
@@ -241,7 +243,7 @@ canvas{display:block;width:100%;height:100%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-  // ============ 48 СЕМЯН ============
+// ============ 48 СЕМЯН ============
 const SEEDS = [
   {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a},
   {id:'potato', name:'Картошка', emoji:'🥔', price:15, sell:21, time:18, color:0xc8a165},
@@ -360,19 +362,13 @@ function getPet(id) { return PETS.find(p => p.id === id); }
 function getHybridKey(a, b) { return [a, b].sort().join('+'); }
 function getHybrid(a, b) { return HYBRIDS[getHybridKey(a, b)] || null; }
 
-// ============ СОХРАНЕНИЕ ============
-const KEY = 'pous_garden_v8';
+const KEY = 'pous_garden_v9';
 let SAVE = {coins: 500, inventory: {}, plants: {}, pets: [], pet: null, skin: 0, hybrid_names: [], held: null};
-try {
-  const s = localStorage.getItem(KEY);
-  if (s) SAVE = Object.assign(SAVE, JSON.parse(s));
-} catch(e) {}
+try { const s = localStorage.getItem(KEY); if (s) SAVE = Object.assign(SAVE, JSON.parse(s)); } catch(e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e) {} }
 
-// ============ ТОКЕН ============
 let GARDEN_TOKEN = localStorage.getItem('pous_garden_token') || null;
-async function serverRegister(name) {
-  const password = 'autopass_' + name.toLowerCase();
+async function serverRegister(name, password) {
   try {
     const r = await fetch('/api/garden/register', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({name: name, password: password})});
     const data = await r.json();
@@ -441,7 +437,6 @@ SKINS_LIST.forEach((s, i) => {
   skinRow.appendChild(d);
 });
 
-// ============ ТЕКСТУРЫ ============
 let TEX = {};
 function preloadTextures() {
   TEX.grass = makeGrassTexture(); TEX.dirt = makeDirtTexture();
@@ -483,11 +478,12 @@ function makeCloudTexture() {
   return new THREE.CanvasTexture(c);
 }
 
-// ============ 3D СЦЕНА ============
 let scene, camera, renderer;
 let otherPlayersMeshes = {};
 let plots = [];
 let clouds = [];
+let playerMesh = null;
+let heldMesh = null;
 
 function init3D() {
   preloadTextures();
@@ -513,13 +509,11 @@ function init3D() {
   sun.shadow.bias = -0.0005;
   scene.add(sun);
   scene.add(new THREE.HemisphereLight(0x87ceeb, 0x5a9e3a, 0.5));
-
   const grassTex = TEX.grass.clone(); grassTex.needsUpdate = true;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80, 20, 20), new THREE.MeshLambertMaterial({map: grassTex}));
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
-
   const PS = 1.4, GAP = 0.2, GRID = 5;
   const total = GRID * PS + (GRID - 1) * GAP;
   const start = -total / 2 + PS / 2;
@@ -530,13 +524,10 @@ function init3D() {
     plot.position.set(x, 0.1, z); plot.castShadow = true; plot.receiveShadow = true; scene.add(plot);
     plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id: i * GRID + j, plantedAt: 0});
   } }
-
   const woodTex = TEX.wood.clone(); woodTex.needsUpdate = true;
   for (let i = 0; i < 14; i++) { const tx = (Math.random() - 0.5) * 55; const tz = (Math.random() - 0.5) * 55; if (Math.abs(tx) < 9 && Math.abs(tz) < 9) continue; createTree(tx, tz, woodTex); }
-
   const cloudTex = TEX.cloud;
   for (let i = 0; i < 8; i++) { const cm = new THREE.SpriteMaterial({map: cloudTex, transparent: true, opacity: 0.85}); const cl = new THREE.Sprite(cm); cl.position.set((Math.random() - 0.5) * 100, 25 + Math.random() * 15, (Math.random() - 0.5) * 100); cl.scale.set(20, 10, 1); scene.add(cl); clouds.push(cl); }
-
   window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 }
 function createTree(x, z, woodTex) {
@@ -547,7 +538,7 @@ function createTree(x, z, woodTex) {
   const l2 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), lm2); l2.position.set(x + 0.7, 3.8, z + 0.4); l2.castShadow = true; scene.add(l2);
   const l3 = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 8), lm2); l3.position.set(x - 0.6, 4.0, z - 0.5); l3.castShadow = true; scene.add(l3);
 }
-function createCharacter(skinIdx) {
+  function createCharacter(skinIdx) {
   const skin = SKINS_LIST[skinIdx] || SKINS_LIST[0];
   const g = new THREE.Group();
   const bm = new THREE.MeshLambertMaterial({color: skin.color});
@@ -567,7 +558,7 @@ function createCharacter(skinIdx) {
 }
 function createPlantMesh(seed, x, z) {
   const g = new THREE.Group();
-    const mat = new THREE.MeshLambertMaterial({color: seed.color});
+  const mat = new THREE.MeshLambertMaterial({color: seed.color});
   const stem = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
   const id = seed.id;
   if (['carrot','cucumber','eggplant'].includes(id)) g.add(box(0.15, 0.5, 0.15, mat, 0, 0.3, 0));
@@ -595,33 +586,16 @@ let playerX = 0, playerZ = 8;
 let myName = '';
 let onlineOthers = [];
 let updateTimer = 0;
-let playerMesh = null;
-let heldMesh = null;
 
 const joy = document.getElementById('joy');
 const stick = document.getElementById('joy-stick');
 let joyCenter = {x: 0, y: 0};
-joy.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const r = joy.getBoundingClientRect();
-  joyCenter = {x: r.left + r.width/2, y: r.top + r.height/2};
-  joyActive = true;
-  moveJoy(e.touches[0]);
-});
-joy.addEventListener('touchmove', e => {
-  e.preventDefault();
-  if (e.touches[0]) moveJoy(e.touches[0]);
-});
-joy.addEventListener('touchend', e => {
-  e.preventDefault();
-  joyActive = false; joyX = joyY = 0;
-  stick.style.transform = 'translate(0, 0)';
-});
+joy.addEventListener('touchstart', e => { e.preventDefault(); const r = joy.getBoundingClientRect(); joyCenter = {x: r.left + r.width/2, y: r.top + r.height/2}; joyActive = true; moveJoy(e.touches[0]); });
+joy.addEventListener('touchmove', e => { e.preventDefault(); if (e.touches[0]) moveJoy(e.touches[0]); });
+joy.addEventListener('touchend', e => { e.preventDefault(); joyActive = false; joyX = joyY = 0; stick.style.transform = 'translate(0, 0)'; });
 function moveJoy(t) {
-  let dx = t.clientX - joyCenter.x;
-  let dy = t.clientY - joyCenter.y;
-  const d = Math.sqrt(dx*dx + dy*dy);
-  const max = 50;
+  let dx = t.clientX - joyCenter.x; let dy = t.clientY - joyCenter.y;
+  const d = Math.sqrt(dx*dx + dy*dy); const max = 50;
   if (d > max) { dx = dx/d*max; dy = dy/d*max; }
   stick.style.transform = `translate(${dx}px, ${dy}px)`;
   joyX = dx / max; joyY = dy / max;
@@ -631,9 +605,7 @@ let lookActive = false;
 let lookLast = {x: 0, y: 0};
 function setupCameraControls() {
   const canvas = renderer.domElement;
-  canvas.addEventListener('touchstart', e => {
-    if (e.target === canvas) { lookActive = true; lookLast = {x: e.touches[0].clientX, y: e.touches[0].clientY}; }
-  });
+  canvas.addEventListener('touchstart', e => { if (e.target === canvas) { lookActive = true; lookLast = {x: e.touches[0].clientX, y: e.touches[0].clientY}; } });
   canvas.addEventListener('touchmove', e => {
     if (lookActive && e.touches[0]) {
       yaw -= (e.touches[0].clientX - lookLast.x) * 0.008;
@@ -645,8 +617,7 @@ function setupCameraControls() {
   canvas.addEventListener('touchend', () => { lookActive = false; });
   canvas.addEventListener('mousedown', e => {
     if (e.button === 0 && !e.target.closest('#joy') && !e.target.closest('button') && !e.target.closest('#chat-panel')) {
-      canvas.requestPointerLock();
-      lookActive = true;
+      canvas.requestPointerLock(); lookActive = true;
     }
   });
   canvas.addEventListener('mousemove', e => {
@@ -669,16 +640,17 @@ function setupCameraControls() {
 const keys = {};
 document.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
-  if (e.key === 'e' || e.key === 'E') actionTap();
-  if (e.key === 'q' || e.key === 'Q') toggleChat();
-  if (e.key === 'r' || e.key === 'R') toggleHold();
-  if (e.key === '1') openShop();
-  if (e.key === '2') openSell();
-  if (e.key === '3') { document.getElementById('lab-modal').classList.add('on'); renderLab(); renderHybridsList(); }
-  if (e.key === '4') openPets();
-  if (e.key === 'Tab') e.preventDefault();
+  if (e.key === 'b' || e.key === 'B' || e.key === 'и') openShop();
+  if (e.key === 'e' || e.key === 'E' || e.key === 'у') actionTap();
+  if (e.key === 'q' || e.key === 'Q' || e.key === 'й') toggleChat();
+  if (e.key === 'r' || e.key === 'R' || e.key === 'к') toggleHold();
+  if (e.key === 'p' || e.key === 'P' || e.key === 'з') openPets();
+  if (e.key === 'g' || e.key === 'G' || e.key === 'п') openLab();
+  if (e.key === "'" || e.key === 'э') openSell();
+  if (e.key === 'Tab') { e.preventDefault(); toggleAdmin(); }
 });
 document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+document.addEventListener('mousedown', e => { if (e.button === 0 && document.pointerLockElement) actionTap(); });
 
 document.getElementById('btn-shop-buy').onclick = openShop;
 function openShop() {
@@ -701,7 +673,6 @@ function buySeed(seed) {
   save(); updateHud(); pushCoins(); openShop();
   toast('Куплено: ' + seed.emoji + ' ' + seed.name, 'good');
 }
-
 document.getElementById('btn-shop-sell').onclick = openSell;
 function openSell() {
   const grid = document.getElementById('sell-grid');
@@ -731,7 +702,6 @@ function sellSeed(id, seed) {
   save(); updateHud(); pushCoins(); openSell();
   toast('+ ' + total + '💰 за ' + seed.emoji, 'good');
 }
-
 document.getElementById('btn-pets').onclick = openPets;
 function openPets() {
   const grid = document.getElementById('pets-grid');
@@ -761,14 +731,13 @@ function openPets() {
 
 let labSlot1 = null, labSlot2 = null;
 let pickTarget = 0;
-document.getElementById('btn-lab').onclick = () => {
+document.getElementById('btn-lab').onclick = openLab;
+function openLab() {
   document.getElementById('lab-modal').classList.add('on');
-  renderLab();
-  renderHybridsList();
-};
+  renderLab(); renderHybridsList();
+}
 function renderLab() {
-  const s1 = document.getElementById('slot1');
-  const s2 = document.getElementById('slot2');
+  const s1 = document.getElementById('slot1'); const s2 = document.getElementById('slot2');
   if (labSlot1) { const seed = getSeed(labSlot1); s1.classList.add('filled'); s1.querySelector('.emo').textContent = seed.emoji; s1.querySelector('.label').textContent = seed.name; }
   else { s1.classList.remove('filled'); s1.querySelector('.emo').textContent = '❓'; s1.querySelector('.label').textContent = 'Родитель 1'; }
   if (labSlot2) { const seed = getSeed(labSlot2); s2.classList.add('filled'); s2.querySelector('.emo').textContent = seed.emoji; s2.querySelector('.label').textContent = seed.name; }
@@ -940,7 +909,6 @@ function updateHud() {
   if (SAVE.held) { const s = getSeed(SAVE.held); if (s) { document.getElementById('held-name').textContent = s.emoji + ' ' + s.name; heldBox.style.display = 'block'; } else heldBox.style.display = 'none'; }
   else heldBox.style.display = 'none';
 }
-
 function toggleHold() {
   if (SAVE.held) { SAVE.held = null; save(); updateHud(); updateHeldMesh(); toast('Убрал из рук', ''); return; }
   const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
@@ -950,8 +918,6 @@ function toggleHold() {
   const s = getSeed(SAVE.held);
   toast('✋ Взял: ' + s.emoji + ' ' + s.name, 'good');
 }
-
-// ============ СЕТЬ ============
 async function sendPosition() {
   if (!myName || !GARDEN_TOKEN) return;
   try {
@@ -967,21 +933,14 @@ function updateOtherPlayers() {
     if (!otherPlayersMeshes[p.name]) {
       const mesh = createCharacter(0);
       mesh.position.set(p.x, 0, p.z);
-      const cv = document.createElement('canvas');
-      cv.width = 256; cv.height = 64;
+      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64;
       const c = cv.getContext('2d');
-      c.fillStyle = 'rgba(0,0,0,0.7)';
-      c.fillRect(0, 0, 256, 64);
-      c.fillStyle = '#fff';
-      c.font = 'bold 32px Arial';
-      c.textAlign = 'center';
-      c.fillText(p.name, 128, 45);
+      c.fillStyle = 'rgba(0,0,0,0.7)'; c.fillRect(0, 0, 256, 64);
+      c.fillStyle = '#fff'; c.font = 'bold 32px Arial'; c.textAlign = 'center'; c.fillText(p.name, 128, 45);
       const tex = new THREE.CanvasTexture(cv);
       const spr = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
-      spr.scale.set(2, 0.5, 1);
-      spr.position.y = 1.9;
-      mesh.add(spr);
-      scene.add(mesh);
+      spr.scale.set(2, 0.5, 1); spr.position.y = 1.9;
+      mesh.add(spr); scene.add(mesh);
       otherPlayersMeshes[p.name] = mesh;
     }
     const mesh = otherPlayersMeshes[p.name];
@@ -1036,9 +995,7 @@ function animate() {
   camera.position.set(playerX, 1.7, playerZ);
   camera.rotation.y = yaw;
   camera.rotation.x = pitch;
-  if (heldMesh) {
-    heldMesh.position.set(playerX + Math.cos(yaw) * 0.4, 1.2, playerZ + Math.sin(-yaw) * 0.4);
-  }
+  if (heldMesh) heldMesh.position.set(playerX + Math.cos(yaw) * 0.4, 1.2, playerZ + Math.sin(-yaw) * 0.4);
   plots.forEach(p => {
     if (p.plant && p.plantSeed) {
       const seed = getSeed(p.plantSeed);
@@ -1047,7 +1004,7 @@ function animate() {
       const scale = 0.4 + progress * 0.6;
       p.plant.scale.set(scale, scale, scale);
       p.plant.rotation.z = Math.sin(time * 1.5 + p.id) * 0.05 * progress;
-      p.plant.rotation.x = Math.cos(time * 1.2 + p.id) * 0.05 * progress;
+      p.plant.rotation.x = Math.cos(time * 1.2 + p.id) * 0.03 * progress;
     }
   });
   clouds.forEach((cloud, i) => {
@@ -1061,16 +1018,18 @@ function animate() {
 
 async function startGame() {
   const name = document.getElementById('name-input').value.trim();
+  const password = document.getElementById('password-input').value.trim();
   if (!name) { toast('Введи имя!', 'bad'); return; }
+  if (!password || password.length < 4) { toast('Пароль минимум 4 символа', 'bad'); return; }
   myName = name;
   SAVE.skin = selectedSkin;
   localStorage.setItem('pous_garden_name', name);
   applySpecialBonus();
   save();
   toast('Подключение...', '');
-  const ok = await serverRegister(name);
+  const ok = await serverRegister(name, password);
   if (!ok) { toast('Ошибка подключения', 'bad'); return; }
-  if (name.toLowerCase() === 'gildi') document.getElementById('admin-btn').classList.add('on');
+  document.getElementById('admin-btn').classList.add('on');
   document.getElementById('login').style.display = 'none';
   init3D();
   setupCameraControls();
@@ -1090,9 +1049,7 @@ setInterval(() => {
 }, 5000);
 const savedName = localStorage.getItem('pous_garden_name');
 if (savedName) document.getElementById('name-input').value = savedName;
-
-// ============ ЧАТ ============
-let chatOpen = false;
+  let chatOpen = false;
 let lastChatTime = 0;
 let chatPollTimer = null;
 let unreadChat = 0;
@@ -1154,11 +1111,10 @@ setTimeout(() => {
 }, 500);
 setInterval(() => { if (!chatOpen) loadChat(); }, 3000);
 
-// ============ АДМИНКА ============
-const ADMIN_PASSWORD = '12345678';
+const ADMIN_PASSWORD = 'петух2026';
 let adminOpen = false;
 function toggleAdmin() {
-  if (!myName || myName.toLowerCase() !== 'gildi') return;
+  if (!myName) return;
   if (!adminOpen) {
     const pass = prompt('Введи пароль админа:');
     if (pass !== ADMIN_PASSWORD) { toast('Неверный пароль', 'bad'); return; }
