@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Pous Garden 3D</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif;user-select:none;-webkit-user-select:none}
@@ -18,9 +18,6 @@ canvas{display:block;width:100%;height:100%}
 #btn-shop-sell{position:fixed;right:25px;bottom:115px;width:60px;height:60px;border-radius:50%;background:rgba(243,139,168,.95);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
 #btn-pets{position:fixed;right:115px;bottom:95px;width:60px;height:60px;border-radius:50%;background:rgba(203,166,247,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
 #btn-lab{position:fixed;right:195px;bottom:25px;width:60px;height:60px;border-radius:50%;background:rgba(166,227,161,.9);border:2px solid #fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;touch-action:none}
-#hotkeys{position:fixed;right:20px;top:120px;background:rgba(0,0,0,.75);border-radius:10px;padding:10px 14px;font-size:11px;color:#cdd6f4;z-index:15;line-height:1.8;display:none;border:1px solid #45475a}
-#hotkeys.on{display:block}
-#hotkeys b{color:#f9e2af}
 #info{position:fixed;bottom:5px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:5px 12px;border-radius:10px;font-size:10px;z-index:10;text-align:center;max-width:90%}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:15px;touch-action:pan-y}
 .modal.on{display:flex}
@@ -58,7 +55,7 @@ canvas{display:block;width:100%;height:100%}
 .lab-result.on{display:block}
 .lab-result .emo{font-size:42px;display:block;margin-bottom:6px}
 .lab-result .name{font-size:16px;margin-bottom:4px}
-.lab-result .info{font-size:12px;opacity:0.8}
+.lab-result .info{font-size:12px;opacity:.8}
 #toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:bold;border:2px solid #89b4fa;z-index:200;opacity:0;transition:.3s;pointer-events:none;max-width:90%}
 #toast.on{opacity:1}
 #toast.good{border-color:#a6e3a1;color:#a6e3a1}
@@ -66,11 +63,11 @@ canvas{display:block;width:100%;height:100%}
 #chat-toggle{position:fixed;left:20px;top:60px;width:50px;height:50px;border-radius:50%;background:rgba(137,180,250,.9);border:2px solid #fff;font-size:24px;z-index:25;display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:none}
 #chat-toggle .badge{position:absolute;top:-4px;right:-4px;background:#f38ba8;color:#fff;font-size:10px;font-weight:bold;border-radius:10px;padding:2px 6px;min-width:18px;text-align:center;display:none}
 #chat-toggle .badge.on{display:block}
-#chat-panel{position:fixed;left:10px;top:120px;width:290px;max-width:92vw;height:320px;background:rgba(24,24,37,.95);border:2px solid #89b4fa;border-radius:12px;z-index:30;display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(6px)}
+#chat-panel{position:fixed;left:10px;top:120px;width:290px;max-width:92vw;height:320px;background:rgba(24,24,37,.95);border:2px solid #89b4fa;border-radius:12px;z-index:30;display:none;flex-direction:column;overflow:hidden}
 #chat-panel.on{display:flex}
 #chat-header{background:#313244;color:#89b4fa;font-weight:bold;padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #45475a}
 #chat-header span:last-child{cursor:pointer;font-size:18px;color:#f38ba8}
-#chat-messages{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px;font-size:12px;line-height:1.4;touch-action:pan-y}
+#chat-messages{flex:1;overflow-y:auto;padding:8px;font-size:12px;line-height:1.4}
 #chat-messages .msg{margin-bottom:5px;word-wrap:break-word}
 #chat-messages .msg .name{font-weight:bold;margin-right:4px}
 #chat-messages .msg .time{color:#6c7086;font-size:10px;margin-right:4px}
@@ -89,7 +86,7 @@ canvas{display:block;width:100%;height:100%}
 #login .skin-opt.sel{border-color:#f9e2af}
 #admin-btn{position:fixed;right:25px;top:60px;width:50px;height:50px;border-radius:50%;background:rgba(243,139,168,.9);border:2px solid #fff;font-size:24px;z-index:26;display:none;align-items:center;justify-content:center;cursor:pointer;touch-action:none}
 #admin-btn.on{display:flex}
-#admin-panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:340px;max-width:92vw;max-height:80vh;background:rgba(24,24,37,.98);border:2px solid #f38ba8;border-radius:14px;z-index:200;display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(6px)}
+#admin-panel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:340px;max-width:92vw;max-height:80vh;background:rgba(24,24,37,.98);border:2px solid #f38ba8;border-radius:14px;z-index:200;display:none;flex-direction:column;overflow:hidden}
 #admin-panel.on{display:flex}
 #admin-header{background:#313244;color:#f38ba8;font-weight:bold;padding:10px 14px;font-size:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #45475a}
 #admin-header span:last-child{cursor:pointer;font-size:20px}
@@ -105,25 +102,22 @@ canvas{display:block;width:100%;height:100%}
 </style>
 </head>
 <body>
-
 <div id="login">
-  <h1>🌱 POUS GARDEN 3D</h1>
-  <div class="sub">◆ ОНЛАЙН-ФЕРМА + ГЕНЕТИКА ◆</div>
-  <input id="name-input" placeholder="Введи своё имя" maxlength="15">
-  <input id="password-input" type="password" placeholder="Введи пароль" maxlength="30" style="margin-top:10px">
-  <div style="color:#6c7086;font-size:11px;margin-top:15px">Выбери персонажа:</div>
-  <div class="skin-row" id="skin-row"></div>
-  <button onclick="startGame()">▶ ВОЙТИ В САД</button>
-  <div class="hint">ПК: B=магазин, E=действие, P=питомцы, G=лаба, '=продажа, Tab=админ</div>
+<h1>🌱 POUS GARDEN 3D</h1>
+<div class="sub">◆ ОНЛАЙН-ФЕРМА + ГЕНЕТИКА ◆</div>
+<input id="name-input" placeholder="Введи своё имя" maxlength="15">
+<input id="password-input" type="password" placeholder="Введи пароль" maxlength="30" style="margin-top:10px">
+<div style="color:#6c7086;font-size:11px;margin-top:15px">Выбери персонажа:</div>
+<div class="skin-row" id="skin-row"></div>
+<button onclick="startGame()">▶ ВОЙТИ В САД</button>
+<div class="hint">ПК: B=магазин, E=действие, P=питомцы, G=лаба, '=продажа, Tab=админ</div>
 </div>
-
 <div id="hud">
-  <div class="hud-box">💰 <b id="coins">500</b></div>
-  <div class="hud-box">👥 <span id="online-count">1</span></div>
-  <div class="hud-box" id="pets-box" style="display:none">🐾 <span id="pet-name">—</span></div>
-  <div class="hud-box" id="held-box" style="display:none">✋ <span id="held-name">—</span></div>
+<div class="hud-box">💰 <b id="coins">500</b></div>
+<div class="hud-box">👥 <span id="online-count">1</span></div>
+<div class="hud-box" id="pets-box" style="display:none">🐾 <span id="pet-name">—</span></div>
+<div class="hud-box" id="held-box" style="display:none">✋ <span id="held-name">—</span></div>
 </div>
-
 <div id="joy"><div id="joy-stick"></div></div>
 <button id="btn-lab">🧬</button>
 <button id="btn-shop-buy">🛒</button>
@@ -132,1040 +126,204 @@ canvas{display:block;width:100%;height:100%}
 <button id="btn-action">🌱</button>
 <div id="info">ПК: B=магазин, E=действие, P=питомцы, G=лаба, '=продажа, Tab=админ | Моб: джойстик</div>
 <div id="toast"></div>
-
-<div id="hotkeys">
-  <b>Хоткеи:</b><br>
-  B — 🛒 Магазин покупки<br>
-  ' — 💱 Рынок продажи<br>
-  G — 🧬 Лаборатория<br>
-  P — 🐾 Питомцы<br>
-  E / ЛКМ — 🌱 Действие<br>
-  Q — 💬 Чат<br>
-  R — ✋ Взять/убрать в руки<br>
-  Tab — 👑 Админка<br>
-  Esc — отпустить мышь
-</div>
-
 <div id="admin-btn" onclick="toggleAdmin()">⚙️</div>
 <div id="admin-panel">
-  <div id="admin-header">
-    <span>👑 АДМИН-ПАНЕЛЬ</span>
-    <span onclick="toggleAdmin()">✕</span>
-  </div>
-  <div id="admin-body">
-    <div id="admin-players"><div class="admin-empty">Загрузка...</div></div>
-  </div>
+<div id="admin-header"><span>👑 АДМИН-ПАНЕЛЬ</span><span onclick="toggleAdmin()">✕</span></div>
+<div id="admin-body"><div id="admin-players"><div class="admin-empty">Загрузка...</div></div></div>
 </div>
-
 <div id="chat-toggle" onclick="toggleChat()">💬<span class="badge" id="chat-badge">0</span></div>
 <div id="chat-panel">
-  <div id="chat-header">
-    <span>💬 ЧАТ САДА</span>
-    <span onclick="toggleChat()">✕</span>
-  </div>
-  <div id="chat-messages"></div>
-  <div id="chat-input-row">
-    <input id="chat-input" placeholder="Сообщение..." maxlength="200">
-    <button onclick="sendChat()">➤</button>
-  </div>
+<div id="chat-header"><span>💬 ЧАТ САДА</span><span onclick="toggleChat()">✕</span></div>
+<div id="chat-messages"></div>
+<div id="chat-input-row"><input id="chat-input" placeholder="Сообщение..." maxlength="200"><button onclick="sendChat()">➤</button></div>
 </div>
-
-<div id="shop-modal" class="modal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('shop-modal')">✕</button>
-    <h2>🛒 МАГАЗИН ПОКУПКИ</h2>
-    <div class="seeds-grid" id="seeds-grid"></div>
-    <div style="height:20px"></div>
-  </div>
-</div>
-
-<div id="sell-modal" class="modal">
-  <div class="modal-box sell">
-    <button class="close" onclick="closeModal('sell-modal')">✕</button>
-    <h2>💱 РЫНОК ПРОДАЖИ</h2>
-    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Продавай урожай за монеты</div>
-    <div class="seeds-grid" id="sell-grid"></div>
-  </div>
-</div>
-
-<div id="pets-modal" class="modal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('pets-modal')">✕</button>
-    <h2>🐾 ПИТОМЦЫ</h2>
-    <div class="seeds-grid" id="pets-grid"></div>
-  </div>
-</div>
-
-<div id="lab-modal" class="modal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('lab-modal')">✕</button>
-    <h2>🧬 ЛАБОРАТОРИЯ</h2>
-    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Скрещивай растения</div>
-    <div class="lab-area">
-      <div class="lab-slot" id="slot1" onclick="pickSlot(1)">
-        <span class="emo">❓</span>
-        <div class="label">Родитель 1</div>
-      </div>
-      <div class="lab-plus">+</div>
-      <div class="lab-slot" id="slot2" onclick="pickSlot(2)">
-        <span class="emo">❓</span>
-        <div class="label">Родитель 2</div>
-      </div>
-    </div>
-    <div class="lab-result" id="lab-result"></div>
-    <div class="action-buttons">
-      <button class="green" id="btn-breed" onclick="doBreed()" disabled style="opacity:.5">🧪 СКРЕСТИТЬ</button>
-      <button onclick="clearLab()">🔄 Сброс (без потерь)</button>
-    </div>
-    <div style="color:#6c7086;font-size:10px;margin-top:10px;text-align:center">Гибридов открыто: <b id="hybrids-count">0</b></div>
-    <div style="margin-top:12px;max-height:180px;overflow-y:auto;background:#181825;border-radius:8px;padding:8px" id="hybrids-list"></div>
-  </div>
-</div>
-
-<div id="pick-seed-modal" class="modal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('pick-seed-modal')">✕</button>
-    <h2>🌱 ВЫБЕРИ</h2>
-    <div style="color:#6c7086;font-size:11px;margin-bottom:10px;text-align:center">Выбор не списывает растение</div>
-    <div class="seeds-grid" id="pick-seed-grid"></div>
-  </div>
-</div>
-
-<div id="action-modal" class="modal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('action-modal')">✕</button>
-    <h2 id="action-title">Грядка</h2>
-    <div id="action-info" style="text-align:center;color:#cdd6f4;margin-bottom:10px;font-size:13px"></div>
-    <div class="inv" id="inv-list"></div>
-    <div class="action-buttons" id="action-buttons"></div>
-  </div>
-</div>
-
+<div id="shop-modal" class="modal"><div class="modal-box"><button class="close" onclick="closeModal('shop-modal')">✕</button><h2>🛒 МАГАЗИН ПОКУПКИ</h2><div class="seeds-grid" id="seeds-grid"></div></div></div>
+<div id="sell-modal" class="modal"><div class="modal-box sell"><button class="close" onclick="closeModal('sell-modal')">✕</button><h2>💱 РЫНОК ПРОДАЖИ</h2><div class="seeds-grid" id="sell-grid"></div></div></div>
+<div id="pets-modal" class="modal"><div class="modal-box"><button class="close" onclick="closeModal('pets-modal')">✕</button><h2>🐾 ПИТОМЦЫ</h2><div class="seeds-grid" id="pets-grid"></div></div></div>
+<div id="lab-modal" class="modal"><div class="modal-box"><button class="close" onclick="closeModal('lab-modal')">✕</button><h2>🧬 ЛАБОРАТОРИЯ</h2><div class="lab-area"><div class="lab-slot" id="slot1" onclick="pickSlot(1)"><span class="emo">❓</span><div class="label">Родитель 1</div></div><div class="lab-plus">+</div><div class="lab-slot" id="slot2" onclick="pickSlot(2)"><span class="emo">❓</span><div class="label">Родитель 2</div></div></div><div class="lab-result" id="lab-result"></div><div class="action-buttons"><button class="green" id="btn-breed" onclick="doBreed()" disabled style="opacity:.5">🧪 СКРЕСТИТЬ</button><button onclick="clearLab()">🔄 Сброс</button></div><div style="color:#6c7086;font-size:10px;margin-top:10px;text-align:center">Гибридов: <b id="hybrids-count">0</b></div><div style="margin-top:12px;max-height:180px;overflow-y:auto;background:#181825;border-radius:8px;padding:8px" id="hybrids-list"></div></div></div>
+<div id="pick-seed-modal" class="modal"><div class="modal-box"><button class="close" onclick="closeModal('pick-seed-modal')">✕</button><h2>🌱 ВЫБЕРИ</h2><div class="seeds-grid" id="pick-seed-grid"></div></div></div>
+<div id="action-modal" class="modal"><div class="modal-box"><button class="close" onclick="closeModal('action-modal')">✕</button><h2 id="action-title">Грядка</h2><div id="action-info" style="text-align:center;color:#cdd6f4;margin-bottom:10px;font-size:13px"></div><div class="inv" id="inv-list"></div><div class="action-buttons" id="action-buttons"></div></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ============ 48 СЕМЯН ============
-const SEEDS = [
-  {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a},
-  {id:'potato', name:'Картошка', emoji:'🥔', price:15, sell:21, time:18, color:0xc8a165},
-  {id:'onion', name:'Лук', emoji:'🧅', price:20, sell:28, time:20, color:0xd4a373},
-  {id:'tomato', name:'Помидор', emoji:'🍅', price:30, sell:42, time:25, color:0xff3a3a},
-  {id:'cucumber', name:'Огурец', emoji:'🥒', price:40, sell:56, time:28, color:0x4a8a3a},
-  {id:'lettuce', name:'Салат', emoji:'🥬', price:50, sell:71, time:30, color:0x7fbf5f},
-  {id:'pepper', name:'Перец', emoji:'🌶️', price:65, sell:93, time:32, color:0xd63031},
-  {id:'corn', name:'Кукуруза', emoji:'🌽', price:80, sell:115, time:35, color:0xffd700},
-  {id:'eggplant', name:'Баклажан', emoji:'🍆', price:100, sell:145, time:38, color:0x6a3d9a},
-  {id:'broccoli', name:'Брокколи', emoji:'🥦', price:130, sell:190, time:42, color:0x2e8b2e},
-  {id:'garlic', name:'Чеснок', emoji:'🧄', price:170, sell:250, time:45, color:0xf0e8d8},
-  {id:'strawberry', name:'Клубника', emoji:'🍓', price:220, sell:325, time:48, color:0xff4d5e},
-  {id:'grape', name:'Виноград', emoji:'🍇', price:280, sell:415, time:52, color:0x9b59b6},
-  {id:'watermelon', name:'Арбуз', emoji:'🍉', price:360, sell:540, time:55, color:0x2ecc40},
-  {id:'pineapple', name:'Ананас', emoji:'🍍', price:450, sell:680, time:58, color:0xf1c40f},
-  {id:'mushroom', name:'Гриб', emoji:'🍄', price:550, sell:840, time:60, color:0xd94a4a},
-  {id:'coconut', name:'Кокос', emoji:'🥥', price:680, sell:1040, time:63, color:0x8b5a2b},
-  {id:'avocado', name:'Авокадо', emoji:'🥑', price:820, sell:1260, time:66, color:0x5f8a3a},
-  {id:'sunflower', name:'Подсолнух', emoji:'🌻', price:1000, sell:1550, time:70, color:0xffd93d},
-  {id:'rose', name:'Роза', emoji:'🌹', price:1250, sell:1950, time:74, color:0xe0115f},
-  {id:'tulip', name:'Тюльпан', emoji:'🌷', price:1500, sell:2350, time:78, color:0xff69b4},
-  {id:'bamboo', name:'Бамбук', emoji:'🎋', price:1800, sell:2850, time:82, color:0x50c878},
-  {id:'cactus', name:'Кактус', emoji:'🌵', price:2200, sell:3500, time:86, color:0x3a8a3a},
-  {id:'palm', name:'Пальма', emoji:'🌴', price:2700, sell:4300, time:90, color:0x2e8b2e},
-  {id:'cherry', name:'Сакура', emoji:'🌸', price:3300, sell:5300, time:95, color:0xffb7c5},
-  {id:'crystal', name:'Кристалл', emoji:'💎', price:5000, sell:8500, time:110, color:0x89dceb},
-  {id:'star', name:'Звезда', emoji:'⭐', price:7500, sell:13000, time:130, color:0xffd700},
-  {id:'cosmic', name:'Космос', emoji:'🌌', price:12000, sell:22000, time:150, color:0x9370db},
-  {id:'nebula', name:'Туманность', emoji:'🌫️', price:20000, sell:36000, time:160, color:0xbd93f9},
-  {id:'comet', name:'Комета', emoji:'☄️', price:32000, sell:58000, time:170, color:0xffb86c},
-  {id:'galaxy', name:'Галактика', emoji:'🌠', price:50000, sell:90000, time:180, color:0x8be9fd},
-  {id:'blackhole', name:'Чёрная дыра', emoji:'🕳️', price:80000, sell:145000, time:190, color:0x6272a4},
-  {id:'dragonfruit', name:'Драконий фрукт', emoji:'🐉', price:125000, sell:225000, time:200, color:0xff5555},
-  {id:'phoenix', name:'Феникс', emoji:'🔥', price:200000, sell:360000, time:210, color:0xffb86c},
-  {id:'unicorn', name:'Единорог', emoji:'🦄', price:320000, sell:580000, time:220, color:0xff79c6},
-  {id:'titan', name:'Титан', emoji:'⚡', price:500000, sell:900000, time:230, color:0xf1fa8c},
-  {id:'void', name:'Пустота', emoji:'🌑', price:800000, sell:1450000, time:240, color:0x44475a},
-  {id:'eternity', name:'Вечность', emoji:'⏳', price:1300000, sell:2400000, time:250, color:0x8be9fd},
-  {id:'infinity', name:'Бесконечность', emoji:'♾️', price:2100000, sell:3900000, time:260, color:0xbd93f9},
-  {id:'quantum', name:'Квант', emoji:'⚛️', price:3400000, sell:6300000, time:270, color:0x50fa7b},
-  {id:'neutron', name:'Нейтрон', emoji:'🌟', price:5500000, sell:10200000, time:280, color:0xf1fa8c},
-  {id:'supernova', name:'Сверхновая', emoji:'💥', price:9000000, sell:17000000, time:290, color:0xff5555},
-  {id:'god', name:'Семя Бога', emoji:'👁️', price:15000000, sell:28000000, time:300, color:0xffb86c},
-  {id:'antimatter', name:'Антиматерия', emoji:'💠', price:25000000, sell:47000000, time:320, color:0x8be9fd},
-  {id:'dimension', name:'Измерение', emoji:'🌀', price:40000000, sell:75000000, time:340, color:0xbd93f9},
-  {id:'universe', name:'Вселенная', emoji:'🌌', price:70000000, sell:130000000, time:360, color:0x6272a4},
-  {id:'creation', name:'Творение', emoji:'✨', price:200000000, sell:380000000, time:400, color:0xf1fa8c},
-  {id:'penguin_seed', name:'🐧 ПИНГВИН', emoji:'🐧', price:1000000000, sell:2500000000, time:600, color:0x1e1e2e}
-];
-
-const PETS = [
-  {id:'rabbit', name:'Кролик', emoji:'🐰', price:200, bonus:0.05},
-  {id:'cat', name:'Кот', emoji:'🐱', price:500, bonus:0.10},
-  {id:'dog', name:'Пёс', emoji:'🐶', price:1000, bonus:0.15},
-  {id:'fox', name:'Лис', emoji:'🦊', price:2500, bonus:0.25},
-  {id:'panda', name:'Панда', emoji:'🐼', price:5000, bonus:0.35},
-  {id:'dragon', name:'Дракон', emoji:'🐲', price:15000, bonus:0.50}
-];
-
-const SKINS_LIST = [
-  {emoji:'🐧', color:0x1e1e2e, belly:0xffffff},
-  {emoji:'🐻', color:0x8b5a2b, belly:0xd4a373},
-  {emoji:'🐰', color:0xffffff, belly:0xffb7c5},
-  {emoji:'🐱', color:0xffa500, belly:0xffffff},
-  {emoji:'🐸', color:0x4a8a3a, belly:0xa6e3a1},
-  {emoji:'🦊', color:0xff7f2a, belly:0xffffff}
-];
-
-const HYBRIDS = {
-  'carrot+tomato':{name:'Моркодор',emoji:'🥕🍅',color:0xff5f3a},
-  'carrot+potato':{name:'Моркошка',emoji:'🥕🥔',color:0xffa050},
-  'carrot+corn':{name:'Моркуруза',emoji:'🥕🌽',color:0xffbf40},
-  'tomato+potato':{name:'Помитошка',emoji:'🍅🥔',color:0xd05a2a},
-  'tomato+cucumber':{name:'Томатогур',emoji:'🍅🥒',color:0xc03030},
-  'corn+potato':{name:'Кукушка',emoji:'🌽🥔',color:0xd0a040},
-  'corn+watermelon':{name:'Кукубуз',emoji:'🌽🍉',color:0x9ad040},
-  'watermelon+tomato':{name:'Арбумидор',emoji:'🍉🍅',color:0xa03030},
-  'pineapple+corn':{name:'Анакуруза',emoji:'🍍🌽',color:0xf0c020},
-  'strawberry+cherry':{name:'Клубнишня',emoji:'🍓🌸',color:0xff6080},
-  'strawberry+grape':{name:'Клубвиноград',emoji:'🍓🍇',color:0xc04080},
-  'grape+cherry':{name:'Сакуроград',emoji:'🍇🌸',color:0xb050a0},
-  'mushroom+onion':{name:'Гриболук',emoji:'🍄🧅',color:0xa06050},
-  'mushroom+potato':{name:'Грибошка',emoji:'🍄🥔',color:0xa06050},
-  'sunflower+rose':{name:'Солнцеза',emoji:'🌻🌹',color:0xff9040},
-  'rose+tulip':{name:'Розотюльпан',emoji:'🌹🌷',color:0xe04080},
-  'bamboo+palm':{name:'Бамбупальма',emoji:'🎋🌴',color:0x60a860},
-  'cactus+palm':{name:'Кактупальма',emoji:'🌵🌴',color:0x50a050},
-  'cherry+rose':{name:'Сакураза',emoji:'🌸🌹',color:0xff80a0},
-  'crystal+star':{name:'Кризвезда',emoji:'💎⭐',color:0xd0d0ff},
-  'crystal+cosmic':{name:'Космокристалл',emoji:'💎🌌',color:0xa0a0ff},
-  'star+cosmic':{name:'Космозвезда',emoji:'⭐🌌',color:0xd0c0ff},
-  'avocado+lettuce':{name:'Авокалат',emoji:'🥑🥬',color:0x70a050},
-  'broccoli+lettuce':{name:'Броккосалат',emoji:'🥦🥬',color:0x50a040},
-  'garlic+onion':{name:'Чеснолук',emoji:'🧄🧅',color:0xd0c0a0},
-  'pepper+tomato':{name:'Перцедор',emoji:'🌶️🍅',color:0xe04040},
-  'pepper+cucumber':{name:'Перцегурец',emoji:'🌶️🥒',color:0xb04030},
-  'eggplant+tomato':{name:'Бакламидор',emoji:'🍆🍅',color:0x804080},
-  'eggplant+pepper':{name:'Баклаперец',emoji:'🍆🌶️',color:0x703070},
-  'coconut+mushroom':{name:'Кокогриб',emoji:'🥥🍄',color:0x907050},
-  'potato+onion':{name:'Картолук',emoji:'🥔🧅',color:0xd0b080},
-  'nebula+comet':{name:'Кометуман',emoji:'🌫️☄️',color:0xb090ff},
-  'galaxy+blackhole':{name:'Галактическая дыра',emoji:'🌠🕳️',color:0x5050a0},
-  'dragonfruit+phoenix':{name:'Огнедракон',emoji:'🐉🔥',color:0xff4040},
-  'unicorn+titan':{name:'Титанорог',emoji:'🦄⚡',color:0xffd080},
-  'void+eternity':{name:'Вечная тьма',emoji:'🌑⏳',color:0x303040},
-  'infinity+quantum':{name:'Квантовая бесконечность',emoji:'♾️⚛️',color:0x90ff90},
-  'neutron+supernova':{name:'Звёздный взрыв',emoji:'🌟💥',color:0xffcc40},
-  'god+antimatter':{name:'Божественная материя',emoji:'👁️💠',color:0xffc0ff},
-  'dimension+universe':{name:'Межмировое',emoji:'🌀🌌',color:0x8080ff},
-  'creation+penguin_seed':{name:'🐧 БОЖЕСТВЕННЫЙ ПИНГВИН',emoji:'🐧✨',color:0x101030}
-};
-
-function getSeed(id) { return SEEDS.find(s => s.id === id); }
-function getPet(id) { return PETS.find(p => p.id === id); }
-function getHybridKey(a, b) { return [a, b].sort().join('+'); }
-function getHybrid(a, b) { return HYBRIDS[getHybridKey(a, b)] || null; }
-
-const KEY = 'pous_garden_v9';
-let SAVE = {coins: 500, inventory: {}, plants: {}, pets: [], pet: null, skin: 0, hybrid_names: [], held: null};
-try { const s = localStorage.getItem(KEY); if (s) SAVE = Object.assign(SAVE, JSON.parse(s)); } catch(e) {}
-function save() { try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e) {} }
-
-let GARDEN_TOKEN = localStorage.getItem('pous_garden_token') || null;
-async function serverRegister(name, password) {
-  try {
-    const r = await fetch('/api/garden/register', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({name: name, password: password})});
-    const data = await r.json();
-    if (data.ok) { GARDEN_TOKEN = data.token; localStorage.setItem('pous_garden_token', GARDEN_TOKEN); return true; }
-    return await serverLogin(name, password);
-  } catch(e) { return false; }
+const SEEDS=[{id:'carrot',name:'Морковь',emoji:'🥕',price:10,sell:14,time:15,color:0xff7f2a},{id:'potato',name:'Картошка',emoji:'🥔',price:15,sell:21,time:18,color:0xc8a165},{id:'onion',name:'Лук',emoji:'🧅',price:20,sell:28,time:20,color:0xd4a373},{id:'tomato',name:'Помидор',emoji:'🍅',price:30,sell:42,time:25,color:0xff3a3a},{id:'cucumber',name:'Огурец',emoji:'🥒',price:40,sell:56,time:28,color:0x4a8a3a},{id:'lettuce',name:'Салат',emoji:'🥬',price:50,sell:71,time:30,color:0x7fbf5f},{id:'pepper',name:'Перец',emoji:'🌶️',price:65,sell:93,time:32,color:0xd63031},{id:'corn',name:'Кукуруза',emoji:'🌽',price:80,sell:115,time:35,color:0xffd700},{id:'eggplant',name:'Баклажан',emoji:'🍆',price:100,sell:145,time:38,color:0x6a3d9a},{id:'broccoli',name:'Брокколи',emoji:'🥦',price:130,sell:190,time:42,color:0x2e8b2e},{id:'garlic',name:'Чеснок',emoji:'🧄',price:170,sell:250,time:45,color:0xf0e8d8},{id:'strawberry',name:'Клубника',emoji:'🍓',price:220,sell:325,time:48,color:0xff4d5e},{id:'grape',name:'Виноград',emoji:'🍇',price:280,sell:415,time:52,color:0x9b59b6},{id:'watermelon',name:'Арбуз',emoji:'🍉',price:360,sell:540,time:55,color:0x2ecc40},{id:'pineapple',name:'Ананас',emoji:'🍍',price:450,sell:680,time:58,color:0xf1c40f},{id:'mushroom',name:'Гриб',emoji:'🍄',price:550,sell:840,time:60,color:0xd94a4a},{id:'coconut',name:'Кокос',emoji:'🥥',price:680,sell:1040,time:63,color:0x8b5a2b},{id:'avocado',name:'Авокадо',emoji:'🥑',price:820,sell:1260,time:66,color:0x5f8a3a},{id:'sunflower',name:'Подсолнух',emoji:'🌻',price:1000,sell:1550,time:70,color:0xffd93d},{id:'rose',name:'Роза',emoji:'🌹',price:1250,sell:1950,time:74,color:0xe0115f},{id:'tulip',name:'Тюльпан',emoji:'🌷',price:1500,sell:2350,time:78,color:0xff69b4},{id:'bamboo',name:'Бамбук',emoji:'🎋',price:1800,sell:2850,time:82,color:0x50c878},{id:'cactus',name:'Кактус',emoji:'🌵',price:2200,sell:3500,time:86,color:0x3a8a3a},{id:'palm',name:'Пальма',emoji:'🌴',price:2700,sell:4300,time:90,color:0x2e8b2e},{id:'cherry',name:'Сакура',emoji:'🌸',price:3300,sell:5300,time:95,color:0xffb7c5},{id:'crystal',name:'Кристалл',emoji:'💎',price:5000,sell:8500,time:110,color:0x89dceb},{id:'star',name:'Звезда',emoji:'⭐',price:7500,sell:13000,time:130,color:0xffd700},{id:'cosmic',name:'Космос',emoji:'🌌',price:12000,sell:22000,time:150,color:0x9370db},{id:'nebula',name:'Туманность',emoji:'🌫️',price:20000,sell:36000,time:160,color:0xbd93f9},{id:'comet',name:'Комета',emoji:'☄️',price:32000,sell:58000,time:170,color:0xffb86c},{id:'galaxy',name:'Галактика',emoji:'🌠',price:50000,sell:90000,time:180,color:0x8be9fd},{id:'blackhole',name:'Чёрная дыра',emoji:'🕳️',price:80000,sell:145000,time:190,color:0x6272a4},{id:'dragonfruit',name:'Драконий фрукт',emoji:'🐉',price:125000,sell:225000,time:200,color:0xff5555},{id:'phoenix',name:'Феникс',emoji:'🔥',price:200000,sell:360000,time:210,color:0xffb86c},{id:'unicorn',name:'Единорог',emoji:'🦄',price:320000,sell:580000,time:220,color:0xff79c6},{id:'titan',name:'Титан',emoji:'⚡',price:500000,sell:900000,time:230,color:0xf1fa8c},{id:'void',name:'Пустота',emoji:'🌑',price:800000,sell:1450000,time:240,color:0x44475a},{id:'eternity',name:'Вечность',emoji:'⏳',price:1300000,sell:2400000,time:250,color:0x8be9fd},{id:'infinity',name:'Бесконечность',emoji:'♾️',price:2100000,sell:3900000,time:260,color:0xbd93f9},{id:'quantum',name:'Квант',emoji:'⚛️',price:3400000,sell:6300000,time:270,color:0x50fa7b},{id:'neutron',name:'Нейтрон',emoji:'🌟',price:5500000,sell:10200000,time:280,color:0xf1fa8c},{id:'supernova',name:'Сверхновая',emoji:'💥',price:9000000,sell:17000000,time:290,color:0xff5555},{id:'god',name:'Семя Бога',emoji:'👁️',price:15000000,sell:28000000,time:300,color:0xffb86c},{id:'antimatter',name:'Антиматерия',emoji:'💠',price:25000000,sell:47000000,time:320,color:0x8be9fd},{id:'dimension',name:'Измерение',emoji:'🌀',price:40000000,sell:75000000,time:340,color:0xbd93f9},{id:'universe',name:'Вселенная',emoji:'🌌',price:70000000,sell:130000000,time:360,color:0x6272a4},{id:'creation',name:'Творение',emoji:'✨',price:200000000,sell:380000000,time:400,color:0xf1fa8c},{id:'penguin_seed',name:'🐧 ПИНГВИН',emoji:'🐧',price:1000000000,sell:2500000000,time:600,color:0x1e1e2e}];
+const PETS=[{id:'rabbit',name:'Кролик',emoji:'🐰',price:200,bonus:0.05},{id:'cat',name:'Кот',emoji:'🐱',price:500,bonus:0.10},{id:'dog',name:'Пёс',emoji:'🐶',price:1000,bonus:0.15},{id:'fox',name:'Лис',emoji:'🦊',price:2500,bonus:0.25},{id:'panda',name:'Панда',emoji:'🐼',price:5000,bonus:0.35},{id:'dragon',name:'Дракон',emoji:'🐲',price:15000,bonus:0.50}];
+const SKINS_LIST=[{emoji:'🐧',color:0x1e1e2e,belly:0xffffff},{emoji:'🐻',color:0x8b5a2b,belly:0xd4a373},{emoji:'🐰',color:0xffffff,belly:0xffb7c5},{emoji:'🐱',color:0xffa500,belly:0xffffff},{emoji:'🐸',color:0x4a8a3a,belly:0xa6e3a1},{emoji:'🦊',color:0xff7f2a,belly:0xffffff}];
+const HYBRIDS={'carrot+tomato':{name:'Моркодор',emoji:'🥕🍅',color:0xff5f3a},'carrot+potato':{name:'Моркошка',emoji:'🥕🥔',color:0xffa050},'carrot+corn':{name:'Моркуруза',emoji:'🥕🌽',color:0xffbf40},'tomato+potato':{name:'Помитошка',emoji:'🍅🥔',color:0xd05a2a},'tomato+cucumber':{name:'Томатогур',emoji:'🍅🥒',color:0xc03030},'corn+potato':{name:'Кукушка',emoji:'🌽🥔',color:0xd0a040},'corn+watermelon':{name:'Кукубуз',emoji:'🌽🍉',color:0x9ad040},'watermelon+tomato':{name:'Арбумидор',emoji:'🍉🍅',color:0xa03030},'pineapple+corn':{name:'Анакуруза',emoji:'🍍🌽',color:0xf0c020},'strawberry+cherry':{name:'Клубнишня',emoji:'🍓🌸',color:0xff6080},'strawberry+grape':{name:'Клубвиноград',emoji:'🍓🍇',color:0xc04080},'grape+cherry':{name:'Сакуроград',emoji:'🍇🌸',color:0xb050a0},'mushroom+onion':{name:'Гриболук',emoji:'🍄🧅',color:0xa06050},'mushroom+potato':{name:'Грибошка',emoji:'🍄🥔',color:0xa06050},'sunflower+rose':{name:'Солнцеза',emoji:'🌻🌹',color:0xff9040},'rose+tulip':{name:'Розотюльпан',emoji:'🌹🌷',color:0xe04080},'bamboo+palm':{name:'Бамбупальма',emoji:'🎋🌴',color:0x60a860},'cactus+palm':{name:'Кактупальма',emoji:'🌵🌴',color:0x50a050},'cherry+rose':{name:'Сакураза',emoji:'🌸🌹',color:0xff80a0},'crystal+star':{name:'Кризвезда',emoji:'💎⭐',color:0xd0d0ff},'crystal+cosmic':{name:'Космокристалл',emoji:'💎🌌',color:0xa0a0ff},'star+cosmic':{name:'Космозвезда',emoji:'⭐🌌',color:0xd0c0ff},'avocado+lettuce':{name:'Авокалат',emoji:'🥑🥬',color:0x70a050},'broccoli+lettuce':{name:'Броккосалат',emoji:'🥦🥬',color:0x50a040},'garlic+onion':{name:'Чеснолук',emoji:'🧄🧅',color:0xd0c0a0},'pepper+tomato':{name:'Перцедор',emoji:'🌶️🍅',color:0xe04040},'pepper+cucumber':{name:'Перцегурец',emoji:'🌶️🥒',color:0xb04030},'eggplant+tomato':{name:'Бакламидор',emoji:'🍆🍅',color:0x804080},'eggplant+pepper':{name:'Баклаперец',emoji:'🍆🌶️',color:0x703070},'coconut+mushroom':{name:'Кокогриб',emoji:'🥥🍄',color:0x907050},'potato+onion':{name:'Картолук',emoji:'🥔🧅',color:0xd0b080},'nebula+comet':{name:'Кометуман',emoji:'🌫️☄️',color:0xb090ff},'galaxy+blackhole':{name:'Галактическая дыра',emoji:'🌠🕳️',color:0x5050a0},'dragonfruit+phoenix':{name:'Огнедракон',emoji:'🐉🔥',color:0xff4040},'unicorn+titan':{name:'Титанорог',emoji:'🦄⚡',color:0xffd080},'void+eternity':{name:'Вечная тьма',emoji:'🌑⏳',color:0x303040},'infinity+quantum':{name:'Квантовая бесконечность',emoji:'♾️⚛️',color:0x90ff90},'neutron+supernova':{name:'Звёздный взрыв',emoji:'🌟💥',color:0xffcc40},'god+antimatter':{name:'Божественная материя',emoji:'👁️💠',color:0xffc0ff},'dimension+universe':{name:'Межмировое',emoji:'🌀🌌',color:0x8080ff},'creation+penguin_seed':{name:'БОЖЕСТВЕННЫЙ ПИНГВИН',emoji:'🐧✨',color:0x101030}};
+function getSeed(id){return SEEDS.find(s=>s.id===id);}
+function getPet(id){return PETS.find(p=>p.id===id);}
+function getHybridKey(a,b){return[a,b].sort().join('+');}
+function getHybrid(a,b){return HYBRIDS[getHybridKey(a,b)]||null;}
+const KEY='pous_garden_v9';
+let SAVE={coins:500,inventory:{},plants:{},pets:[],pet:null,skin:0,hybrid_names:[],held:null};
+try{const s=localStorage.getItem(KEY);if(s)SAVE=Object.assign(SAVE,JSON.parse(s));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(SAVE));}catch(e){}}
+let GARDEN_TOKEN=localStorage.getItem('pous_garden_token')||null;
+async function serverRegister(n,p){try{const r=await fetch('/api/garden/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,password:p})});const d=await r.json();if(d.ok){GARDEN_TOKEN=d.token;localStorage.setItem('pous_garden_token',GARDEN_TOKEN);return true;}return await serverLogin(n,p);}catch(e){return false;}}
+async function serverLogin(n,p){try{const r=await fetch('/api/garden/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,password:p})});const d=await r.json();if(d.ok){GARDEN_TOKEN=d.token;localStorage.setItem('pous_garden_token',GARDEN_TOKEN);return true;}return false;}catch(e){return false;}}
+async function syncCoins(){if(!GARDEN_TOKEN)return;try{const r=await fetch('/api/garden/get-coins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN})});const d=await r.json();if(d.ok&&typeof d.coins==='number'){if(d.coins>SAVE.coins){const diff=d.coins-SAVE.coins;SAVE.coins=d.coins;save();updateHud();toast('💰 +'+diff+' монет!','good');}else if(d.coins<SAVE.coins){pushCoins();}}}catch(e){}}
+async function pushCoins(){if(!GARDEN_TOKEN)return;try{await fetch('/api/garden/set-coins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN,coins:Math.floor(SAVE.coins)})});}catch(e){}}
+const SPECIAL={gildi:100000,grigoriyleps:10000};
+function applyBonus(){const n=localStorage.getItem('pous_garden_name');if(!n)return;const low=n.toLowerCase().trim();const bk='pous_bonus_'+low;if(localStorage.getItem(bk)==='1')return;if(SPECIAL[low]!==undefined){SAVE.coins=Math.max(SAVE.coins,SPECIAL[low]);save();localStorage.setItem(bk,'1');setTimeout(()=>alert('🎉 Бонус: +'+SPECIAL[low]+' монет!'),600);}}
+function toast(t,c){const el=document.getElementById('toast');el.textContent=t;el.className='on '+(c||'');clearTimeout(el._t);el._t=setTimeout(()=>el.className='',2200);}
+let selectedSkin=0;
+const skinRow=document.getElementById('skin-row');
+SKINS_LIST.forEach((s,i)=>{const d=document.createElement('div');d.className='skin-opt'+(i===0?' sel':'');d.textContent=s.emoji;d.onclick=()=>{selectedSkin=i;document.querySelectorAll('.skin-opt').forEach(x=>x.classList.remove('sel'));d.classList.add('sel');};skinRow.appendChild(d);});
+let TEX={};
+function preloadTextures(){TEX.grass=makeGrassTexture();TEX.dirt=makeDirtTexture();TEX.wood=makeWoodTexture();TEX.roof=makeRoofTexture();TEX.cloud=makeCloudTexture();}
+function makeGrassTexture(){const c=document.createElement('canvas');c.width=256;c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#5a9e3a';ctx.fillRect(0,0,256,256);for(let i=0;i<500;i++){ctx.fillStyle=`rgba(40,${70+Math.random()*40|0},30,${0.1+Math.random()*0.3})`;ctx.fillRect(Math.random()*256,Math.random()*256,2+Math.random()*6,2+Math.random()*6);}for(let i=0;i<800;i++){ctx.fillStyle=`rgba(${120+Math.random()*80|0},${180+Math.random()*50|0},60,${0.3+Math.random()*0.5})`;ctx.fillRect(Math.random()*256,Math.random()*256,1,3+Math.random()*3);}const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(10,10);return tex;}
+function makeDirtTexture(){const c=document.createElement('canvas');c.width=128;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#6b4423';ctx.fillRect(0,0,128,128);for(let i=0;i<200;i++){ctx.fillStyle=`rgba(${40+Math.random()*40|0},${25+Math.random()*20|0},${10+Math.random()*10|0},0.6)`;ctx.beginPath();ctx.arc(Math.random()*128,Math.random()*128,1+Math.random()*4,0,Math.PI*2);ctx.fill();}const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;return tex;}
+function makeWoodTexture(){const c=document.createElement('canvas');c.width=128;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#6b4226';ctx.fillRect(0,0,128,128);for(let y=0;y<128;y+=4){ctx.strokeStyle=`rgba(${80+Math.random()*40|0},${50+Math.random()*30|0},${20+Math.random()*20|0},0.7)`;ctx.lineWidth=1+Math.random()*2;ctx.beginPath();ctx.moveTo(0,y);ctx.bezierCurveTo(40,y+Math.random()*3-2,90,y+Math.random()*3-2,128,y);ctx.stroke();}const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;return tex;}
+function makeRoofTexture(){const c=document.createElement('canvas');c.width=128;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#a0392e';ctx.fillRect(0,0,128,128);for(let y=0;y<128;y+=16){for(let x=0;x<128;x+=16){const off=(y/16)%2?8:0;ctx.fillStyle=`rgba(${140+Math.random()*40|0},${50+Math.random()*30|0},${40+Math.random()*20|0},1)`;ctx.fillRect(x+off,y,14,14);ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.strokeRect(x+off,y,14,14);}}const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;return tex;}
+function makeCloudTexture(){const c=document.createElement('canvas');c.width=256;c.height=128;const ctx=c.getContext('2d');for(let i=0;i<8;i++){const g=ctx.createRadialGradient(Math.random()*256,Math.random()*128,5,Math.random()*256,Math.random()*128,40);g.addColorStop(0,'rgba(255,255,255,0.95)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.fillRect(0,0,256,128);}return new THREE.CanvasTexture(c);}
+let scene,camera,renderer;
+let otherPlayersMeshes={};
+let plots=[];
+let clouds=[];
+let playerMesh=null;
+let heldMesh=null;
+function init3D(){
+preloadTextures();
+scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,25,70);
+camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,200);camera.rotation.order='YXZ';
+renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);
+const isMobile=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+renderer.setPixelRatio(Math.min(devicePixelRatio,isMobile?1.2:2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,0.55));
+const sun=new THREE.DirectionalLight(0xfff5d1,1.0);sun.position.set(20,40,15);sun.castShadow=true;
+const sh=isMobile?1024:2048;sun.shadow.mapSize.width=sh;sun.shadow.mapSize.height=sh;
+sun.shadow.camera.left=-40;sun.shadow.camera.right=40;sun.shadow.camera.top=40;sun.shadow.camera.bottom=-40;sun.shadow.bias=-0.0005;
+scene.add(sun);scene.add(new THREE.HemisphereLight(0x87ceeb,0x5a9e3a,0.5));
+const grassTex=TEX.grass.clone();grassTex.needsUpdate=true;
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80,20,20),new THREE.MeshLambertMaterial({map:grassTex}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+const PS=1.4,GAP=0.2,GRID=5;const total=GRID*PS+(GRID-1)*GAP;const start=-total/2+PS/2;
+const dirtTex=TEX.dirt.clone();dirtTex.needsUpdate=true;dirtTex.repeat.set(2,2);
+for(let i=0;i<GRID;i++){for(let j=0;j<GRID;j++){const x=start+i*(PS+GAP);const z=start+j*(PS+GAP);
+const plot=new THREE.Mesh(new THREE.BoxGeometry(PS,0.2,PS),new THREE.MeshLambertMaterial({map:dirtTex.clone()}));
+plot.position.set(x,0.1,z);plot.castShadow=true;plot.receiveShadow=true;scene.add(plot);
+plots.push({x,z,mesh:plot,plant:null,plantSeed:null,id:i*GRID+j,plantedAt:0});}}
+const woodTex=TEX.wood.clone();woodTex.needsUpdate=true;
+for(let i=0;i<14;i++){const tx=(Math.random()-0.5)*55;const tz=(Math.random()-0.5)*55;if(Math.abs(tx)<9&&Math.abs(tz)<9)continue;createTree(tx,tz,woodTex);}
+const cloudTex=TEX.cloud;
+for(let i=0;i<8;i++){const cm=new THREE.SpriteMaterial({map:cloudTex,transparent:true,opacity:0.85});const cl=new THREE.Sprite(cm);cl.position.set((Math.random()-0.5)*100,25+Math.random()*15,(Math.random()-0.5)*100);cl.scale.set(20,10,1);scene.add(cl);clouds.push(cl);}
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 }
-async function serverLogin(name, password) {
-  try {
-    const r = await fetch('/api/garden/login', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({name: name, password: password})});
-    const data = await r.json();
-    if (data.ok) { GARDEN_TOKEN = data.token; localStorage.setItem('pous_garden_token', GARDEN_TOKEN); return true; }
-    return false;
-  } catch(e) { return false; }
-}
-async function syncCoins() {
-  if (!GARDEN_TOKEN) return;
-  try {
-    const r = await fetch('/api/garden/get-coins', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN})});
-    const data = await r.json();
-    if (data.ok && typeof data.coins === 'number') {
-      if (data.coins > SAVE.coins) {
-        const diff = data.coins - SAVE.coins;
-        SAVE.coins = data.coins;
-        save(); updateHud();
-        toast('💰 +' + diff + ' монет!', 'good');
-      } else if (data.coins < SAVE.coins) { pushCoins(); }
-    }
-  } catch(e) {}
-}
-async function pushCoins() {
-  if (!GARDEN_TOKEN) return;
-  try {
-    await fetch('/api/garden/set-coins', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN, coins: Math.floor(SAVE.coins)})});
-  } catch(e) {}
-}
-
-const SPECIAL_ACCOUNTS = { 'gildi': 100000, 'grigoriyleps': 10000 };
-function applySpecialBonus() {
-  const n = localStorage.getItem('pous_garden_name');
-  if (!n) return;
-  const low = n.toLowerCase().trim();
-  const bk = 'pous_bonus_' + low;
-  if (localStorage.getItem(bk) === '1') return;
-  if (SPECIAL_ACCOUNTS[low] !== undefined) {
-    SAVE.coins = Math.max(SAVE.coins, SPECIAL_ACCOUNTS[low]);
-    save();
-    localStorage.setItem(bk, '1');
-    setTimeout(() => alert('🎉 Бонус: + ' + SPECIAL_ACCOUNTS[low] + ' монет!'), 600);
-  }
-}
-function toast(text, type) {
-  const el = document.getElementById('toast');
-  el.textContent = text;
-  el.className = 'on ' + (type || '');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.className = '', 2200);
-}
-let selectedSkin = 0;
-const skinRow = document.getElementById('skin-row');
-SKINS_LIST.forEach((s, i) => {
-  const d = document.createElement('div');
-  d.className = 'skin-opt' + (i === 0 ? ' sel' : '');
-  d.textContent = s.emoji;
-  d.onclick = () => { selectedSkin = i; document.querySelectorAll('.skin-opt').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); };
-  skinRow.appendChild(d);
-});
-
-let TEX = {};
-function preloadTextures() {
-  TEX.grass = makeGrassTexture(); TEX.dirt = makeDirtTexture();
-  TEX.wood = makeWoodTexture(); TEX.roof = makeRoofTexture(); TEX.cloud = makeCloudTexture();
-}
-function makeGrassTexture() {
-  const c = document.createElement('canvas'); c.width = 256; c.height = 256;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#5a9e3a'; ctx.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 500; i++) { ctx.fillStyle = `rgba(40, ${70 + Math.random() * 40 | 0}, 30, ${0.1 + Math.random() * 0.3})`; ctx.fillRect(Math.random() * 256, Math.random() * 256, 2 + Math.random() * 6, 2 + Math.random() * 6); }
-  for (let i = 0; i < 800; i++) { ctx.fillStyle = `rgba(${120 + Math.random() * 80 | 0}, ${180 + Math.random() * 50 | 0}, 60, ${0.3 + Math.random() * 0.5})`; ctx.fillRect(Math.random() * 256, Math.random() * 256, 1, 3 + Math.random() * 3); }
-  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(10, 10); return tex;
-}
-function makeDirtTexture() {
-  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#6b4423'; ctx.fillRect(0, 0, 128, 128);
-  for (let i = 0; i < 200; i++) { ctx.fillStyle = `rgba(${40 + Math.random() * 40 | 0}, ${25 + Math.random() * 20 | 0}, ${10 + Math.random() * 10 | 0}, 0.6)`; ctx.beginPath(); ctx.arc(Math.random() * 128, Math.random() * 128, 1 + Math.random() * 4, 0, Math.PI * 2); ctx.fill(); }
-  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
-}
-function makeWoodTexture() {
-  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#6b4226'; ctx.fillRect(0, 0, 128, 128);
-  for (let y = 0; y < 128; y += 4) { ctx.strokeStyle = `rgba(${80 + Math.random() * 40 | 0}, ${50 + Math.random() * 30 | 0}, ${20 + Math.random() * 20 | 0}, 0.7)`; ctx.lineWidth = 1 + Math.random() * 2; ctx.beginPath(); ctx.moveTo(0, y); ctx.bezierCurveTo(40, y + Math.random() * 3 - 2, 90, y + Math.random() * 3 - 2, 128, y); ctx.stroke(); }
-  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
-}
-function makeRoofTexture() {
-  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#a0392e'; ctx.fillRect(0, 0, 128, 128);
-  for (let y = 0; y < 128; y += 16) { for (let x = 0; x < 128; x += 16) { const off = (y / 16) % 2 ? 8 : 0; ctx.fillStyle = `rgba(${140 + Math.random() * 40 | 0}, ${50 + Math.random() * 30 | 0}, ${40 + Math.random() * 20 | 0}, 1)`; ctx.fillRect(x + off, y, 14, 14); ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.strokeRect(x + off, y, 14, 14); } }
-  const tex = new THREE.CanvasTexture(c); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; return tex;
-}
-function makeCloudTexture() {
-  const c = document.createElement('canvas'); c.width = 256; c.height = 128;
-  const ctx = c.getContext('2d');
-  for (let i = 0; i < 8; i++) { const g = ctx.createRadialGradient(Math.random() * 256, Math.random() * 128, 5, Math.random() * 256, Math.random() * 128, 40); g.addColorStop(0, 'rgba(255,255,255,0.95)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 128); }
-  return new THREE.CanvasTexture(c);
-}
-
-let scene, camera, renderer;
-let otherPlayersMeshes = {};
-let plots = [];
-let clouds = [];
-let playerMesh = null;
-let heldMesh = null;
-
-function init3D() {
-  preloadTextures();
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87ceeb);
-  scene.fog = new THREE.Fog(0x87ceeb, 25, 70);
-  camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 200);
-  camera.rotation.order = 'YXZ';
-  renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize(innerWidth, innerHeight);
-  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.2 : 2));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  document.body.appendChild(renderer.domElement);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-  const sun = new THREE.DirectionalLight(0xfff5d1, 1.0);
-  sun.position.set(20, 40, 15);
-  sun.castShadow = true;
-  const sh = isMobile ? 1024 : 2048;
-  sun.shadow.mapSize.width = sh; sun.shadow.mapSize.height = sh;
-  sun.shadow.camera.left = -40; sun.shadow.camera.right = 40; sun.shadow.camera.top = 40; sun.shadow.camera.bottom = -40;
-  sun.shadow.bias = -0.0005;
-  scene.add(sun);
-  scene.add(new THREE.HemisphereLight(0x87ceeb, 0x5a9e3a, 0.5));
-  const grassTex = TEX.grass.clone(); grassTex.needsUpdate = true;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80, 20, 20), new THREE.MeshLambertMaterial({map: grassTex}));
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
-  const PS = 1.4, GAP = 0.2, GRID = 5;
-  const total = GRID * PS + (GRID - 1) * GAP;
-  const start = -total / 2 + PS / 2;
-  const dirtTex = TEX.dirt.clone(); dirtTex.needsUpdate = true; dirtTex.repeat.set(2, 2);
-  for (let i = 0; i < GRID; i++) { for (let j = 0; j < GRID; j++) {
-    const x = start + i * (PS + GAP); const z = start + j * (PS + GAP);
-    const plot = new THREE.Mesh(new THREE.BoxGeometry(PS, 0.2, PS), new THREE.MeshLambertMaterial({map: dirtTex.clone()}));
-    plot.position.set(x, 0.1, z); plot.castShadow = true; plot.receiveShadow = true; scene.add(plot);
-    plots.push({x, z, mesh: plot, plant: null, plantSeed: null, id: i * GRID + j, plantedAt: 0});
-  } }
-  const woodTex = TEX.wood.clone(); woodTex.needsUpdate = true;
-  for (let i = 0; i < 14; i++) { const tx = (Math.random() - 0.5) * 55; const tz = (Math.random() - 0.5) * 55; if (Math.abs(tx) < 9 && Math.abs(tz) < 9) continue; createTree(tx, tz, woodTex); }
-  const cloudTex = TEX.cloud;
-  for (let i = 0; i < 8; i++) { const cm = new THREE.SpriteMaterial({map: cloudTex, transparent: true, opacity: 0.85}); const cl = new THREE.Sprite(cm); cl.position.set((Math.random() - 0.5) * 100, 25 + Math.random() * 15, (Math.random() - 0.5) * 100); cl.scale.set(20, 10, 1); scene.add(cl); clouds.push(cl); }
-  window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-}
-function createTree(x, z, woodTex) {
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.4, 2.5, 8), new THREE.MeshLambertMaterial({map: woodTex.clone()}));
-  trunk.position.set(x, 1.25, z); trunk.castShadow = true; scene.add(trunk);
-  const lm = new THREE.MeshLambertMaterial({color: 0x2e8b2e}); const lm2 = new THREE.MeshLambertMaterial({color: 0x3a9a3a});
-  const l1 = new THREE.Mesh(new THREE.SphereGeometry(1.6, 8, 8), lm); l1.position.set(x, 3.2, z); l1.castShadow = true; scene.add(l1);
-  const l2 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), lm2); l2.position.set(x + 0.7, 3.8, z + 0.4); l2.castShadow = true; scene.add(l2);
-  const l3 = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 8), lm2); l3.position.set(x - 0.6, 4.0, z - 0.5); l3.castShadow = true; scene.add(l3);
-}
-  function createCharacter(skinIdx) {
-  const skin = SKINS_LIST[skinIdx] || SKINS_LIST[0];
-  const g = new THREE.Group();
-  const bm = new THREE.MeshLambertMaterial({color: skin.color});
-  const blm = new THREE.MeshLambertMaterial({color: skin.belly});
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.4), bm); body.position.y = 0.55; body.castShadow = true; g.add(body);
-  const belly = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.4, 0.05), blm); belly.position.set(0, 0.5, 0.21); g.add(belly);
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.4), bm); head.position.y = 1.1; head.castShadow = true; g.add(head);
-  const em = new THREE.MeshBasicMaterial({color: 0x000000});
-  const eL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), em); eL.position.set(-0.1, 1.15, 0.21); g.add(eL);
-  const eR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.05), em); eR.position.set(0.1, 1.15, 0.21); g.add(eR);
-  const beak = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.15), new THREE.MeshLambertMaterial({color: 0xffa500})); beak.position.set(0, 1.0, 0.22); g.add(beak);
-  const aL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bm); aL.position.set(-0.35, 0.6, 0); aL.castShadow = true; g.add(aL);
-  const aR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, 0.15), bm); aR.position.set(0.35, 0.6, 0); aR.castShadow = true; g.add(aR);
-  const lL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bm); lL.position.set(-0.12, 0.2, 0); g.add(lL);
-  const lR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), bm); lR.position.set(0.12, 0.2, 0); g.add(lR);
-  return g;
-}
-function createPlantMesh(seed, x, z) {
-  const g = new THREE.Group();
-  const mat = new THREE.MeshLambertMaterial({color: seed.color});
-  const stem = new THREE.MeshLambertMaterial({color: 0x2e8b2e});
-  const id = seed.id;
-  if (['carrot','cucumber','eggplant'].includes(id)) g.add(box(0.15, 0.5, 0.15, mat, 0, 0.3, 0));
-  else if (['tomato','pepper','strawberry'].includes(id)) { g.add(box(0.08, 0.6, 0.08, stem, 0, 0.3, 0)); g.add(sph(0.2, mat, 0, 0.7, 0)); }
-  else if (['corn','bamboo','palm'].includes(id)) g.add(box(0.12, 1.2, 0.12, mat, 0, 0.6, 0));
-  else if (['potato','onion','garlic','coconut'].includes(id)) { g.add(box(0.05, 0.5, 0.05, stem, 0, 0.25, 0)); g.add(sph(0.25, mat, 0, 0.55, 0)); }
-  else if (['lettuce','broccoli'].includes(id)) g.add(sph(0.35, mat, 0, 0.35, 0));
-  else if (['watermelon','pineapple'].includes(id)) g.add(sph(0.4, mat, 0, 0.4, 0));
-  else if (id === 'mushroom') { g.add(box(0.12, 0.4, 0.12, new THREE.MeshLambertMaterial({color:0xf5e6d3}), 0, 0.2, 0)); g.add(sph(0.3, mat, 0, 0.55, 0)); }
-  else if (['avocado','sunflower','rose','tulip','cherry'].includes(id)) { g.add(box(0.08, 0.8, 0.08, stem, 0, 0.4, 0)); g.add(sph(0.28, mat, 0, 0.9, 0)); }
-  else if (id === 'cactus') { g.add(box(0.3, 0.9, 0.3, mat, 0, 0.45, 0)); g.add(box(0.2, 0.2, 0.2, mat, 0.25, 0.6, 0)); }
-  else if (['crystal','star','cosmic','nebula','comet','galaxy','blackhole','dragonfruit','phoenix','unicorn','titan','void','eternity','infinity','quantum','neutron','supernova','god','antimatter','dimension','universe','creation','penguin_seed'].includes(id)) { const oct = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), mat); oct.position.y = 0.5; g.add(oct); }
-  else { g.add(sph(0.4, mat, 0, 0.45, 0)); g.add(sph(0.25, mat, 0, 0.85, 0)); }
-  g.position.set(x, 0.2, z);
-  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
-  return g;
-}
-function box(w, h, d, mat, x, y, z) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); return m; }
-function sph(r, mat, x, y, z) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 10), mat); m.position.set(x, y, z); return m; }
-
-let yaw = 0, pitch = 0;
-let joyX = 0, joyY = 0;
-let joyActive = false;
-let playerX = 0, playerZ = 8;
-let myName = '';
-let onlineOthers = [];
-let updateTimer = 0;
-
-const joy = document.getElementById('joy');
-const stick = document.getElementById('joy-stick');
-let joyCenter = {x: 0, y: 0};
-joy.addEventListener('touchstart', e => { e.preventDefault(); const r = joy.getBoundingClientRect(); joyCenter = {x: r.left + r.width/2, y: r.top + r.height/2}; joyActive = true; moveJoy(e.touches[0]); });
-joy.addEventListener('touchmove', e => { e.preventDefault(); if (e.touches[0]) moveJoy(e.touches[0]); });
-joy.addEventListener('touchend', e => { e.preventDefault(); joyActive = false; joyX = joyY = 0; stick.style.transform = 'translate(0, 0)'; });
-function moveJoy(t) {
-  let dx = t.clientX - joyCenter.x; let dy = t.clientY - joyCenter.y;
-  const d = Math.sqrt(dx*dx + dy*dy); const max = 50;
-  if (d > max) { dx = dx/d*max; dy = dy/d*max; }
-  stick.style.transform = `translate(${dx}px, ${dy}px)`;
-  joyX = dx / max; joyY = dy / max;
-}
-
-let lookActive = false;
-let lookLast = {x: 0, y: 0};
-function setupCameraControls() {
-  const canvas = renderer.domElement;
-  canvas.addEventListener('touchstart', e => { if (e.target === canvas) { lookActive = true; lookLast = {x: e.touches[0].clientX, y: e.touches[0].clientY}; } });
-  canvas.addEventListener('touchmove', e => {
-    if (lookActive && e.touches[0]) {
-      yaw -= (e.touches[0].clientX - lookLast.x) * 0.008;
-      pitch -= (e.touches[0].clientY - lookLast.y) * 0.008;
-      pitch = Math.max(-1.4, Math.min(1.4, pitch));
-      lookLast = {x: e.touches[0].clientX, y: e.touches[0].clientY};
-    }
-  });
-  canvas.addEventListener('touchend', () => { lookActive = false; });
-  canvas.addEventListener('mousedown', e => {
-    if (e.button === 0 && !e.target.closest('#joy') && !e.target.closest('button') && !e.target.closest('#chat-panel')) {
-      canvas.requestPointerLock(); lookActive = true;
-    }
-  });
-  canvas.addEventListener('mousemove', e => {
-    if (document.pointerLockElement === canvas) {
-      yaw -= e.movementX * 0.002;
-      pitch -= e.movementY * 0.002;
-      pitch = Math.max(-1.4, Math.min(1.4, pitch));
-    } else if (lookActive) {
-      yaw -= (e.clientX - lookLast.x) * 0.008;
-      pitch -= (e.clientY - lookLast.y) * 0.008;
-      pitch = Math.max(-1.4, Math.min(1.4, pitch));
-      lookLast = {x: e.clientX, y: e.clientY};
-    }
-  });
-  canvas.addEventListener('mouseup', () => { lookActive = false; });
-  document.addEventListener('pointerlockchange', () => { if (document.pointerLockElement !== canvas) lookActive = false; });
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-}
-
-const keys = {};
-document.addEventListener('keydown', e => {
-  keys[e.key.toLowerCase()] = true;
-  if (e.key === 'b' || e.key === 'B' || e.key === 'и') openShop();
-  if (e.key === 'e' || e.key === 'E' || e.key === 'у') actionTap();
-  if (e.key === 'q' || e.key === 'Q' || e.key === 'й') toggleChat();
-  if (e.key === 'r' || e.key === 'R' || e.key === 'к') toggleHold();
-  if (e.key === 'p' || e.key === 'P' || e.key === 'з') openPets();
-  if (e.key === 'g' || e.key === 'G' || e.key === 'п') openLab();
-  if (e.key === "'" || e.key === 'э') openSell();
-  if (e.key === 'Tab') { e.preventDefault(); toggleAdmin(); }
-});
-document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
-document.addEventListener('mousedown', e => { if (e.button === 0 && document.pointerLockElement) actionTap(); });
-
-document.getElementById('btn-shop-buy').onclick = openShop;
-function openShop() {
-  const grid = document.getElementById('seeds-grid');
-  grid.innerHTML = '';
-  SEEDS.forEach(seed => {
-    const can = SAVE.coins >= seed.price;
-    const card = document.createElement('div');
-    card.className = 'seed-card' + (can ? '' : ' cant');
-    card.innerHTML = `<span class="emo">${seed.emoji}</span><div class="name">${seed.name}</div><div class="info">⏱ ${seed.time}с → +${seed.sell}💰</div><div class="price">💰 ${seed.price}</div>`;
-    if (can) card.onclick = () => buySeed(seed);
-    grid.appendChild(card);
-  });
-  document.getElementById('shop-modal').classList.add('on');
-}
-function buySeed(seed) {
-  if (SAVE.coins < seed.price) return;
-  SAVE.coins -= seed.price;
-  SAVE.inventory[seed.id] = (SAVE.inventory[seed.id] || 0) + 1;
-  save(); updateHud(); pushCoins(); openShop();
-  toast('Куплено: ' + seed.emoji + ' ' + seed.name, 'good');
-}
-document.getElementById('btn-shop-sell').onclick = openSell;
-function openSell() {
-  const grid = document.getElementById('sell-grid');
-  grid.innerHTML = '';
-  const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
-  if (!entries.length) { grid.innerHTML = '<div style="grid-column:span 2;text-align:center;color:#6c7086;padding:20px">Нечего продавать</div>'; }
-  else {
-    entries.forEach(([id, count]) => {
-      const seed = getSeed(id);
-      if (!seed) return;
-      const card = document.createElement('div');
-      card.className = 'seed-card';
-      card.innerHTML = `<span class="emo">${seed.emoji}</span><div class="name">${seed.name}</div><div class="info">В наличии: ${count}</div><div class="sell-price">+${seed.sell}💰 за шт</div>`;
-      card.onclick = () => sellSeed(id, seed);
-      grid.appendChild(card);
-    });
-  }
-  document.getElementById('sell-modal').classList.add('on');
-}
-function sellSeed(id, seed) {
-  if (!SAVE.inventory[id] || SAVE.inventory[id] <= 0) return;
-  SAVE.inventory[id]--;
-  if (SAVE.inventory[id] === 0) delete SAVE.inventory[id];
-  const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
-  const total = Math.floor(seed.sell * (1 + bonus));
-  SAVE.coins += total;
-  save(); updateHud(); pushCoins(); openSell();
-  toast('+ ' + total + '💰 за ' + seed.emoji, 'good');
-}
-document.getElementById('btn-pets').onclick = openPets;
-function openPets() {
-  const grid = document.getElementById('pets-grid');
-  grid.innerHTML = '';
-  PETS.forEach(pet => {
-    const owned = SAVE.pets.includes(pet.id);
-    const can = SAVE.coins >= pet.price;
-    const card = document.createElement('div');
-    card.className = 'seed-card' + ((owned || can) ? '' : ' cant');
-    card.innerHTML = `<span class="emo">${pet.emoji}</span><div class="name">${pet.name}</div><div class="info">+${Math.round(pet.bonus*100)}%</div><div class="price">${owned ? (SAVE.pet === pet.id ? '✅ ОДЕТ' : 'НАДЕТЬ') : '💰 ' + pet.price}</div>`;
-    if (owned || can) {
-      card.onclick = () => {
-        if (!owned) {
-          if (SAVE.coins < pet.price) return;
-          SAVE.coins -= pet.price;
-          SAVE.pets.push(pet.id);
-          toast('Куплен: ' + pet.emoji + ' ' + pet.name, 'good');
-        }
-        SAVE.pet = pet.id;
-        save(); updateHud(); pushCoins(); openPets();
-      };
-    }
-    grid.appendChild(card);
-  });
-  document.getElementById('pets-modal').classList.add('on');
-}
-
-let labSlot1 = null, labSlot2 = null;
-let pickTarget = 0;
-document.getElementById('btn-lab').onclick = openLab;
-function openLab() {
-  document.getElementById('lab-modal').classList.add('on');
-  renderLab(); renderHybridsList();
-}
-function renderLab() {
-  const s1 = document.getElementById('slot1'); const s2 = document.getElementById('slot2');
-  if (labSlot1) { const seed = getSeed(labSlot1); s1.classList.add('filled'); s1.querySelector('.emo').textContent = seed.emoji; s1.querySelector('.label').textContent = seed.name; }
-  else { s1.classList.remove('filled'); s1.querySelector('.emo').textContent = '❓'; s1.querySelector('.label').textContent = 'Родитель 1'; }
-  if (labSlot2) { const seed = getSeed(labSlot2); s2.classList.add('filled'); s2.querySelector('.emo').textContent = seed.emoji; s2.querySelector('.label').textContent = seed.name; }
-  else { s2.classList.remove('filled'); s2.querySelector('.emo').textContent = '❓'; s2.querySelector('.label').textContent = 'Родитель 2'; }
-  const resultEl = document.getElementById('lab-result');
-  if (labSlot1 && labSlot2) {
-    const hybrid = getHybrid(labSlot1, labSlot2);
-    if (hybrid) {
-      const s1s = getSeed(labSlot1), s2s = getSeed(labSlot2);
-      const price = Math.floor((s1s.sell + s2s.sell) * 0.75);
-      const time = Math.floor((s1s.time + s2s.time) * 0.75);
-      resultEl.classList.add('on');
-      resultEl.innerHTML = `<span class="emo">${hybrid.emoji}</span><div class="name">${hybrid.name}</div><div class="info">💰 ${price} · ⏱ ${time}с</div>`;
-      document.getElementById('btn-breed').disabled = false;
-      document.getElementById('btn-breed').style.opacity = '1';
-    } else { resultEl.classList.remove('on'); document.getElementById('btn-breed').disabled = true; document.getElementById('btn-breed').style.opacity = '0.5'; }
-  } else { resultEl.classList.remove('on'); document.getElementById('btn-breed').disabled = true; document.getElementById('btn-breed').style.opacity = '0.5'; }
-}
-function pickSlot(n) {
-  pickTarget = n;
-  const grid = document.getElementById('pick-seed-grid');
-  grid.innerHTML = '';
-  const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
-  if (!entries.length) { grid.innerHTML = '<div style="grid-column:span 2;text-align:center;color:#6c7086;padding:20px">Нет растений</div>'; }
-  else {
-    entries.forEach(([id, count]) => {
-      const seed = getSeed(id);
-      if (!seed) return;
-      const card = document.createElement('div');
-      card.className = 'seed-card';
-      card.innerHTML = `<span class="emo">${seed.emoji}</span><div class="name">${seed.name}</div><div class="price">x${count}</div>`;
-      card.onclick = () => { if (pickTarget === 1) labSlot1 = id; else labSlot2 = id; closeModal('pick-seed-modal'); renderLab(); };
-      grid.appendChild(card);
-    });
-  }
-  document.getElementById('pick-seed-modal').classList.add('on');
-}
-function doBreed() {
-  if (!labSlot1 || !labSlot2) return;
-  const hybrid = getHybrid(labSlot1, labSlot2);
-  if (!hybrid) return;
-  if (!SAVE.inventory[labSlot1] || SAVE.inventory[labSlot1] <= 0) { toast('Нет ' + getSeed(labSlot1).name, 'bad'); labSlot1 = null; renderLab(); return; }
-  if (!SAVE.inventory[labSlot2] || SAVE.inventory[labSlot2] <= 0) { toast('Нет ' + getSeed(labSlot2).name, 'bad'); labSlot2 = null; renderLab(); return; }
-  SAVE.inventory[labSlot1]--; if (SAVE.inventory[labSlot1] <= 0) delete SAVE.inventory[labSlot1];
-  SAVE.inventory[labSlot2]--; if (SAVE.inventory[labSlot2] <= 0) delete SAVE.inventory[labSlot2];
-  const hybridId = 'hybrid_' + getHybridKey(labSlot1, labSlot2);
-  let hybridSeed = SEEDS.find(s => s.id === hybridId);
-  if (!hybridSeed) {
-    const s1 = getSeed(labSlot1), s2 = getSeed(labSlot2);
-    hybridSeed = {id: hybridId, name: hybrid.name, emoji: hybrid.emoji, price: Math.floor((s1.price + s2.price) * 0.75), sell: Math.floor((s1.sell + s2.sell) * 0.75), time: Math.floor((s1.time + s2.time) * 0.75), color: hybrid.color};
-    SEEDS.push(hybridSeed);
-  }
-  SAVE.inventory[hybridId] = (SAVE.inventory[hybridId] || 0) + 1;
-  if (!SAVE.hybrid_names.includes(hybrid.name)) { SAVE.hybrid_names.push(hybrid.name); toast('🌟 Новый гибрид: ' + hybrid.name + '!', 'good'); }
-  else toast('Получен: ' + hybrid.name, 'good');
-  save(); updateHud();
-  labSlot1 = null; labSlot2 = null;
-  renderLab(); renderHybridsList();
-}
-function clearLab() { labSlot1 = null; labSlot2 = null; renderLab(); }
-function renderHybridsList() {
-  const list = document.getElementById('hybrids-list');
-  const count = SAVE.hybrid_names.length;
-  document.getElementById('hybrids-count').textContent = count;
-  if (!count) { list.innerHTML = '<div style="text-align:center;color:#6c7086;font-size:11px;padding:8px">Открой первый гибрид 🧪</div>'; return; }
-  list.innerHTML = SAVE.hybrid_names.map(n => { const h = Object.values(HYBRIDS).find(x => x.name === n); return `<div style="color:#a6e3a1;font-size:11px;padding:3px 0">${h ? h.emoji : '🧬'} ${n}</div>`; }).join('');
-}
-
-document.getElementById('btn-action').onclick = actionTap;
-let currentPlot = null;
-let selectedSeed = null;
-function actionTap() {
-  const ray = new THREE.Raycaster();
-  ray.setFromCamera({x: 0, y: 0}, camera);
-  const hits = ray.intersectObjects(plots.map(p => p.mesh));
-  if (!hits.length || hits[0].distance > 5) { toast('Подойди к грядке', 'bad'); return; }
-  const plot = plots.find(p => p.mesh === hits[0].object);
-  if (plot) openPlotMenu(plot);
-}
-function openPlotMenu(plot) {
-  currentPlot = plot;
-  selectedSeed = null;
-  const title = document.getElementById('action-title');
-  const info = document.getElementById('action-info');
-  const invEl = document.getElementById('inv-list');
-  const btns = document.getElementById('action-buttons');
-  title.textContent = '🌱 Грядка #' + (plot.id + 1);
-  btns.innerHTML = '';
-  if (plot.plant) {
-    const seed = getSeed(plot.plantSeed);
-    const elapsed = (Date.now() - plot.plantedAt) / 1000;
-    const left = Math.max(0, seed.time - elapsed);
-    if (left > 0) { info.innerHTML = seed.emoji + ' <b>' + seed.name + '</b><br>Осталось <b>' + Math.ceil(left) + 'с</b>'; invEl.style.display = 'none'; }
-    else {
-      const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
-      const total = Math.floor(seed.sell * (1 + bonus));
-      info.innerHTML = '✅ <b>' + seed.emoji + ' ' + seed.name + '</b><br>Продажа: <b>+' + total + '💰</b>';
-      invEl.style.display = 'none';
-      const b = document.createElement('button');
-      b.className = 'green';
-      b.textContent = '🌾 Собрать (+' + total + '💰)';
-      b.onclick = () => harvest(plot);
-      btns.appendChild(b);
-    }
-  } else {
-    info.textContent = 'Выбери семечко:';
-    invEl.style.display = 'flex';
-    invEl.innerHTML = '';
-    const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
-    if (!entries.length) { invEl.innerHTML = '<div class="inv-empty">Нет семян. Купи в 🛒</div>'; }
-    else {
-      entries.forEach(([id, count]) => {
-        const seed = getSeed(id);
-        if (!seed) return;
-        const item = document.createElement('div');
-        item.className = 'inv-item';
-        item.textContent = seed.emoji + ' ' + seed.name + ' (' + count + ')';
-        item.onclick = () => { selectedSeed = id; document.querySelectorAll('.inv-item').forEach(x => x.classList.remove('sel')); item.classList.add('sel'); updatePlantBtn(); };
-        invEl.appendChild(item);
-      });
-    }
-    const b = document.createElement('button');
-    b.className = 'green';
-    b.id = 'plant-btn';
-    b.textContent = 'Выбери семечко';
-    b.disabled = true;
-    b.style.opacity = '0.5';
-    b.onclick = () => { if (selectedSeed) plantSeed(plot, selectedSeed); };
-    btns.appendChild(b);
-  }
-  document.getElementById('action-modal').classList.add('on');
-}
-function updatePlantBtn() {
-  const b = document.getElementById('plant-btn');
-  if (!b) return;
-  if (selectedSeed) { const seed = getSeed(selectedSeed); b.textContent = '🌱 Посадить ' + seed.emoji + ' ' + seed.name; b.disabled = false; b.style.opacity = '1'; }
-}
-function plantSeed(plot, seedId) {
-  if (!SAVE.inventory[seedId]) return;
-  SAVE.inventory[seedId]--;
-  if (SAVE.inventory[seedId] === 0) delete SAVE.inventory[seedId];
-  const seed = getSeed(seedId);
-  plot.plantSeed = seedId;
-  plot.plantedAt = Date.now();
-  plot.plant = createPlantMesh(seed, plot.x, plot.z);
-  scene.add(plot.plant);
-  save(); updateHud();
-  closeModal('action-modal');
-  toast('Посажено: ' + seed.emoji + ' ' + seed.name, 'good');
-}
-function harvest(plot) {
-  const seed = getSeed(plot.plantSeed);
-  const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
-  const total = Math.floor(seed.sell * (1 + bonus));
-  SAVE.coins += total;
-  if (plot.plant) { scene.remove(plot.plant); plot.plant = null; }
-  plot.plantSeed = null; plot.plantedAt = 0;
-  save(); updateHud(); pushCoins();
-  closeModal('action-modal');
-  toast('+ ' + total + '💰 за ' + seed.emoji, 'good');
-}
-function closeModal(id) { document.getElementById(id).classList.remove('on'); }
-function updateHud() {
-  document.getElementById('coins').textContent = Math.floor(SAVE.coins);
-  const petsBox = document.getElementById('pets-box');
-  if (SAVE.pet) { const pet = getPet(SAVE.pet); document.getElementById('pet-name').textContent = pet.emoji + ' ' + pet.name; petsBox.style.display = 'block'; }
-  else petsBox.style.display = 'none';
-  const heldBox = document.getElementById('held-box');
-  if (SAVE.held) { const s = getSeed(SAVE.held); if (s) { document.getElementById('held-name').textContent = s.emoji + ' ' + s.name; heldBox.style.display = 'block'; } else heldBox.style.display = 'none'; }
-  else heldBox.style.display = 'none';
-}
-function toggleHold() {
-  if (SAVE.held) { SAVE.held = null; save(); updateHud(); updateHeldMesh(); toast('Убрал из рук', ''); return; }
-  const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
-  if (!entries.length) { toast('Инвентарь пуст', 'bad'); return; }
-  SAVE.held = entries[0][0];
-  save(); updateHud(); updateHeldMesh();
-  const s = getSeed(SAVE.held);
-  toast('✋ Взял: ' + s.emoji + ' ' + s.name, 'good');
-}
-async function sendPosition() {
-  if (!myName || !GARDEN_TOKEN) return;
-  try {
-    const r = await fetch('/api/garden/update', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN, x: playerX, z: playerZ, yaw: yaw, held: SAVE.held})});
-    const data = await r.json();
-    if (data.ok) { onlineOthers = data.others || []; document.getElementById('online-count').textContent = onlineOthers.length + 1; updateOtherPlayers(); }
-  } catch(e) {}
-}
-function updateOtherPlayers() {
-  const seen = new Set();
-  onlineOthers.forEach(p => {
-    seen.add(p.name);
-    if (!otherPlayersMeshes[p.name]) {
-      const mesh = createCharacter(0);
-      mesh.position.set(p.x, 0, p.z);
-      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64;
-      const c = cv.getContext('2d');
-      c.fillStyle = 'rgba(0,0,0,0.7)'; c.fillRect(0, 0, 256, 64);
-      c.fillStyle = '#fff'; c.font = 'bold 32px Arial'; c.textAlign = 'center'; c.fillText(p.name, 128, 45);
-      const tex = new THREE.CanvasTexture(cv);
-      const spr = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
-      spr.scale.set(2, 0.5, 1); spr.position.y = 1.9;
-      mesh.add(spr); scene.add(mesh);
-      otherPlayersMeshes[p.name] = mesh;
-    }
-    const mesh = otherPlayersMeshes[p.name];
-    mesh.position.x += (p.x - mesh.position.x) * 0.3;
-    mesh.position.z += (p.z - mesh.position.z) * 0.3;
-    mesh.rotation.y = p.yaw + Math.PI;
-  });
-  Object.keys(otherPlayersMeshes).forEach(n => { if (!seen.has(n)) { scene.remove(otherPlayersMeshes[n]); delete otherPlayersMeshes[n]; } });
-}
-function restorePlants() {
-  plots.forEach(plot => {
-    const saved = SAVE.plants[plot.id];
-    if (saved && saved.seed) {
-      const seed = getSeed(saved.seed);
-      if (!seed) return;
-      plot.plant = createPlantMesh(seed, plot.x, plot.z);
-      scene.add(plot.plant);
-      plot.plantSeed = saved.seed;
-      plot.plantedAt = saved.plantedAt || Date.now();
-    }
-  });
-}
-function updateHeldMesh() {
-  if (heldMesh) { scene.remove(heldMesh); heldMesh = null; }
-  if (!SAVE.held) return;
-  const seed = getSeed(SAVE.held);
-  if (!seed) return;
-  const mat = new THREE.MeshLambertMaterial({color: seed.color});
-  heldMesh = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), mat);
-  heldMesh.castShadow = true;
-  scene.add(heldMesh);
-}
-
-const clock = new THREE.Clock();
-function animate() {
-  requestAnimationFrame(animate);
-  const dt = Math.min(0.05, clock.getDelta());
-  const time = clock.elapsedTime;
-  let mx = joyX, mz = joyY;
-  if (keys['w'] || keys['arrowup'] || keys['ц']) mz -= 1;
-  if (keys['s'] || keys['arrowdown'] || keys['ы']) mz += 1;
-  if (keys['a'] || keys['arrowleft'] || keys['ф']) mx -= 1;
-  if (keys['d'] || keys['arrowright'] || keys['в']) mx += 1;
-  const len = Math.sqrt(mx*mx + mz*mz);
-  if (len > 1) { mx /= len; mz /= len; }
-  const speed = 4;
-  const cos = Math.cos(yaw), sin = Math.sin(yaw);
-  playerX += (mx * cos + mz * sin) * speed * dt;
-  playerZ += (-mx * sin + mz * cos) * speed * dt;
-  playerX = Math.max(-30, Math.min(30, playerX));
-  playerZ = Math.max(-30, Math.min(30, playerZ));
-  camera.position.set(playerX, 1.7, playerZ);
-  camera.rotation.y = yaw;
-  camera.rotation.x = pitch;
-  if (heldMesh) heldMesh.position.set(playerX + Math.cos(yaw) * 0.4, 1.2, playerZ + Math.sin(-yaw) * 0.4);
-  plots.forEach(p => {
-    if (p.plant && p.plantSeed) {
-      const seed = getSeed(p.plantSeed);
-      const elapsed = (Date.now() - p.plantedAt) / 1000;
-      const progress = Math.min(elapsed / seed.time, 1);
-      const scale = 0.4 + progress * 0.6;
-      p.plant.scale.set(scale, scale, scale);
-      p.plant.rotation.z = Math.sin(time * 1.5 + p.id) * 0.05 * progress;
-      p.plant.rotation.x = Math.cos(time * 1.2 + p.id) * 0.03 * progress;
-    }
-  });
-  clouds.forEach((cloud, i) => {
-    cloud.position.x += 0.03 * (1 + (i % 3) * 0.3);
-    if (cloud.position.x > 60) cloud.position.x = -60;
-  });
-  updateTimer += dt;
-  if (updateTimer > 0.12) { updateTimer = 0; sendPosition(); }
-  if (!document.hidden) renderer.render(scene, camera);
-}
-
-async function startGame() {
-  const name = document.getElementById('name-input').value.trim();
-  const password = document.getElementById('password-input').value.trim();
-  if (!name) { toast('Введи имя!', 'bad'); return; }
-  if (!password || password.length < 4) { toast('Пароль минимум 4 символа', 'bad'); return; }
-  myName = name;
-  SAVE.skin = selectedSkin;
-  localStorage.setItem('pous_garden_name', name);
-  applySpecialBonus();
-  save();
-  toast('Подключение...', '');
-  const ok = await serverRegister(name, password);
-  if (!ok) { toast('Ошибка подключения', 'bad'); return; }
-  document.getElementById('admin-btn').classList.add('on');
-  document.getElementById('login').style.display = 'none';
-  init3D();
-  setupCameraControls();
-  restorePlants();
-  updateHud();
-  updateHeldMesh();
-  renderHybridsList();
-  syncCoins();
-  setInterval(syncCoins, 3000);
-  animate();
-}
-setInterval(() => {
-  if (!myName) return;
-  SAVE.plants = {};
-  plots.forEach(p => { if (p.plantSeed) SAVE.plants[p.id] = {seed: p.plantSeed, plantedAt: p.plantedAt}; });
-  save();
-}, 5000);
-const savedName = localStorage.getItem('pous_garden_name');
-if (savedName) document.getElementById('name-input').value = savedName;
-  let chatOpen = false;
-let lastChatTime = 0;
-let chatPollTimer = null;
-let unreadChat = 0;
-function toggleChat() {
-  chatOpen = !chatOpen;
-  const panel = document.getElementById('chat-panel');
-  if (chatOpen) {
-    panel.classList.add('on');
-    unreadChat = 0;
-    updateChatBadge();
-    loadChat();
-    if (!chatPollTimer) chatPollTimer = setInterval(loadChat, 1500);
-    setTimeout(() => { const ci = document.getElementById('chat-input'); if (ci) ci.focus(); }, 300);
-  } else panel.classList.remove('on');
-}
-function updateChatBadge() {
-  const badge = document.getElementById('chat-badge');
-  if (unreadChat > 0) { badge.textContent = unreadChat > 9 ? '9+' : unreadChat; badge.classList.add('on'); }
-  else badge.classList.remove('on');
-}
-async function sendChat() {
-  const inp = document.getElementById('chat-input');
-  const text = inp.value.trim();
-  if (!text || !myName || !GARDEN_TOKEN) return;
-  inp.value = '';
-  try {
-    await fetch('/api/garden/chat/send', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN, text: text})});
-    loadChat();
-  } catch(e) {}
-}
-async function loadChat() {
-  try {
-    const r = await fetch('/api/garden/chat/get?since=' + lastChatTime);
-    const data = await r.json();
-    if (!data.ok) return;
-    const box = document.getElementById('chat-messages');
-    let scrolled = false;
-    data.messages.forEach(m => {
-      lastChatTime = Math.max(lastChatTime, m.time);
-      const d = document.createElement('div');
-      d.className = 'msg';
-      const t = new Date(m.time * 1000);
-      const timeStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
-      d.innerHTML = '<span class="time">' + timeStr + '</span><span class="name" style="color:' + m.color + '">' + escapeHtml(m.name) + ':</span> ' + escapeHtml(m.text);
-      box.appendChild(d);
-      scrolled = true;
-      if (!chatOpen && m.name !== myName) { unreadChat++; updateChatBadge(); }
-    });
-    while (box.children.length > 50) box.removeChild(box.firstChild);
-    if (scrolled) box.scrollTop = box.scrollHeight;
-  } catch(e) {}
-}
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-}
-setTimeout(() => {
-  const ci = document.getElementById('chat-input');
-  if (ci) { ci.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendChat(); } }); }
-}, 500);
-setInterval(() => { if (!chatOpen) loadChat(); }, 3000);
-
-const ADMIN_PASSWORD = 'петух2026';
-let adminOpen = false;
-function toggleAdmin() {
-  if (!myName) return;
-  if (!adminOpen) {
-    const pass = prompt('Введи пароль админа:');
-    if (pass !== ADMIN_PASSWORD) { toast('Неверный пароль', 'bad'); return; }
-  }
-  adminOpen = !adminOpen;
-  const panel = document.getElementById('admin-panel');
-  if (adminOpen) { panel.classList.add('on'); loadAdminPlayers(); setInterval(loadAdminPlayers, 3000); }
-  else panel.classList.remove('on');
-}
-async function loadAdminPlayers() {
-  if (!GARDEN_TOKEN) return;
-  try {
-    const r = await fetch('/api/garden/admin/list', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN})});
-    const data = await r.json();
-    const box = document.getElementById('admin-players');
-    if (!data.ok) { box.innerHTML = '<div class="admin-empty">Ошибка: ' + (data.error || '?') + '</div>'; return; }
-    if (!data.players.length) { box.innerHTML = '<div class="admin-empty">Никого нет онлайн</div>'; return; }
-    box.innerHTML = '';
-    data.players.forEach(p => {
-      const d = document.createElement('div');
-      d.className = 'admin-player';
-      d.innerHTML = '<div class="pname">' + escapeHtml(p.name) + '</div><div class="pinfo">💰 ' + p.coins + ' | X:' + Math.round(p.x) + ' Z:' + Math.round(p.z) + '</div><div class="pactions"><button class="give" onclick="adminGive(\'' + escapeHtml(p.name) + '\')">💰 Дать монеты</button><button class="kick" onclick="adminKick(\'' + escapeHtml(p.name) + '\')">👢 Кик</button></div>';
-      box.appendChild(d);
-    });
-  } catch(e) {}
-}
-async function adminGive(target) {
-  const amount = parseInt(prompt('Сколько монет дать ' + target + '?', '1000'));
-  if (!amount || amount <= 0) return;
-  try {
-    const r = await fetch('/api/garden/admin/give', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN, target: target, amount: amount})});
-    const data = await r.json();
-    if (data.ok) { toast('✅ Дано ' + amount + ' монет', 'good'); loadAdminPlayers(); }
-    else toast('❌ ' + (data.error || 'Ошибка'), 'bad');
-  } catch(e) { toast('Ошибка сети', 'bad'); }
-}
-async function adminKick(target) {
-  if (!confirm('Кикнуть ' + target + '?')) return;
-  try {
-    const r = await fetch('/api/garden/admin/kick', {method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({token: GARDEN_TOKEN, target: target})});
-    const data = await r.json();
-    if (data.ok) { toast('👢 ' + target + ' кикнут', 'good'); loadAdminPlayers(); }
-    else toast('❌ ' + (data.error || 'Ошибка'), 'bad');
-  } catch(e) { toast('Ошибка сети', 'bad'); }
-}
-window.addEventListener('beforeunload', () => {
-  if (myName && GARDEN_TOKEN) {
-    const data = JSON.stringify({token: GARDEN_TOKEN});
-    navigator.sendBeacon('/api/garden/leave', new Blob([data], {type: 'application/json'}));
-  }
-});
+function createTree(x,z,woodTex){const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.4,2.5,8),new THREE.MeshLambertMaterial({map:woodTex.clone()}));trunk.position.set(x,1.25,z);trunk.castShadow=true;scene.add(trunk);const lm=new THREE.MeshLambertMaterial({color:0x2e8b2e});const lm2=new THREE.MeshLambertMaterial({color:0x3a9a3a});const l1=new THREE.Mesh(new THREE.SphereGeometry(1.6,8,8),lm);l1.position.set(x,3.2,z);l1.castShadow=true;scene.add(l1);const l2=new THREE.Mesh(new THREE.SphereGeometry(1.2,8,8),lm2);l2.position.set(x+0.7,3.8,z+0.4);l2.castShadow=true;scene.add(l2);const l3=new THREE.Mesh(new THREE.SphereGeometry(1.1,8,8),lm2);l3.position.set(x-0.6,4.0,z-0.5);l3.castShadow=true;scene.add(l3);}
+function createCharacter(skinIdx){const skin=SKINS_LIST[skinIdx]||SKINS_LIST[0];const g=new THREE.Group();const bm=new THREE.MeshLambertMaterial({color:skin.color});const blm=new THREE.MeshLambertMaterial({color:skin.belly});const body=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.7,0.4),bm);body.position.y=0.55;body.castShadow=true;g.add(body);const belly=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.4,0.05),blm);belly.position.set(0,0.5,0.21);g.add(belly);const head=new THREE.Mesh(new THREE.BoxGeometry(0.45,0.45,0.4),bm);head.position.y=1.1;head.castShadow=true;g.add(head);const em=new THREE.MeshBasicMaterial({color:0x000000});const eL=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,0.05),em);eL.position.set(-0.1,1.15,0.21);g.add(eL);const eR=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,0.05),em);eR.position.set(0.1,1.15,0.21);g.add(eR);const beak=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.08,0.15),new THREE.MeshLambertMaterial({color:0xffa500}));beak.position.set(0,1.0,0.22);g.add(beak);const aL=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.55,0.15),bm);aL.position.set(-0.35,0.6,0);aL.castShadow=true;g.add(aL);const aR=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.55,0.15),bm);aR.position.set(0.35,0.6,0);aR.castShadow=true;g.add(aR);const lL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.4,0.18),bm);lL.position.set(-0.12,0.2,0);g.add(lL);const lR=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.4,0.18),bm);lR.position.set(0.12,0.2,0);g.add(lR);return g;}
+function createPlantMesh(seed,x,z){const g=new THREE.Group();const mat=new THREE.MeshLambertMaterial({color:seed.color});const stem=new THREE.MeshLambertMaterial({color:0x2e8b2e});const id=seed.id;
+if(['carrot','cucumber','eggplant'].includes(id))g.add(box(0.15,0.5,0.15,mat,0,0.3,0));
+else if(['tomato','pepper','strawberry'].includes(id)){g.add(box(0.08,0.6,0.08,stem,0,0.3,0));g.add(sph(0.2,mat,0,0.7,0));}
+else if(['corn','bamboo','palm'].includes(id))g.add(box(0.12,1.2,0.12,mat,0,0.6,0));
+else if(['potato','onion','garlic','coconut'].includes(id)){g.add(box(0.05,0.5,0.05,stem,0,0.25,0));g.add(sph(0.25,mat,0,0.55,0));}
+else if(['lettuce','broccoli'].includes(id))g.add(sph(0.35,mat,0,0.35,0));
+else if(['watermelon','pineapple'].includes(id))g.add(sph(0.4,mat,0,0.4,0));
+else if(id==='mushroom'){g.add(box(0.12,0.4,0.12,new THREE.MeshLambertMaterial({color:0xf5e6d3}),0,0.2,0));g.add(sph(0.3,mat,0,0.55,0));}
+else if(['avocado','sunflower','rose','tulip','cherry'].includes(id)){g.add(box(0.08,0.8,0.08,stem,0,0.4,0));g.add(sph(0.28,mat,0,0.9,0));}
+else if(id==='cactus'){g.add(box(0.3,0.9,0.3,mat,0,0.45,0));g.add(box(0.2,0.2,0.2,mat,0.25,0.6,0));}
+else if(['crystal','star','cosmic','nebula','comet','galaxy','blackhole','dragonfruit','phoenix','unicorn','titan','void','eternity','infinity','quantum','neutron','supernova','god','antimatter','dimension','universe','creation','penguin_seed'].includes(id)){const oct=new THREE.Mesh(new THREE.OctahedronGeometry(0.4),mat);oct.position.y=0.5;g.add(oct);}
+else{g.add(sph(0.4,mat,0,0.45,0));g.add(sph(0.25,mat,0,0.85,0));}
+g.position.set(x,0.2,z);g.traverse(o=>{if(o.isMesh)o.castShadow=true;});return g;}
+function box(w,h,d,mat,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);return m;}
+function sph(r,mat,x,y,z){const m=new THREE.Mesh(new THREE.SphereGeometry(r,10,10),mat);m.position.set(x,y,z);return m;}
+let yaw=0,pitch=0,joyX=0,joyY=0,joyActive=false,playerX=0,playerZ=8,myName='',onlineOthers=[],updateTimer=0;
+const joy=document.getElementById('joy');const stick=document.getElementById('joy-stick');let joyCenter={x:0,y:0};
+joy.addEventListener('touchstart',e=>{e.preventDefault();const r=joy.getBoundingClientRect();joyCenter={x:r.left+r.width/2,y:r.top+r.height/2};joyActive=true;moveJoy(e.touches[0]);});
+joy.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches[0])moveJoy(e.touches[0]);});
+joy.addEventListener('touchend',e=>{e.preventDefault();joyActive=false;joyX=joyY=0;stick.style.transform='translate(0,0)';});
+function moveJoy(t){let dx=t.clientX-joyCenter.x,dy=t.clientY-joyCenter.y;const d=Math.sqrt(dx*dx+dy*dy);const max=50;if(d>max){dx=dx/d*max;dy=dy/d*max;}stick.style.transform=`translate(${dx}px,${dy}px)`;joyX=dx/max;joyY=dy/max;}
+let lookActive=false,lookLast={x:0,y:0};
+function setupCameraControls(){const canvas=renderer.domElement;
+canvas.addEventListener('touchstart',e=>{if(e.target===canvas){lookActive=true;lookLast={x:e.touches[0].clientX,y:e.touches[0].clientY};}});
+canvas.addEventListener('touchmove',e=>{if(lookActive&&e.touches[0]){yaw-=(e.touches[0].clientX-lookLast.x)*0.008;pitch-=(e.touches[0].clientY-lookLast.y)*0.008;pitch=Math.max(-1.4,Math.min(1.4,pitch));lookLast={x:e.touches[0].clientX,y:e.touches[0].clientY};}});
+canvas.addEventListener('touchend',()=>{lookActive=false;});
+canvas.addEventListener('mousedown',e=>{if(e.button===0&&!e.target.closest('#joy')&&!e.target.closest('button')&&!e.target.closest('#chat-panel')){canvas.requestPointerLock();lookActive=true;}});
+canvas.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas){yaw-=e.movementX*0.002;pitch-=e.movementY*0.002;pitch=Math.max(-1.4,Math.min(1.4,pitch));}else if(lookActive){yaw-=(e.clientX-lookLast.x)*0.008;pitch-=(e.clientY-lookLast.y)*0.008;pitch=Math.max(-1.4,Math.min(1.4,pitch));lookLast={x:e.clientX,y:e.clientY};}});
+canvas.addEventListener('mouseup',()=>{lookActive=false;});
+document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement!==canvas)lookActive=false;});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());}
+const keys={};
+document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;
+if(e.key==='b'||e.key==='B'||e.key==='и')openShop();
+if(e.key==='e'||e.key==='E'||e.key==='у')actionTap();
+if(e.key==='q'||e.key==='Q'||e.key==='й')toggleChat();
+if(e.key==='r'||e.key==='R'||e.key==='к')toggleHold();
+if(e.key==='p'||e.key==='P'||e.key==='з')openPets();
+if(e.key==='g'||e.key==='G'||e.key==='п')openLab();
+if(e.key==="'"||e.key==='э')openSell();
+if(e.key==='Tab'){e.preventDefault();toggleAdmin();}});
+document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.addEventListener('mousedown',e=>{if(e.button===0&&document.pointerLockElement)actionTap();});
+document.getElementById('btn-shop-buy').onclick=openShop;
+function openShop(){const grid=document.getElementById('seeds-grid');grid.innerHTML='';SEEDS.forEach(seed=>{const can=SAVE.coins>=seed.price;const card=document.createElement('div');card.className='seed-card'+(can?'':' cant');card.innerHTML=`<span class="emo">${seed.emoji}</span><div class="name">${seed.name}</div><div class="info">${seed.time}с → +${seed.sell}💰</div><div class="price">💰 ${seed.price}</div>`;if(can)card.onclick=()=>buySeed(seed);grid.appendChild(card);});document.getElementById('shop-modal').classList.add('on');}
+function buySeed(seed){if(SAVE.coins<seed.price)return;SAVE.coins-=seed.price;SAVE.inventory[seed.id]=(SAVE.inventory[seed.id]||0)+1;save();updateHud();pushCoins();openShop();toast('Куплено: '+seed.emoji+' '+seed.name,'good');}
+document.getElementById('btn-shop-sell').onclick=openSell;
+function openSell(){const grid=document.getElementById('sell-grid');grid.innerHTML='';const entries=Object.entries(SAVE.inventory).filter(([id,c])=>c>0);if(!entries.length){grid.innerHTML='<div style="grid-column:span 2;text-align:center;color:#6c7086;padding:20px">Нечего продавать</div>';}else{entries.forEach(([id,count])=>{const seed=getSeed(id);if(!seed)return;const card=document.createElement('div');card.className='seed-card';card.innerHTML=`<span class="emo">${seed.emoji}</span><div class="name">${seed.name}</div><div class="info">В наличии: ${count}</div><div class="sell-price">+${seed.sell}💰 за шт</div>`;card.onclick=()=>sellSeed(id,seed);grid.appendChild(card);});}document.getElementById('sell-modal').classList.add('on');}
+function sellSeed(id,seed){if(!SAVE.inventory[id]||SAVE.inventory[id]<=0)return;SAVE.inventory[id]--;if(SAVE.inventory[id]===0)delete SAVE.inventory[id];const bonus=SAVE.pet?getPet(SAVE.pet).bonus:0;const total=Math.floor(seed.sell*(1+bonus));SAVE.coins+=total;save();updateHud();pushCoins();openSell();toast('+'+total+'💰 за '+seed.emoji,'good');}
+document.getElementById('btn-pets').onclick=openPets;
+function openPets(){const grid=document.getElementById('pets-grid');grid.innerHTML='';PETS.forEach(pet=>{const owned=SAVE.pets.includes(pet.id);const can=SAVE.coins>=pet.price;const card=document.createElement('div');card.className='seed-card'+((owned||can)?'':' cant');card.innerHTML=`<span class="emo">${pet.emoji}</span><div class="name">${pet.name}</div><div class="info">+${Math.round(pet.bonus*100)}%</div><div class="price">${owned?(SAVE.pet===pet.id?'✅ ОДЕТ':'НАДЕТЬ'):'💰 '+pet.price}</div>`;if(owned||can){card.onclick=()=>{if(!owned){if(SAVE.coins<pet.price)return;SAVE.coins-=pet.price;SAVE.pets.push(pet.id);toast('Куплен: '+pet.emoji+' '+pet.name,'good');}SAVE.pet=pet.id;save();updateHud();pushCoins();openPets();};}grid.appendChild(card);});document.getElementById('pets-modal').classList.add('on');}
+let labSlot1=null,labSlot2=null,pickTarget=0;
+document.getElementById('btn-lab').onclick=openLab;
+function openLab(){document.getElementById('lab-modal').classList.add('on');renderLab();renderHybridsList();}
+function renderLab(){const s1=document.getElementById('slot1'),s2=document.getElementById('slot2');if(labSlot1){const seed=getSeed(labSlot1);s1.classList.add('filled');s1.querySelector('.emo').textContent=seed.emoji;s1.querySelector('.label').textContent=seed.name;}else{s1.classList.remove('filled');s1.querySelector('.emo').textContent='❓';s1.querySelector('.label').textContent='Родитель 1';}if(labSlot2){const seed=getSeed(labSlot2);s2.classList.add('filled');s2.querySelector('.emo').textContent=seed.emoji;s2.querySelector('.label').textContent=seed.name;}else{s2.classList.remove('filled');s2.querySelector('.emo').textContent='❓';s2.querySelector('.label').textContent='Родитель 2';}const resultEl=document.getElementById('lab-result');if(labSlot1&&labSlot2){const hybrid=getHybrid(labSlot1,labSlot2);if(hybrid){const s1s=getSeed(labSlot1),s2s=getSeed(labSlot2);const price=Math.floor((s1s.sell+s2s.sell)*0.75);const time=Math.floor((s1s.time+s2s.time)*0.75);resultEl.classList.add('on');resultEl.innerHTML=`<span class="emo">${hybrid.emoji}</span><div class="name">${hybrid.name}</div><div class="info">💰 ${price} · ⏱ ${time}с</div>`;document.getElementById('btn-breed').disabled=false;document.getElementById('btn-breed').style.opacity='1';}else{resultEl.classList.remove('on');document.getElementById('btn-breed').disabled=true;document.getElementById('btn-breed').style.opacity='0.5';}}else{resultEl.classList.remove('on');document.getElementById('btn-breed').disabled=true;document.getElementById('btn-breed').style.opacity='0.5';}}
+function pickSlot(n){pickTarget=n;const grid=document.getElementById('pick-seed-grid');grid.innerHTML='';const entries=Object.entries(SAVE.inventory).filter(([id,c])=>c>0);if(!entries.length){grid.innerHTML='<div style="grid-column:span 2;text-align:center;color:#6c7086;padding:20px">Нет растений</div>';}else{entries.forEach(([id,count])=>{const seed=getSeed(id);if(!seed)return;const card=document.createElement('div');card.className='seed-card';card.innerHTML=`<span class="emo">${seed.emoji}</span><div class="name">${seed.name}</div><div class="price">x${count}</div>`;card.onclick=()=>{if(pickTarget===1)labSlot1=id;else labSlot2=id;closeModal('pick-seed-modal');renderLab();};grid.appendChild(card);});}document.getElementById('pick-seed-modal').classList.add('on');}
+function doBreed(){if(!labSlot1||!labSlot2)return;const hybrid=getHybrid(labSlot1,labSlot2);if(!hybrid)return;if(!SAVE.inventory[labSlot1]||SAVE.inventory[labSlot1]<=0){toast('Нет '+getSeed(labSlot1).name,'bad');labSlot1=null;renderLab();return;}if(!SAVE.inventory[labSlot2]||SAVE.inventory[labSlot2]<=0){toast('Нет '+getSeed(labSlot2).name,'bad');labSlot2=null;renderLab();return;}SAVE.inventory[labSlot1]--;if(SAVE.inventory[labSlot1]<=0)delete SAVE.inventory[labSlot1];SAVE.inventory[labSlot2]--;if(SAVE.inventory[labSlot2]<=0)delete SAVE.inventory[labSlot2];const hybridId='hybrid_'+getHybridKey(labSlot1,labSlot2);let hybridSeed=SEEDS.find(s=>s.id===hybridId);if(!hybridSeed){const s1=getSeed(labSlot1),s2=getSeed(labSlot2);hybridSeed={id:hybridId,name:hybrid.name,emoji:hybrid.emoji,price:Math.floor((s1.price+s2.price)*0.75),sell:Math.floor((s1.sell+s2.sell)*0.75),time:Math.floor((s1.time+s2.time)*0.75),color:hybrid.color};SEEDS.push(hybridSeed);}SAVE.inventory[hybridId]=(SAVE.inventory[hybridId]||0)+1;if(!SAVE.hybrid_names.includes(hybrid.name)){SAVE.hybrid_names.push(hybrid.name);toast('🌟 Новый гибрид: '+hybrid.name+'!','good');}else toast('Получен: '+hybrid.name,'good');save();updateHud();labSlot1=null;labSlot2=null;renderLab();renderHybridsList();}
+function clearLab(){labSlot1=null;labSlot2=null;renderLab();}
+function renderHybridsList(){const list=document.getElementById('hybrids-list');const count=SAVE.hybrid_names.length;document.getElementById('hybrids-count').textContent=count;if(!count){list.innerHTML='<div style="text-align:center;color:#6c7086;font-size:11px;padding:8px">Открой первый гибрид 🧪</div>';return;}list.innerHTML=SAVE.hybrid_names.map(n=>{const h=Object.values(HYBRIDS).find(x=>x.name===n);return`<div style="color:#a6e3a1;font-size:11px;padding:3px 0">${h?h.emoji:'🧬'} ${n}</div>`;}).join('');}
+document.getElementById('btn-action').onclick=actionTap;
+let currentPlot=null,selectedSeed=null;
+function actionTap(){const ray=new THREE.Raycaster();ray.setFromCamera({x:0,y:0},camera);const hits=ray.intersectObjects(plots.map(p=>p.mesh));if(!hits.length||hits[0].distance>5){toast('Подойди к грядке','bad');return;}const plot=plots.find(p=>p.mesh===hits[0].object);if(plot)openPlotMenu(plot);}
+function openPlotMenu(plot){currentPlot=plot;selectedSeed=null;const title=document.getElementById('action-title');const info=document.getElementById('action-info');const invEl=document.getElementById('inv-list');const btns=document.getElementById('action-buttons');title.textContent='🌱 Грядка #'+(plot.id+1);btns.innerHTML='';
+if(plot.plant){const seed=getSeed(plot.plantSeed);const elapsed=(Date.now()-plot.plantedAt)/1000;const left=Math.max(0,seed.time-elapsed);if(left>0){info.innerHTML=seed.emoji+' <b>'+seed.name+'</b><br>Осталось <b>'+Math.ceil(left)+'с</b>';invEl.style.display='none';}else{const bonus=SAVE.pet?getPet(SAVE.pet).bonus:0;const total=Math.floor(seed.sell*(1+bonus));info.innerHTML='✅ <b>'+seed.emoji+' '+seed.name+'</b><br>Продажа: <b>+'+total+'💰</b>';invEl.style.display='none';const b=document.createElement('button');b.className='green';b.textContent='🌾 Собрать (+'+total+'💰)';b.onclick=()=>harvest(plot);btns.appendChild(b);}}
+else{info.textContent='Выбери семечко:';invEl.style.display='flex';invEl.innerHTML='';const entries=Object.entries(SAVE.inventory).filter(([id,c])=>c>0);if(!entries.length){invEl.innerHTML='<div class="inv-empty">Нет семян. Купи в 🛒</div>';}else{entries.forEach(([id,count])=>{const seed=getSeed(id);if(!seed)return;const item=document.createElement('div');item.className='inv-item';item.textContent=seed.emoji+' '+seed.name+' ('+count+')';item.onclick=()=>{selectedSeed=id;document.querySelectorAll('.inv-item').forEach(x=>x.classList.remove('sel'));item.classList.add('sel');updatePlantBtn();};invEl.appendChild(item);});}const b=document.createElement('button');b.className='green';b.id='plant-btn';b.textContent='Выбери семечко';b.disabled=true;b.style.opacity='0.5';b.onclick=()=>{if(selectedSeed)plantSeed(plot,selectedSeed);};btns.appendChild(b);}
+document.getElementById('action-modal').classList.add('on');}
+function updatePlantBtn(){const b=document.getElementById('plant-btn');if(!b)return;if(selectedSeed){const seed=getSeed(selectedSeed);b.textContent='🌱 Посадить '+seed.emoji+' '+seed.name;b.disabled=false;b.style.opacity='1';}}
+function plantSeed(plot,seedId){if(!SAVE.inventory[seedId])return;SAVE.inventory[seedId]--;if(SAVE.inventory[seedId]===0)delete SAVE.inventory[seedId];const seed=getSeed(seedId);plot.plantSeed=seedId;plot.plantedAt=Date.now();plot.plant=createPlantMesh(seed,plot.x,plot.z);scene.add(plot.plant);save();updateHud();closeModal('action-modal');toast('Посажено: '+seed.emoji+' '+seed.name,'good');}
+function harvest(plot){const seed=getSeed(plot.plantSeed);const bonus=SAVE.pet?getPet(SAVE.pet).bonus:0;const total=Math.floor(seed.sell*(1+bonus));SAVE.coins+=total;if(plot.plant){scene.remove(plot.plant);plot.plant=null;}plot.plantSeed=null;plot.plantedAt=0;save();updateHud();pushCoins();closeModal('action-modal');toast('+'+total+'💰 за '+seed.emoji,'good');}
+function closeModal(id){document.getElementById(id).classList.remove('on');}
+function updateHud(){document.getElementById('coins').textContent=Math.floor(SAVE.coins);const petsBox=document.getElementById('pets-box');if(SAVE.pet){const pet=getPet(SAVE.pet);document.getElementById('pet-name').textContent=pet.emoji+' '+pet.name;petsBox.style.display='block';}else petsBox.style.display='none';const heldBox=document.getElementById('held-box');if(SAVE.held){const s=getSeed(SAVE.held);if(s){document.getElementById('held-name').textContent=s.emoji+' '+s.name;heldBox.style.display='block';}else heldBox.style.display='none';}else heldBox.style.display='none';}
+function toggleHold(){if(SAVE.held){SAVE.held=null;save();updateHud();updateHeldMesh();toast('Убрал из рук','');return;}const entries=Object.entries(SAVE.inventory).filter(([id,c])=>c>0);if(!entries.length){toast('Инвентарь пуст','bad');return;}SAVE.held=entries[0][0];save();updateHud();updateHeldMesh();const s=getSeed(SAVE.held);toast('✋ Взял: '+s.emoji+' '+s.name,'good');}
+async function sendPosition(){if(!myName||!GARDEN_TOKEN)return;try{const r=await fetch('/api/garden/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN,x:playerX,z:playerZ,yaw:yaw,held:SAVE.held})});const data=await r.json();if(data.ok){onlineOthers=data.others||[];document.getElementById('online-count').textContent=onlineOthers.length+1;updateOtherPlayers();}}catch(e){}}
+function updateOtherPlayers(){const seen=new Set();onlineOthers.forEach(p=>{seen.add(p.name);if(!otherPlayersMeshes[p.name]){const mesh=createCharacter(0);mesh.position.set(p.x,0,p.z);const cv=document.createElement('canvas');cv.width=256;cv.height=64;const c=cv.getContext('2d');c.fillStyle='rgba(0,0,0,0.7)';c.fillRect(0,0,256,64);c.fillStyle='#fff';c.font='bold 32px Arial';c.textAlign='center';c.fillText(p.name,128,45);const tex=new THREE.CanvasTexture(cv);const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex}));spr.scale.set(2,0.5,1);spr.position.y=1.9;mesh.add(spr);scene.add(mesh);otherPlayersMeshes[p.name]=mesh;}const mesh=otherPlayersMeshes[p.name];mesh.position.x+=(p.x-mesh.position.x)*0.3;mesh.position.z+=(p.z-mesh.position.z)*0.3;mesh.rotation.y=p.yaw+Math.PI;});Object.keys(otherPlayersMeshes).forEach(n=>{if(!seen.has(n)){scene.remove(otherPlayersMeshes[n]);delete otherPlayersMeshes[n];}});}
+function restorePlants(){plots.forEach(plot=>{const saved=SAVE.plants[plot.id];if(saved&&saved.seed){const seed=getSeed(saved.seed);if(!seed)return;plot.plant=createPlantMesh(seed,plot.x,plot.z);scene.add(plot.plant);plot.plantSeed=saved.seed;plot.plantedAt=saved.plantedAt||Date.now();}});}
+function updateHeldMesh(){if(heldMesh){scene.remove(heldMesh);heldMesh=null;}if(!SAVE.held)return;const seed=getSeed(SAVE.held);if(!seed)return;const mat=new THREE.MeshLambertMaterial({color:seed.color});heldMesh=new THREE.Mesh(new THREE.BoxGeometry(0.25,0.25,0.25),mat);heldMesh.castShadow=true;scene.add(heldMesh);}
+const clock=new THREE.Clock();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(0.05,clock.getDelta());const time=clock.elapsedTime;
+let mx=joyX,mz=joyY;
+if(keys['w']||keys['arrowup']||keys['ц'])mz-=1;
+if(keys['s']||keys['arrowdown']||keys['ы'])mz+=1;
+if(keys['a']||keys['arrowleft']||keys['ф'])mx-=1;
+if(keys['d']||keys['arrowright']||keys['в'])mx+=1;
+const len=Math.sqrt(mx*mx+mz*mz);if(len>1){mx/=len;mz/=len;}
+const speed=4;const cos=Math.cos(yaw),sin=Math.sin(yaw);
+playerX+=(mx*cos+mz*sin)*speed*dt;playerZ+=(-mx*sin+mz*cos)*speed*dt;
+playerX=Math.max(-30,Math.min(30,playerX));playerZ=Math.max(-30,Math.min(30,playerZ));
+camera.position.set(playerX,1.7,playerZ);camera.rotation.y=yaw;camera.rotation.x=pitch;
+if(heldMesh)heldMesh.position.set(playerX+Math.cos(yaw)*0.4,1.2,playerZ+Math.sin(-yaw)*0.4);
+plots.forEach(p=>{if(p.plant&&p.plantSeed){const seed=getSeed(p.plantSeed);const elapsed=(Date.now()-p.plantedAt)/1000;const progress=Math.min(elapsed/seed.time,1);const scale=0.4+progress*0.6;p.plant.scale.set(scale,scale,scale);p.plant.rotation.z=Math.sin(time*1.5+p.id)*0.05*progress;p.plant.rotation.x=Math.cos(time*1.2+p.id)*0.03*progress;}});
+clouds.forEach((cloud,i)=>{cloud.position.x+=0.03*(1+(i%3)*0.3);if(cloud.position.x>60)cloud.position.x=-60;});
+updateTimer+=dt;if(updateTimer>0.12){updateTimer=0;sendPosition();}
+if(!document.hidden)renderer.render(scene,camera);}
+async function startGame(){const name=document.getElementById('name-input').value.trim();const password=document.getElementById('password-input').value.trim();if(!name){toast('Введи имя!','bad');return;}if(!password||password.length<4){toast('Пароль минимум 4 символа','bad');return;}myName=name;SAVE.skin=selectedSkin;localStorage.setItem('pous_garden_name',name);applyBonus();save();toast('Подключение...','');const ok=await serverRegister(name,password);if(!ok){toast('Ошибка подключения','bad');return;}document.getElementById('admin-btn').classList.add('on');document.getElementById('login').style.display='none';init3D();setupCameraControls();restorePlants();updateHud();updateHeldMesh();renderHybridsList();syncCoins();setInterval(syncCoins,3000);animate();}
+setInterval(()=>{if(!myName)return;SAVE.plants={};plots.forEach(p=>{if(p.plantSeed)SAVE.plants[p.id]={seed:p.plantSeed,plantedAt:p.plantedAt};});save();},5000);
+const savedName=localStorage.getItem('pous_garden_name');
+if(savedName)document.getElementById('name-input').value=savedName;
+let chatOpen=false,lastChatTime=0,chatPollTimer=null,unreadChat=0;
+function toggleChat(){chatOpen=!chatOpen;const panel=document.getElementById('chat-panel');if(chatOpen){panel.classList.add('on');unreadChat=0;updateChatBadge();loadChat();if(!chatPollTimer)chatPollTimer=setInterval(loadChat,1500);setTimeout(()=>{const ci=document.getElementById('chat-input');if(ci)ci.focus();},300);}else panel.classList.remove('on');}
+function updateChatBadge(){const badge=document.getElementById('chat-badge');if(unreadChat>0){badge.textContent=unreadChat>9?'9+':unreadChat;badge.classList.add('on');}else badge.classList.remove('on');}
+async function sendChat(){const inp=document.getElementById('chat-input');const text=inp.value.trim();if(!text||!myName||!GARDEN_TOKEN)return;inp.value='';try{await fetch('/api/garden/chat/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN,text:text})});loadChat();}catch(e){}}
+async function loadChat(){try{const r=await fetch('/api/garden/chat/get?since='+lastChatTime);const data=await r.json();if(!data.ok)return;const box=document.getElementById('chat-messages');let scrolled=false;data.messages.forEach(m=>{lastChatTime=Math.max(lastChatTime,m.time);const d=document.createElement('div');d.className='msg';const t=new Date(m.time*1000);const timeStr=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');d.innerHTML='<span class="time">'+timeStr+'</span><span class="name" style="color:'+m.color+'">'+escapeHtml(m.name)+':</span> '+escapeHtml(m.text);box.appendChild(d);scrolled=true;if(!chatOpen&&m.name!==myName){unreadChat++;updateChatBadge();}});while(box.children.length>50)box.removeChild(box.firstChild);if(scrolled)box.scrollTop=box.scrollHeight;}catch(e){}}
+function escapeHtml(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+setTimeout(()=>{const ci=document.getElementById('chat-input');if(ci){ci.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});}},500);
+setInterval(()=>{if(!chatOpen)loadChat();},3000);
+const ADMIN_PASSWORD='петух2026';
+let adminOpen=false;
+function toggleAdmin(){if(!myName)return;if(!adminOpen){const pass=prompt('Введи пароль админа:');if(pass!==ADMIN_PASSWORD){toast('Неверный пароль','bad');return;}}adminOpen=!adminOpen;const panel=document.getElementById('admin-panel');if(adminOpen){panel.classList.add('on');loadAdminPlayers();setInterval(loadAdminPlayers,3000);}else panel.classList.remove('on');}
+async function loadAdminPlayers(){if(!GARDEN_TOKEN)return;try{const r=await fetch('/api/garden/admin/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN})});const data=await r.json();const box=document.getElementById('admin-players');if(!data.ok){box.innerHTML='<div class="admin-empty">Ошибка: '+(data.error||'?')+'</div>';return;}if(!data.players.length){box.innerHTML='<div class="admin-empty">Никого нет онлайн</div>';return;}box.innerHTML='';data.players.forEach(p=>{const d=document.createElement('div');d.className='admin-player';d.innerHTML='<div class="pname">'+escapeHtml(p.name)+'</div><div class="pinfo">💰 '+p.coins+' | X:'+Math.round(p.x)+' Z:'+Math.round(p.z)+'</div><div class="pactions"><button class="give" onclick="adminGive(\''+escapeHtml(p.name)+'\')">💰 Дать монеты</button><button class="kick" onclick="adminKick(\''+escapeHtml(p.name)+'\')">👢 Кик</button></div>';box.appendChild(d);});}catch(e){}}
+async function adminGive(target){const amount=parseInt(prompt('Сколько монет дать '+target+'?','1000'));if(!amount||amount<=0)return;try{const r=await fetch('/api/garden/admin/give',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN,target:target,amount:amount})});const data=await r.json();if(data.ok){toast('✅ Дано '+amount+' монет','good');loadAdminPlayers();}else toast('❌ '+(data.error||'Ошибка'),'bad');}catch(e){toast('Ошибка сети','bad');}}
+async function adminKick(target){if(!confirm('Кикнуть '+target+'?'))return;try{const r=await fetch('/api/garden/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:GARDEN_TOKEN,target:target})});const data=await r.json();if(data.ok){toast('👢 '+target+' кикнут','good');loadAdminPlayers();}else toast('❌ '+(data.error||'Ошибка'),'bad');}catch(e){toast('Ошибка сети','bad');}}
+window.addEventListener('beforeunload',()=>{if(myName&&GARDEN_TOKEN){const data=JSON.stringify({token:GARDEN_TOKEN});navigator.sendBeacon('/api/garden/leave',new Blob([data],{type:'application/json'}));}});
 </script>
 </body>
 </html>
