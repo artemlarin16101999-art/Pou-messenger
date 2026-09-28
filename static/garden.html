@@ -292,6 +292,67 @@ function save() {
   try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e) {}
 }
 
+// ============ ТОКЕН ============
+let GARDEN_TOKEN = localStorage.getItem('pous_garden_token') || null;
+
+async function serverRegister(name) {
+  // Автоматическая регистрация с паролем-заглушкой (для простоты)
+  const password = 'autopass_' + name.toLowerCase();
+  try {
+    const r = await fetch('/api/garden/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: name, password: password})
+    });
+    const data = await r.json();
+    if (data.ok) {
+      GARDEN_TOKEN = data.token;
+      localStorage.setItem('pous_garden_token', GARDEN_TOKEN);
+      return true;
+    }
+    // Если имя занято — пробуем войти с тем же паролем
+    return await serverLogin(name, password);
+  } catch(e) {
+    console.error('Register error:', e);
+    return false;
+  }
+}
+
+async function serverLogin(name, password) {
+  try {
+    const r = await fetch('/api/garden/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: name, password: password})
+    });
+    const data = await r.json();
+    if (data.ok) {
+      GARDEN_TOKEN = data.token;
+      localStorage.setItem('pous_garden_token', GARDEN_TOKEN);
+      return true;
+    }
+    return false;
+  } catch(e) {
+    console.error('Login error:', e);
+    return false;
+  }
+}
+
+async function serverCheckSession() {
+  if (!GARDEN_TOKEN) return false;
+  try {
+    const r = await fetch('/api/garden/check-session', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: GARDEN_TOKEN})
+    });
+    const data = await r.json();
+    return data.ok;
+  } catch(e) {
+    return false;
+  }
+}
+
 // ============ СПЕЦИАЛЬНЫЕ АККАУНТЫ ============
 const SPECIAL_ACCOUNTS = {
   'gildi': 100000,
@@ -337,7 +398,7 @@ SKINS_LIST.forEach((s, i) => {
   skinRow.appendChild(d);
 });
 
-// ============ ТЕКСТУРЫ (с фиксом чёрных) ============
+// ============ ТЕКСТУРЫ ============
 let TEX = {};
 
 function preloadTextures() {
@@ -801,7 +862,7 @@ function openPets() {
   document.getElementById('pets-modal').classList.add('on');
 }
 
-// ============ ГЕНЕТИКА (С ФИКСОМ) ============
+// ============ ГЕНЕТИКА ============
 let labSlot1 = null, labSlot2 = null;
 let pickTarget = 0;
 
@@ -879,7 +940,6 @@ function pickSlot(n) {
         <div class="price">x${count}</div>
       `;
       card.onclick = () => {
-        // ★ ФИКС: НЕ списываем здесь!
         if (pickTarget === 1) labSlot1 = id;
         else labSlot2 = id;
         closeModal('pick-seed-modal');
@@ -896,7 +956,6 @@ function doBreed() {
   const hybrid = getHybrid(labSlot1, labSlot2);
   if (!hybrid) return;
 
-  // ★ ФИКС: списываем ТОЛЬКО теперь
   if (!SAVE.inventory[labSlot1] || SAVE.inventory[labSlot1] <= 0) {
     toast('Нет ' + getSeed(labSlot1).name + ' в инвентаре', 'bad');
     labSlot1 = null; renderLab(); return;
@@ -1084,15 +1143,14 @@ function updateHud() {
 }
 
 async function sendPosition() {
-  if (!myName) return;
+  if (!myName || !GARDEN_TOKEN) return;
   try {
     const r = await fetch('/api/garden/update', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        name: myName,
-        x: playerX, z: playerZ, yaw: yaw,
-        coins: Math.floor(SAVE.coins)
+        token: GARDEN_TOKEN,
+        x: playerX, z: playerZ, yaw: yaw
       })
     });
     const data = await r.json();
@@ -1206,7 +1264,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-function startGame() {
+async function startGame() {
   const name = document.getElementById('name-input').value.trim();
   if (!name) { toast('Введи имя!', 'bad'); return; }
   myName = name;
@@ -1214,6 +1272,15 @@ function startGame() {
   localStorage.setItem('pous_garden_name', name);
   applySpecialBonus();
   save();
+
+  // Регистрируемся/логинимся на сервере
+  toast('Подключение...', '');
+  const ok = await serverRegister(name);
+  if (!ok) {
+    toast('Ошибка подключения к серверу', 'bad');
+    return;
+  }
+
   document.getElementById('login').style.display = 'none';
   init3D();
   setupCameraControls();
@@ -1268,13 +1335,13 @@ function updateChatBadge() {
 async function sendChat() {
   const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
-  if (!text || !myName) return;
+  if (!text || !myName || !GARDEN_TOKEN) return;
   inp.value = '';
   try {
     await fetch('/api/garden/chat/send', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({name: myName, text: text})
+      body: JSON.stringify({token: GARDEN_TOKEN, text: text})
     });
     loadChat();
   } catch(e) {}
@@ -1326,6 +1393,14 @@ setTimeout(() => {
 setInterval(() => {
   if (!chatOpen) loadChat();
 }, 3000);
+
+// ============ ВЫХОД ============
+window.addEventListener('beforeunload', () => {
+  if (myName && GARDEN_TOKEN) {
+    const data = JSON.stringify({token: GARDEN_TOKEN});
+    navigator.sendBeacon('/api/garden/leave', new Blob([data], {type: 'application/json'}));
+  }
+});
 </script>
 </body>
   </html>
