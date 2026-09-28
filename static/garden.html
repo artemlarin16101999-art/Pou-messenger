@@ -217,7 +217,7 @@ canvas{display:block;width:100%;height:100%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ============ 28 СЕМЯН ============
+  // ============ 28 СЕМЯН ============
 const SEEDS = [
   {id:'carrot', name:'Морковь', emoji:'🥕', price:10, sell:14, time:15, color:0xff7f2a},
   {id:'potato', name:'Картошка', emoji:'🥔', price:15, sell:21, time:18, color:0xc8a165},
@@ -360,6 +360,41 @@ async function serverLogin(name, password) {
     console.error('Login error:', e);
     return false;
   }
+}
+
+// ============ СИНХРОНИЗАЦИЯ МОНЕТ ============
+async function syncCoins() {
+  if (!GARDEN_TOKEN) return;
+  try {
+    const r = await fetch('/api/garden/get-coins', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: GARDEN_TOKEN})
+    });
+    const data = await r.json();
+    if (data.ok && typeof data.coins === 'number') {
+      if (data.coins > SAVE.coins) {
+        const diff = data.coins - SAVE.coins;
+        SAVE.coins = data.coins;
+        save();
+        updateHud();
+        toast('💰 +' + diff + ' монет от админа!', 'good');
+      } else if (data.coins < SAVE.coins) {
+        pushCoins();
+      }
+    }
+  } catch(e) {}
+}
+
+async function pushCoins() {
+  if (!GARDEN_TOKEN) return;
+  try {
+    await fetch('/api/garden/set-coins', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: GARDEN_TOKEN, coins: Math.floor(SAVE.coins)})
+    });
+  } catch(e) {}
 }
 
 // ============ СПЕЦИАЛЬНЫЕ АККАУНТЫ ============
@@ -834,6 +869,7 @@ function buySeed(seed) {
   SAVE.coins -= seed.price;
   SAVE.inventory[seed.id] = (SAVE.inventory[seed.id] || 0) + 1;
   save(); updateHud();
+  pushCoins();
   openShop();
   toast('Куплено: ' + seed.emoji + ' ' + seed.name, 'good');
 }
@@ -863,6 +899,7 @@ function openPets() {
         }
         SAVE.pet = pet.id;
         save(); updateHud();
+        pushCoins();
         openPets();
       };
     }
@@ -976,523 +1013,4 @@ function doBreed() {
   SAVE.inventory[labSlot1]--;
   if (SAVE.inventory[labSlot1] <= 0) delete SAVE.inventory[labSlot1];
   SAVE.inventory[labSlot2]--;
-  if (SAVE.inventory[labSlot2] <= 0) delete SAVE.inventory[labSlot2];
-
-  const hybridId = 'hybrid_' + getHybridKey(labSlot1, labSlot2);
-  let hybridSeed = SEEDS.find(s => s.id === hybridId);
-  if (!hybridSeed) {
-    const s1 = getSeed(labSlot1), s2 = getSeed(labSlot2);
-    hybridSeed = {
-      id: hybridId,
-      name: hybrid.name,
-      emoji: hybrid.emoji,
-      price: Math.floor((s1.price + s2.price) * 0.75),
-      sell: Math.floor((s1.sell + s2.sell) * 0.75),
-      time: Math.floor((s1.time + s2.time) * 0.75),
-      color: hybrid.color
-    };
-    SEEDS.push(hybridSeed);
-  }
-  SAVE.inventory[hybridId] = (SAVE.inventory[hybridId] || 0) + 1;
-  if (!SAVE.hybrid_names.includes(hybrid.name)) {
-    SAVE.hybrid_names.push(hybrid.name);
-    toast('🌟 Новый гибрид: ' + hybrid.name + '!', 'good');
-  } else {
-    toast('Получен: ' + hybrid.name, 'good');
-  }
-  save(); updateHud();
-  labSlot1 = null; labSlot2 = null;
-  renderLab();
-  renderHybridsList();
-}
-
-function clearLab() {
-  labSlot1 = null; labSlot2 = null;
-  renderLab();
-}
-
-function renderHybridsList() {
-  const list = document.getElementById('hybrids-list');
-  const count = SAVE.hybrid_names.length;
-  document.getElementById('hybrids-count').textContent = count;
-  if (!count) {
-    list.innerHTML = '<div style="text-align:center;color:#6c7086;font-size:11px;padding:8px">Открой первый гибрид 🧪</div>';
-    return;
-  }
-  list.innerHTML = SAVE.hybrid_names.map(n => {
-    const h = Object.values(HYBRIDS).find(x => x.name === n);
-    return `<div style="color:#a6e3a1;font-size:11px;padding:3px 0">${h ? h.emoji : '🧬'} ${n}</div>`;
-  }).join('');
-}
-
-// ============ ГРЯДКА ============
-document.getElementById('btn-action').onclick = actionTap;
-let currentPlot = null;
-let selectedSeed = null;
-
-function actionTap() {
-  const ray = new THREE.Raycaster();
-  ray.setFromCamera({x: 0, y: 0}, camera);
-  const hits = ray.intersectObjects(plots.map(p => p.mesh));
-  if (!hits.length || hits[0].distance > 5) { toast('Подойди к грядке', 'bad'); return; }
-  const plot = plots.find(p => p.mesh === hits[0].object);
-  if (plot) openPlotMenu(plot);
-}
-
-function openPlotMenu(plot) {
-  currentPlot = plot;
-  selectedSeed = null;
-  const title = document.getElementById('action-title');
-  const info = document.getElementById('action-info');
-  const invEl = document.getElementById('inv-list');
-  const btns = document.getElementById('action-buttons');
-  title.textContent = '🌱 Грядка #' + (plot.id + 1);
-  btns.innerHTML = '';
-
-  if (plot.plant) {
-    const seed = getSeed(plot.plantSeed);
-    const elapsed = (Date.now() - plot.plantedAt) / 1000;
-    const left = Math.max(0, seed.time - elapsed);
-    if (left > 0) {
-      info.innerHTML = seed.emoji + ' <b>' + seed.name + '</b><br>Осталось <b>' + Math.ceil(left) + 'с</b>';
-      invEl.style.display = 'none';
-    } else {
-      const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
-      const total = Math.floor(seed.sell * (1 + bonus));
-      info.innerHTML = '✅ <b>' + seed.emoji + ' ' + seed.name + '</b><br>Продажа: <b>+' + total + '💰</b>';
-      invEl.style.display = 'none';
-      const b = document.createElement('button');
-      b.className = 'green';
-      b.textContent = '🌾 Собрать (+' + total + '💰)';
-      b.onclick = () => harvest(plot);
-      btns.appendChild(b);
-    }
-  } else {
-    info.textContent = 'Выбери семечко:';
-    invEl.style.display = 'flex';
-    invEl.innerHTML = '';
-    const entries = Object.entries(SAVE.inventory).filter(([id, c]) => c > 0);
-    if (!entries.length) {
-      invEl.innerHTML = '<div class="inv-empty">Нет семян. Купи в 🏪</div>';
-    } else {
-      entries.forEach(([id, count]) => {
-        const seed = getSeed(id);
-        const item = document.createElement('div');
-        item.className = 'inv-item';
-        item.textContent = seed.emoji + ' ' + seed.name + ' (' + count + ')';
-        item.onclick = () => {
-          selectedSeed = id;
-          document.querySelectorAll('.inv-item').forEach(x => x.classList.remove('sel'));
-          item.classList.add('sel');
-          updatePlantBtn();
-        };
-        invEl.appendChild(item);
-      });
-    }
-    const b = document.createElement('button');
-    b.className = 'green';
-    b.id = 'plant-btn';
-    b.textContent = 'Выбери семечко';
-    b.disabled = true;
-    b.style.opacity = '0.5';
-    b.onclick = () => { if (selectedSeed) plantSeed(plot, selectedSeed); };
-    btns.appendChild(b);
-  }
-  document.getElementById('action-modal').classList.add('on');
-}
-
-function updatePlantBtn() {
-  const b = document.getElementById('plant-btn');
-  if (!b) return;
-  if (selectedSeed) {
-    const seed = getSeed(selectedSeed);
-    b.textContent = '🌱 Посадить ' + seed.emoji + ' ' + seed.name;
-    b.disabled = false; b.style.opacity = '1';
-  }
-}
-
-function plantSeed(plot, seedId) {
-  if (!SAVE.inventory[seedId]) return;
-  SAVE.inventory[seedId]--;
-  if (SAVE.inventory[seedId] === 0) delete SAVE.inventory[seedId];
-  const seed = getSeed(seedId);
-  plot.plantSeed = seedId;
-  plot.plantedAt = Date.now();
-  plot.plant = createPlantMesh(seed, plot.x, plot.z);
-  scene.add(plot.plant);
-  save(); updateHud();
-  closeModal('action-modal');
-  toast('Посажено: ' + seed.emoji + ' ' + seed.name, 'good');
-}
-
-function harvest(plot) {
-  const seed = getSeed(plot.plantSeed);
-  const bonus = SAVE.pet ? getPet(SAVE.pet).bonus : 0;
-  const total = Math.floor(seed.sell * (1 + bonus));
-  SAVE.coins += total;
-  if (plot.plant) { scene.remove(plot.plant); plot.plant = null; }
-  plot.plantSeed = null; plot.plantedAt = 0;
-  save(); updateHud();
-  closeModal('action-modal');
-  toast('+ ' + total + '💰 за ' + seed.emoji, 'good');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('on');
-}
-
-function updateHud() {
-  document.getElementById('coins').textContent = Math.floor(SAVE.coins);
-  const petsBox = document.getElementById('pets-box');
-  if (SAVE.pet) {
-    const pet = getPet(SAVE.pet);
-    document.getElementById('pet-name').textContent = pet.emoji + ' ' + pet.name;
-    petsBox.style.display = 'block';
-  } else petsBox.style.display = 'none';
-}
-
-async function sendPosition() {
-  if (!myName || !GARDEN_TOKEN) return;
-  try {
-    const r = await fetch('/api/garden/update', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        token: GARDEN_TOKEN,
-        x: playerX, z: playerZ, yaw: yaw
-      })
-    });
-    const data = await r.json();
-    if (data.ok) {
-      onlineOthers = data.others || [];
-      document.getElementById('online-count').textContent = onlineOthers.length + 1;
-      updateOtherPlayers();
-    }
-  } catch(e) {}
-}
-
-function updateOtherPlayers() {
-  const seen = new Set();
-  onlineOthers.forEach(p => {
-    seen.add(p.name);
-    if (!otherPlayersMeshes[p.name]) {
-      const mesh = createCharacter(0);
-      mesh.position.set(p.x, 0, p.z);
-      const cv = document.createElement('canvas');
-      cv.width = 256; cv.height = 64;
-      const c = cv.getContext('2d');
-      c.fillStyle = 'rgba(0,0,0,0.7)';
-      c.fillRect(0, 0, 256, 64);
-      c.fillStyle = '#fff';
-      c.font = 'bold 32px Arial';
-      c.textAlign = 'center';
-      c.fillText(p.name, 128, 45);
-      const tex = new THREE.CanvasTexture(cv);
-      const spr = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
-      spr.scale.set(2, 0.5, 1);
-      spr.position.y = 1.9;
-      mesh.add(spr);
-      scene.add(mesh);
-      otherPlayersMeshes[p.name] = mesh;
-    }
-    const mesh = otherPlayersMeshes[p.name];
-    mesh.position.x += (p.x - mesh.position.x) * 0.3;
-    mesh.position.z += (p.z - mesh.position.z) * 0.3;
-    mesh.rotation.y = p.yaw;
-  });
-  Object.keys(otherPlayersMeshes).forEach(n => {
-    if (!seen.has(n)) {
-      scene.remove(otherPlayersMeshes[n]);
-      delete otherPlayersMeshes[n];
-    }
-  });
-}
-
-function restorePlants() {
-  plots.forEach(plot => {
-    const saved = SAVE.plants[plot.id];
-    if (saved && saved.seed) {
-      const seed = getSeed(saved.seed);
-      if (!seed) return;
-      plot.plant = createPlantMesh(seed, plot.x, plot.z);
-      scene.add(plot.plant);
-      plot.plantSeed = saved.seed;
-      plot.plantedAt = saved.plantedAt || Date.now();
-    }
-  });
-}
-
-const clock = new THREE.Clock();
-
-function animate() {
-  requestAnimationFrame(animate);
-  const dt = Math.min(0.05, clock.getDelta());
-  const time = clock.elapsedTime;
-
-  let mx = joyX, mz = joyY;
-  if (keys['w']) mz -= 1;
-  if (keys['s']) mz += 1;
-  if (keys['a']) mx -= 1;
-  if (keys['d']) mx += 1;
-
-  const len = Math.sqrt(mx*mx + mz*mz);
-  if (len > 1) { mx /= len; mz /= len; }
-  const speed = 4;
-  const cos = Math.cos(yaw), sin = Math.sin(yaw);
-  playerX += (mx * cos + mz * sin) * speed * dt;
-  playerZ += (-mx * sin + mz * cos) * speed * dt;
-  playerX = Math.max(-30, Math.min(30, playerX));
-  playerZ = Math.max(-30, Math.min(30, playerZ));
-  camera.position.set(playerX, 1.7, playerZ);
-  camera.rotation.y = yaw;
-  camera.rotation.x = pitch;
-
-  plots.forEach(p => {
-    if (p.plant && p.plantSeed) {
-      const seed = getSeed(p.plantSeed);
-      const elapsed = (Date.now() - p.plantedAt) / 1000;
-      const progress = Math.min(elapsed / seed.time, 1);
-      const scale = 0.4 + progress * 0.6;
-      p.plant.scale.set(scale, scale, scale);
-      p.plant.rotation.z = Math.sin(time * 1.5 + p.id) * 0.05 * progress;
-      p.plant.rotation.x = Math.cos(time * 1.2 + p.id) * 0.03 * progress;
-    }
-  });
-
-  clouds.forEach((cloud, i) => {
-    cloud.position.x += 0.03 * (1 + (i % 3) * 0.3);
-    if (cloud.position.x > 60) cloud.position.x = -60;
-  });
-
-  updateTimer += dt;
-  if (updateTimer > 0.5) {
-    updateTimer = 0;
-    sendPosition();
-  }
-
-  renderer.render(scene, camera);
-}
-
-async function startGame() {
-  const name = document.getElementById('name-input').value.trim();
-  if (!name) { toast('Введи имя!', 'bad'); return; }
-  myName = name;
-  SAVE.skin = selectedSkin;
-  localStorage.setItem('pous_garden_name', name);
-  applySpecialBonus();
-  save();
-
-  toast('Подключение...', '');
-  const ok = await serverRegister(name);
-  if (!ok) {
-    toast('Ошибка подключения к серверу', 'bad');
-    return;
-  }
-
-  if (name.toLowerCase() === 'gildi') {
-    document.getElementById('admin-btn').classList.add('on');
-  }
-
-  document.getElementById('login').style.display = 'none';
-  init3D();
-  setupCameraControls();
-  restorePlants();
-  updateHud();
-  renderHybridsList();
-  animate();
-}
-
-setInterval(() => {
-  if (!myName) return;
-  SAVE.plants = {};
-  plots.forEach(p => {
-    if (p.plantSeed) SAVE.plants[p.id] = {seed: p.plantSeed, plantedAt: p.plantedAt};
-  });
-  save();
-}, 5000);
-
-const savedName = localStorage.getItem('pous_garden_name');
-if (savedName) document.getElementById('name-input').value = savedName;
-
-// ============ ЧАТ ============
-let chatOpen = false;
-let lastChatTime = 0;
-let chatPollTimer = null;
-let unreadChat = 0;
-
-function toggleChat() {
-  chatOpen = !chatOpen;
-  const panel = document.getElementById('chat-panel');
-  if (chatOpen) {
-    panel.classList.add('on');
-    unreadChat = 0;
-    updateChatBadge();
-    loadChat();
-    if (!chatPollTimer) chatPollTimer = setInterval(loadChat, 1500);
-    setTimeout(() => {
-      const ci = document.getElementById('chat-input');
-      if (ci) ci.focus();
-    }, 300);
-  } else panel.classList.remove('on');
-}
-
-function updateChatBadge() {
-  const badge = document.getElementById('chat-badge');
-  if (unreadChat > 0) {
-    badge.textContent = unreadChat > 9 ? '9+' : unreadChat;
-    badge.classList.add('on');
-  } else badge.classList.remove('on');
-}
-
-async function sendChat() {
-  const inp = document.getElementById('chat-input');
-  const text = inp.value.trim();
-  if (!text || !myName || !GARDEN_TOKEN) return;
-  inp.value = '';
-  try {
-    await fetch('/api/garden/chat/send', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({token: GARDEN_TOKEN, text: text})
-    });
-    loadChat();
-  } catch(e) {}
-}
-
-async function loadChat() {
-  try {
-    const r = await fetch('/api/garden/chat/get?since=' + lastChatTime);
-    const data = await r.json();
-    if (!data.ok) return;
-    const box = document.getElementById('chat-messages');
-    let scrolled = false;
-    data.messages.forEach(m => {
-      lastChatTime = Math.max(lastChatTime, m.time);
-      const d = document.createElement('div');
-      d.className = 'msg';
-      const t = new Date(m.time * 1000);
-      const timeStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
-      d.innerHTML = '<span class="time">' + timeStr + '</span>' +
-                    '<span class="name" style="color:' + m.color + '">' + escapeHtml(m.name) + ':</span> ' +
-                    escapeHtml(m.text);
-      box.appendChild(d);
-      scrolled = true;
-      if (!chatOpen && m.name !== myName) {
-        unreadChat++;
-        updateChatBadge();
-      }
-    });
-    while (box.children.length > 50) box.removeChild(box.firstChild);
-    if (scrolled) box.scrollTop = box.scrollHeight;
-  } catch(e) {}
-}
-
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
-}
-
-setTimeout(() => {
-  const ci = document.getElementById('chat-input');
-  if (ci) {
-    ci.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); sendChat(); }
-    });
-  }
-}, 500);
-
-setInterval(() => {
-  if (!chatOpen) loadChat();
-}, 3000);
-
-// ============ АДМИН-ПАНЕЛЬ ============
-const ADMIN_PASSWORD = '12345678';
-let adminOpen = false;
-
-function toggleAdmin() {
-  if (!myName || myName.toLowerCase() !== 'gildi') return;
-  if (!adminOpen) {
-    const pass = prompt('Введи пароль админа:');
-    if (pass !== ADMIN_PASSWORD) { toast('Неверный пароль', 'bad'); return; }
-  }
-  adminOpen = !adminOpen;
-  const panel = document.getElementById('admin-panel');
-  if (adminOpen) {
-    panel.classList.add('on');
-    loadAdminPlayers();
-    setInterval(loadAdminPlayers, 3000);
-  } else {
-    panel.classList.remove('on');
-  }
-}
-
-async function loadAdminPlayers() {
-  if (!GARDEN_TOKEN) return;
-  try {
-    const r = await fetch('/api/garden/admin/list', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({token: GARDEN_TOKEN})
-    });
-    const data = await r.json();
-    const box = document.getElementById('admin-players');
-    if (!data.ok) { box.innerHTML = '<div class="admin-empty">Ошибка: ' + (data.error || '?') + '</div>'; return; }
-    if (!data.players.length) { box.innerHTML = '<div class="admin-empty">Никого нет онлайн</div>'; return; }
-    box.innerHTML = '';
-    data.players.forEach(p => {
-      const d = document.createElement('div');
-      d.className = 'admin-player';
-      d.innerHTML = `
-        <div class="pname">${escapeHtml(p.name)}</div>
-        <div class="pinfo">💰 ${p.coins} | X:${Math.round(p.x)} Z:${Math.round(p.z)}</div>
-        <div class="pactions">
-          <button class="give" onclick="adminGive('${escapeHtml(p.name)}')">💰 Дать монеты</button>
-          <button class="kick" onclick="adminKick('${escapeHtml(p.name)}')">👢 Кик</button>
-        </div>
-      `;
-      box.appendChild(d);
-    });
-  } catch(e) {}
-}
-
-async function adminGive(target) {
-  const amount = parseInt(prompt('Сколько монет дать ' + target + '?', '1000'));
-  if (!amount || amount <= 0) return;
-  try {
-    const r = await fetch('/api/garden/admin/give', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({token: GARDEN_TOKEN, target: target, amount: amount})
-    });
-    const data = await r.json();
-    if (data.ok) { toast('✅ Дано ' + amount + ' монет', 'good'); loadAdminPlayers(); }
-    else toast('❌ ' + (data.error || 'Ошибка'), 'bad');
-  } catch(e) { toast('Ошибка сети', 'bad'); }
-}
-
-async function adminKick(target) {
-  if (!confirm('Кикнуть ' + target + '?')) return;
-  try {
-    const r = await fetch('/api/garden/admin/kick', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({token: GARDEN_TOKEN, target: target})
-    });
-    const data = await r.json();
-    if (data.ok) { toast('👢 ' + target + ' кикнут', 'good'); loadAdminPlayers(); }
-    else toast('❌ ' + (data.error || 'Ошибка'), 'bad');
-  } catch(e) { toast('Ошибка сети', 'bad'); }
-}
-
-// ============ ВЫХОД ============
-window.addEventListener('beforeunload', () => {
-  if (myName && GARDEN_TOKEN) {
-    const data = JSON.stringify({token: GARDEN_TOKEN});
-    navigator.sendBeacon('/api/garden/leave', new Blob([data], {type: 'application/json'}));
-  }
-});
-
-</script>
-</body>
-</html>
+  if (SAVE.inventory[
