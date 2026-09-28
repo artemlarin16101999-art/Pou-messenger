@@ -4,36 +4,24 @@ import os
 import time
 import asyncio
 import hashlib
-from datetime import datetime
+import hmac
 
 DATA_FILE = 'pou_data.json'
 GARDEN_FILE = 'garden_data.json'
 lock = asyncio.Lock()
 
-ONLINE_TIMEOUT = 30
-MAX_HISTORY = 500
 ADMIN_NAME = 'POUADMINISTRATOR'
-ADMIN_PASSWORD = 'admin123'
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin123')  # вынеси в env!
 GARDEN_ADMIN = 'gildi'
 
-# ============ ХРАНИЛИЩЕ ============
-messages = []
-users_online = {}
-verified_users = set()
-banned_users = set()
-muted_users = {}
-user_info = {}
-registered_users = {}
-active_calls = {}
-sessions = {}
-
-# === POUS GARDEN ===
+# ============ POUS GARDEN ============
 garden_players = {}
 GARDEN_TIMEOUT = 10
 garden_messages = []
 GARDEN_MSG_LIMIT = 50
 garden_accounts = {}
 garden_sessions = {}
+
 
 # ============ GARDEN: СОХРАНЕНИЕ ============
 def save_garden():
@@ -46,6 +34,7 @@ def save_garden():
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
         print(f'[GARDEN] Ошибка сохранения: {e}')
+
 
 def load_garden():
     global garden_accounts, garden_messages
@@ -63,6 +52,7 @@ def load_garden():
     except Exception as e:
         print(f'[GARDEN] Ошибка загрузки: {e}')
 
+
 # ============ GARDEN: ХЕШИ ============
 def garden_hash(password, salt=None):
     if salt is None:
@@ -70,10 +60,12 @@ def garden_hash(password, salt=None):
     h = hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), 100000)
     return h.hex(), salt
 
+
 def garden_create_token(name):
     token = os.urandom(32).hex()
     garden_sessions[token] = {'name': name, 'time': time.time()}
     return token
+
 
 def garden_check_token(token):
     if not token:
@@ -85,6 +77,11 @@ def garden_check_token(token):
         del garden_sessions[token]
         return None
     return sess['name']
+
+
+def is_admin(name):
+    return name and name.lower() == GARDEN_ADMIN.lower()
+
 
 # ============ GARDEN: РЕГИСТРАЦИЯ / ВХОД ============
 async def garden_register(request):
@@ -101,14 +98,14 @@ async def garden_register(request):
             return web.json_response({'ok': False, 'error': 'Имя занято'})
 
         pw_hash, salt = garden_hash(password)
-        is_admin = (name.lower() == GARDEN_ADMIN.lower())
-        coins = 100000 if is_admin else 500
+        admin_flag = (name.lower() == GARDEN_ADMIN.lower())
+        coins = 100000 if admin_flag else 500
 
         garden_accounts[name] = {
             'password_hash': pw_hash,
             'salt': salt,
             'coins': coins,
-            'is_admin': is_admin,
+            'is_admin': admin_flag,
             'created': time.time()
         }
         save_garden()
@@ -118,8 +115,9 @@ async def garden_register(request):
             'token': token,
             'name': name,
             'coins': coins,
-            'is_admin': is_admin
+            'is_admin': admin_flag
         })
+
 
 async def garden_login(request):
     data = await request.json()
@@ -143,7 +141,7 @@ async def garden_login(request):
 
         acc = garden_accounts[actual_name]
         pw_hash, _ = garden_hash(password, acc['salt'])
-        if pw_hash != acc['password_hash']:
+        if not hmac.compare_digest(pw_hash, acc['password_hash']):
             return web.json_response({'ok': False, 'error': 'Неверный пароль'})
 
         if actual_name.lower() == GARDEN_ADMIN.lower():
@@ -157,6 +155,7 @@ async def garden_login(request):
             'coins': acc['coins'],
             'is_admin': acc.get('is_admin', False)
         })
+
 
 async def garden_check_session(request):
     data = await request.json()
@@ -174,25 +173,13 @@ async def garden_check_session(request):
         'is_admin': acc.get('is_admin', False)
     })
 
-async def garden_save_coins(request):
-    data = await request.json()
-    token = (data.get('token') or '').strip()
-    name = garden_check_token(token)
-    if not name:
-        return web.json_response({'ok': False, 'error': 'Не авторизован'})
-    coins = int(data.get('coins', 0))
-    async with lock:
-        if name in garden_accounts:
-            garden_accounts[name]['coins'] = coins
-            save_garden()
-    return web.json_response({'ok': True})
 
 # ============ GARDEN: АДМИН ============
 async def garden_admin_kick(request):
     data = await request.json()
     token = (data.get('token') or '').strip()
     admin_name = garden_check_token(token)
-    if not admin_name or admin_name.lower() != GARDEN_ADMIN.lower():
+    if not is_admin(admin_name):
         return web.json_response({'ok': False, 'error': 'Нет доступа'})
     target = (data.get('target') or '').strip()
     async with lock:
@@ -201,11 +188,12 @@ async def garden_admin_kick(request):
             return web.json_response({'ok': True})
     return web.json_response({'ok': False, 'error': 'Игрок не найден'})
 
+
 async def garden_admin_give(request):
     data = await request.json()
     token = (data.get('token') or '').strip()
     admin_name = garden_check_token(token)
-    if not admin_name or admin_name.lower() != GARDEN_ADMIN.lower():
+    if not is_admin(admin_name):
         return web.json_response({'ok': False, 'error': 'Нет доступа'})
     target = (data.get('target') or '').strip()
     amount = int(data.get('amount', 0))
@@ -216,11 +204,12 @@ async def garden_admin_give(request):
             return web.json_response({'ok': True, 'coins': garden_accounts[target]['coins']})
     return web.json_response({'ok': False, 'error': 'Аккаунт не найден'})
 
+
 async def garden_admin_list(request):
     data = await request.json()
     token = (data.get('token') or '').strip()
     admin_name = garden_check_token(token)
-    if not admin_name or admin_name.lower() != GARDEN_ADMIN.lower():
+    if not is_admin(admin_name):
         return web.json_response({'ok': False, 'error': 'Нет доступа'})
     async with lock:
         players = []
@@ -234,7 +223,13 @@ async def garden_admin_list(request):
             })
         return web.json_response({'ok': True, 'players': players})
 
+
 async def garden_admin_stats(request):
+    data = await request.json()
+    token = (data.get('token') or '').strip()
+    admin_name = garden_check_token(token)
+    if not is_admin(admin_name):
+        return web.json_response({'ok': False, 'error': 'Нет доступа'})
     async with lock:
         return web.json_response({
             'ok': True,
@@ -243,23 +238,28 @@ async def garden_admin_stats(request):
             'admin': GARDEN_ADMIN
         })
 
+
 # ============ GARDEN: ИГРОВОЙ ============
 async def garden_update(request):
     try:
         data = await request.json()
-    except:
+    except Exception:
         return web.json_response({'ok': False, 'error': 'bad json'})
-    name = (data.get('name') or '').strip()
+
+    token = (data.get('token') or '').strip()
+    name = garden_check_token(token)
     if not name:
-        return web.json_response({'ok': False, 'error': 'no name'})
+        return web.json_response({'ok': False, 'error': 'Не авторизован'})
+
     async with lock:
         now = time.time()
+        acc = garden_accounts.get(name, {})
         garden_players[name] = {
             'x': float(data.get('x', 0)),
             'z': float(data.get('z', 0)),
             'yaw': float(data.get('yaw', 0)),
             'skin': data.get('skin', '🐧'),
-            'coins': int(data.get('coins', 0)),
+            'coins': acc.get('coins', 0),
             'time': now
         }
         expired = [n for n, p in garden_players.items() if now - p['time'] > GARDEN_TIMEOUT]
@@ -276,6 +276,21 @@ async def garden_update(request):
             })
         return web.json_response({'ok': True, 'others': others})
 
+
+async def garden_leave(request):
+    try:
+        data = await request.json()
+    except Exception:
+        return web.json_response({'ok': False, 'error': 'bad json'})
+    token = (data.get('token') or '').strip()
+    name = garden_check_token(token)
+    if not name:
+        return web.json_response({'ok': False, 'error': 'Не авторизован'})
+    async with lock:
+        garden_players.pop(name, None)
+    return web.json_response({'ok': True})
+
+
 async def garden_stats(request):
     async with lock:
         return web.json_response({
@@ -284,18 +299,26 @@ async def garden_stats(request):
             'players': [{'name': n, 'coins': p.get('coins', 0)} for n, p in garden_players.items()]
         })
 
+
 async def garden_chat_send(request):
     try:
         data = await request.json()
-    except:
+    except Exception:
         return web.json_response({'ok': False, 'error': 'bad json'})
-    name = (data.get('name') or '').strip()[:15]
+
+    token = (data.get('token') or '').strip()
+    name = garden_check_token(token)
+    if not name:
+        return web.json_response({'ok': False, 'error': 'Не авторизован'})
+
     text = (data.get('text') or '').strip()[:200]
-    if not name or not text:
+    if not text:
         return web.json_response({'ok': False, 'error': 'empty'})
+
     colors = ['#f38ba8', '#fab387', '#f9e2af', '#a6e3a1',
               '#89dceb', '#89b4fa', '#cba6f7', '#f5c2e7']
     color_idx = sum(ord(c) for c in name) % len(colors)
+
     async with lock:
         msg = {
             'name': name,
@@ -309,6 +332,7 @@ async def garden_chat_send(request):
         save_garden()
     return web.json_response({'ok': True})
 
+
 async def garden_chat_get(request):
     try:
         since = float(request.query.get('since', 0))
@@ -318,44 +342,32 @@ async def garden_chat_get(request):
         new_msgs = [m for m in garden_messages if m['time'] > since]
         return web.json_response({'ok': True, 'messages': new_msgs})
 
-# ============ МЕССЕНДЖЕР (старое, минимально) ============
-async def index(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'index.html')
-    return web.FileResponse(path)
 
-async def gamestrel(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'gamestrel.html')
-    return web.FileResponse(path)
+# ============ СТАТИКА ============
+def static_handler(filename):
+    async def handler(request):
+        path = os.path.join(os.path.dirname(__file__), 'static', filename)
+        return web.FileResponse(path)
+    return handler
 
-async def tictactoe(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'tictactoe.html')
-    return web.FileResponse(path)
-
-async def poublox(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'poublox.html')
-    return web.FileResponse(path)
-
-async def garden(request):
-    path = os.path.join(os.path.dirname(__file__), 'static', 'garden.html')
-    return web.FileResponse(path)
 
 # ============ ЗАПУСК ============
 async def main():
     load_garden()
 
     app = web.Application()
-    app.router.add_get('/', index)
-    app.router.add_get('/index.html', index)
-    app.router.add_get('/gamestrel.html', gamestrel)
-    app.router.add_get('/tictactoe.html', tictactoe)
-    app.router.add_get('/poublox.html', poublox)
-    app.router.add_get('/garden.html', garden)
+    app.router.add_get('/', static_handler('index.html'))
+    app.router.add_get('/index.html', static_handler('index.html'))
+    app.router.add_get('/gamestrel.html', static_handler('gamestrel.html'))
+    app.router.add_get('/tictactoe.html', static_handler('tictactoe.html'))
+    app.router.add_get('/poublox.html', static_handler('poublox.html'))
+    app.router.add_get('/garden.html', static_handler('garden.html'))
 
     app.router.add_post('/api/garden/register', garden_register)
     app.router.add_post('/api/garden/login', garden_login)
     app.router.add_post('/api/garden/check-session', garden_check_session)
-    app.router.add_post('/api/garden/save-coins', garden_save_coins)
     app.router.add_post('/api/garden/update', garden_update)
+    app.router.add_post('/api/garden/leave', garden_leave)
     app.router.add_get('/api/garden/stats', garden_stats)
     app.router.add_post('/api/garden/chat/send', garden_chat_send)
     app.router.add_get('/api/garden/chat/get', garden_chat_get)
@@ -363,7 +375,7 @@ async def main():
     app.router.add_post('/api/garden/admin/kick', garden_admin_kick)
     app.router.add_post('/api/garden/admin/give', garden_admin_give)
     app.router.add_post('/api/garden/admin/list', garden_admin_list)
-    app.router.add_get('/api/garden/admin/stats', garden_admin_stats)
+    app.router.add_post('/api/garden/admin/stats', garden_admin_stats)
 
     port = int(os.environ.get('PORT', 8080))
     print(f'[POU] Запуск на порту {port}')
@@ -382,16 +394,17 @@ async def main():
                 expired = [n for n, p in garden_players.items() if now - p['time'] > GARDEN_TIMEOUT]
                 for n in expired:
                     del garden_players[n]
-    asyncio.create_task(cleanup())
 
     async def autosave():
         while True:
             await asyncio.sleep(30)
             async with lock:
                 save_garden()
-    asyncio.create_task(autosave())
 
+    asyncio.create_task(cleanup())
+    asyncio.create_task(autosave())
     await asyncio.Future()
+
 
 if __name__ == '__main__':
     asyncio.run(main())
